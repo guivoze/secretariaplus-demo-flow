@@ -11,7 +11,7 @@ interface ProfileOption {
 }
 
 export const Step2ProfileConfirmation = () => {
-  const { userData, setUserData, nextStep } = useDemo();
+  const { userData, setUserData, setCurrentStep } = useDemo();
   const [profiles, setProfiles] = useState<ProfileOption[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -114,7 +114,8 @@ export const Step2ProfileConfirmation = () => {
       console.error('Error confirming profile:', error);
     }
 
-    nextStep();
+    // Skip the modal and go directly to Step3Pain
+    setCurrentStep(3);
   };
 
   if (isLoading) {
@@ -171,7 +172,7 @@ export const Step2ProfileConfirmation = () => {
                   <p className="font-semibold text-foreground text-sm">
                     {profile.at}
                   </p>
-                  <p className="text-muted-foreground text-xs truncate">
+                  <p className="text-muted-foreground text-xs break-words">
                     {profile.username}
                   </p>
                 </div>
