@@ -1,0 +1,95 @@
+import { useState, useEffect } from "react";
+import { CustomButton } from "@/components/ui/custom-button";
+import { CustomInput } from "@/components/ui/custom-input";
+import { CustomCard } from "@/components/ui/custom-card";
+import { useDemo } from "@/hooks/useDemo";
+import { motion } from "framer-motion";
+
+export const Step1Landing = () => {
+  const { userData, setUserData, nextStep } = useDemo();
+  const [instagram, setInstagram] = useState(userData.instagram || '');
+  const [liveCount, setLiveCount] = useState(243);
+
+  // Increment live count every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveCount(prev => prev + Math.floor(Math.random() * 3) + 1);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleSubmit = () => {
+    if (instagram.trim()) {
+      setUserData({ instagram: instagram.trim() });
+      nextStep();
+    }
+  };
+
+  return (
+    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-md"
+      >
+        <CustomCard variant="elevated" className="text-center space-y-6">
+          {/* Logo */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          >
+            <h1 className="text-3xl font-bold text-primary mb-2">
+              SecretáriaPlus
+            </h1>
+            <div className="w-16 h-1 bg-primary mx-auto rounded-full" />
+          </motion.div>
+
+          {/* Main content */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-foreground leading-tight">
+              Teste gratuitamente e veja a I.A agendar consultas no piloto automático. Preparado?
+            </h2>
+            
+            <p className="text-muted-foreground">
+              Insira o @ do instagram profissional para iniciar
+            </p>
+
+            <div className="space-y-4">
+              <CustomInput
+                prefix="@"
+                placeholder="digita o @ certinho, tem uma surpresa pra você. 🎁"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+                className="text-center"
+              />
+
+              <CustomButton
+                onClick={handleSubmit}
+                disabled={!instagram.trim()}
+                className="w-full"
+                size="lg"
+              >
+                QUERO TESTAR AGORA 🚀
+              </CustomButton>
+            </div>
+          </div>
+
+          {/* Live counter */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-sm text-muted-foreground"
+          >
+            <span className="text-primary font-semibold animate-pulse-slow">
+              {liveCount}
+            </span>{" "}
+            clínicas testando agora
+          </motion.div>
+        </CustomCard>
+      </motion.div>
+    </div>
+  );
+};
