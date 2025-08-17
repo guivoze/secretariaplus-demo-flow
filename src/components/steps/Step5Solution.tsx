@@ -14,12 +14,12 @@ export const Step5Solution = () => {
         transition={{ duration: 0.6 }}
         className="w-full max-w-2xl"
       >
-        <CustomCard variant="elevated" className="text-center space-y-8">
+        <CustomCard variant="elevated" className="text-center space-y-6 p-6">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-xl text-foreground leading-relaxed"
+            className="text-lg text-foreground leading-relaxed"
           >
             E por isso... treinamos nossa I.A para ser uma <span className="font-bold text-primary">vendedora de consultas nata</span>.
           </motion.p>
@@ -34,16 +34,16 @@ export const Step5Solution = () => {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
             className="space-y-4"
           >
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-xl font-bold text-foreground">
               Interessante, né?
             </h2>
             
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-base text-muted-foreground leading-relaxed">
               Pra você testar na íntegra e ver como ela fará com seus pacientes, a I.A precisa entender você primeiro.
             </p>
           </motion.div>

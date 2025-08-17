@@ -25,16 +25,17 @@ export const CustomButton = forwardRef<HTMLButtonElement, CustomButtonProps>(({
   };
 
   const sizes = {
-    sm: "px-4 py-2 text-sm",
-    md: "px-6 py-3 text-base",
-    lg: "px-8 py-4 text-lg"
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-4 py-2 text-sm",
+    lg: "px-6 py-2.5 text-base"
   };
 
   return (
     <motion.button
       ref={ref}
-      whileHover={{ scale: disabled ? 1 : 1.02 }}
-      whileTap={{ scale: disabled ? 1 : 0.98 }}
+      whileHover={{ y: disabled ? 0 : -1 }}
+      whileTap={{ y: disabled ? 0 : 1 }}
+      transition={{ type: "tween", ease: "easeInOut", duration: 0.2 }}
       className={cn(
         "font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
         variants[variant],

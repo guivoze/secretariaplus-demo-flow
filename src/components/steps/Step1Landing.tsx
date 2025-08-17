@@ -33,14 +33,14 @@ export const Step1Landing = () => {
         transition={{ duration: 0.6 }}
         className="w-full max-w-md"
       >
-        <CustomCard variant="elevated" className="text-center space-y-6">
+        <CustomCard variant="elevated" className="text-center space-y-4 p-6">
           {/* Logo */}
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
           >
-            <h1 className="text-3xl font-bold text-primary mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               SecretáriaPlus
             </h1>
             <div className="w-16 h-1 bg-primary mx-auto rounded-full" />
@@ -48,7 +48,7 @@ export const Step1Landing = () => {
 
           {/* Main content */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground leading-tight">
+            <h2 className="text-lg font-semibold text-foreground leading-tight">
               Teste gratuitamente e veja a I.A agendar consultas no piloto automático. Preparado?
             </h2>
             

@@ -41,15 +41,11 @@ export const Step3Pain = () => {
             Investir na técnica, posicionamento, entregar o melhor resultado clínico... mas deixar de crescer por incompetência de uma secretária no WhatsApp
           </motion.p>
 
-          <motion.div initial={{
-          opacity: 0,
-          scale: 0.9
-        }} animate={{
-          opacity: 1,
-          scale: 1
-        }} transition={{
-          delay: 0.3
-        }}>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
             <CustomCard variant="bordered" className="bg-primary/10 border-primary">
               <p className="text-xl font-semibold text-foreground">
                 72% dos seus pacientes ou leads VÃO embora só por que você demora mais de 3 minutos para responder
