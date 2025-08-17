@@ -33,61 +33,22 @@ export const Step11Calendar = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex items-center justify-between"
+            className="text-center"
           >
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Calendar className="w-8 h-8 text-primary" />
-              Agosto 2025
+            <h2 className="text-xl font-bold text-foreground flex items-center justify-center gap-2">
+              <Calendar className="w-6 h-6 text-gray-800" />
+              20 de Agosto, 2025
             </h2>
-            <div className="flex gap-2">
-              <button className="p-2 rounded-lg hover:bg-muted">
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button className="p-2 rounded-lg hover:bg-muted">
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Calendar Grid */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+          <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
+              className="space-y-4"
             >
-              <div className="grid grid-cols-7 gap-1 mb-4">
-                {days.map((day) => (
-                  <div key={day} className="text-center text-sm font-medium text-muted-foreground p-2">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-1">
-                {monthDays.map((day) => (
-                  <div
-                    key={day}
-                    className={`text-center p-2 rounded-lg cursor-pointer transition-colors ${
-                      day === 20
-                        ? 'bg-primary text-black font-bold'
-                        : 'hover:bg-muted'
-                    }`}
-                  >
-                    {day}
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Appointments for selected day */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="space-y-3"
-            >
-              <h3 className="text-lg font-semibold text-foreground">
-                20 de Agosto - Agendamentos
+              <h3 className="text-lg font-semibold text-foreground text-center">
+                Agendamentos do Dia
               </h3>
               
               <div className="space-y-2">
@@ -99,7 +60,7 @@ export const Step11Calendar = () => {
                     transition={{ delay: 0.4 + index * 0.1 }}
                     className={`p-3 rounded-lg border-2 transition-all ${
                       appointment.isNew
-                        ? 'border-primary bg-primary/10 animate-pulse'
+                        ? 'border-gray-800 bg-gray-100 animate-pulse'
                         : appointment.available
                         ? 'border-dashed border-muted-foreground/50 bg-muted/30'
                         : 'border-border bg-background'
@@ -108,7 +69,7 @@ export const Step11Calendar = () => {
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-foreground">{appointment.time}</span>
                       {appointment.isNew && (
-                        <span className="text-xs bg-primary text-black px-2 py-1 rounded-full font-semibold">
+                        <span className="text-xs bg-gray-800 text-white px-2 py-1 rounded-full font-semibold">
                           NOVO!
                         </span>
                       )}
@@ -123,14 +84,13 @@ export const Step11Calendar = () => {
                   </motion.div>
                 ))}
               </div>
-            </motion.div>
-          </div>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-primary/10 border border-primary rounded-xl p-4"
+            className="bg-gray-100 border border-gray-300 rounded-xl p-4"
           >
             <h4 className="font-semibold text-foreground mb-2">
               🎉 Agendamento realizado automaticamente!

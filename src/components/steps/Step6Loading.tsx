@@ -5,30 +5,45 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 
 const loadingSteps = [
-  "Buscando seu Instagram",
-  "Configurando sua I.A automagicamente", 
-  "Nossa, que resultados lindos...",
-  "hmm preenchimento labial...",
-  "Ajustando sua especialidade",
-  "Encontrando sua clínica...",
-  "Filtrando procedimentos"
+  "Buscando seu Instagram...",
+  "Analisando seus posts...",
+  "Identificando seu público...",
+  "Configurando sua I.A...",
+  "Ajustando sua especialidade...",
+  "Finalizando configurações..."
+];
+
+const instagramPosts = [
+  {
+    image: "https://via.placeholder.com/300x300/E5C197/000000?text=Post+1",
+    likes: "142",
+    comments: "23"
+  },
+  {
+    image: "https://via.placeholder.com/300x300/E5C197/000000?text=Post+2", 
+    likes: "89",
+    comments: "12"
+  },
+  {
+    image: "https://via.placeholder.com/300x300/E5C197/000000?text=Post+3",
+    likes: "201",
+    comments: "34"
+  }
 ];
 
 export const Step6Loading = () => {
   const { nextStep, userData } = useDemo();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [currentPostIndex, setCurrentPostIndex] = useState(0);
 
   useEffect(() => {
     if (currentStepIndex < loadingSteps.length) {
       const timer = setTimeout(() => {
-        setCompletedSteps(prev => [...prev, currentStepIndex]);
         setCurrentStepIndex(prev => prev + 1);
-      }, 600);
+      }, 1200);
 
       return () => clearTimeout(timer);
     } else {
-      // All steps completed, move to next step after a brief delay
       const timer = setTimeout(() => {
         nextStep();
       }, 1000);
@@ -36,85 +51,69 @@ export const Step6Loading = () => {
     }
   }, [currentStepIndex, nextStep]);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentPostIndex(prev => (prev + 1) % instagramPosts.length);
+    }, 2000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Matrix-like background effect */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="text-xs font-mono text-gray-600 animate-pulse">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} className="mb-2">
-              {'{ "user": "processing", "ai": "learning", "status": "active" }'}
-            </div>
-          ))}
-        </div>
+      {/* Instagram posts slideshow background */}
+      <div className="absolute inset-0 opacity-20">
+        <motion.div
+          key={currentPostIndex}
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1, ease: "easeInOut" }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${instagramPosts[currentPostIndex].image})`,
+            filter: 'blur(10px)'
+          }}
+        />
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
         className="w-full max-w-md relative z-10"
       >
         <CustomCard variant="elevated" className="text-center space-y-6">
-          {/* Profile avatar */}
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="w-20 h-20 bg-primary rounded-full mx-auto flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="w-16 h-16 bg-gray-800 rounded-full mx-auto flex items-center justify-center"
           >
-            <span className="text-2xl font-bold text-white">
+            <span className="text-lg font-medium text-white">
               {userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
             </span>
           </motion.div>
 
-          {/* Loading steps */}
-          <div className="space-y-3">
-            {loadingSteps.map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ 
-                  opacity: index <= currentStepIndex ? 1 : 0.3,
-                  x: 0 
-                }}
-                transition={{ delay: index * 0.1 }}
-                className={`flex items-center gap-3 text-left ${
-                  completedSteps.includes(index) ? 'text-foreground' : 'text-muted-foreground'
-                }`}
-              >
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                  completedSteps.includes(index) 
-                    ? 'bg-green-500' 
-                    : index === currentStepIndex 
-                    ? 'bg-primary animate-pulse' 
-                    : 'bg-gray-300'
-                }`}>
-                  {completedSteps.includes(index) ? (
-                    <Check className="w-3 h-3 text-white" />
-                  ) : index === currentStepIndex ? (
-                    <div className="w-2 h-2 bg-white rounded-full" />
-                  ) : null}
-                </div>
-                <span className={`text-sm ${
-                  completedSteps.includes(index) ? 'font-medium' : ''
-                }`}>
-                  {step}
-                </span>
-                {completedSteps.includes(index) && (
-                  <span className="text-green-500 text-sm">✓</span>
-                )}
-              </motion.div>
-            ))}
+          <div className="h-6 flex items-center justify-center">
+            <motion.div
+              key={currentStepIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-foreground font-medium"
+            >
+              {currentStepIndex < loadingSteps.length ? loadingSteps[currentStepIndex] : "Concluído!"}
+            </motion.div>
           </div>
 
-          {/* Progress indicator */}
           <div className="w-full bg-gray-200 rounded-full h-2">
             <motion.div
-              className="bg-primary h-2 rounded-full"
+              className="bg-gray-800 h-2 rounded-full"
               initial={{ width: 0 }}
-              animate={{ width: `${(completedSteps.length / loadingSteps.length) * 100}%` }}
-              transition={{ duration: 0.3 }}
+              animate={{ width: `${(currentStepIndex / loadingSteps.length) * 100}%` }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
             />
           </div>
         </CustomCard>

@@ -11,7 +11,7 @@ import { Step4Agitate } from "@/components/steps/Step4Agitate";
 import { Step5Solution } from "@/components/steps/Step5Solution";
 import { Step6Loading } from "@/components/steps/Step6Loading";
 import { Step7Form } from "@/components/steps/Step7Form";
-import { Step8Confirmation } from "@/components/steps/Step8Confirmation";
+
 import { Step9PreChat } from "@/components/steps/Step9PreChat";
 import { Step10WhatsApp } from "@/components/steps/Step10WhatsApp";
 import { Step11Calendar } from "@/components/steps/Step11Calendar";
@@ -25,7 +25,7 @@ const DemoContent = () => {
   const { currentStep, resetDemo } = useDemo();
 
   const calculateProgress = (step: number) => {
-    return Math.min((step / 15) * 100, 100); // 16 steps total (0-15)
+    return Math.min((step / 14) * 100, 100); // 15 steps total (0-14)
   };
 
   const renderCurrentStep = () => {
@@ -45,22 +45,20 @@ const DemoContent = () => {
       case 6:
         return <Step7Form />;
       case 7:
-        return <Step8Confirmation />;
-      case 8:
         return <Step9PreChat />;
-      case 9:
+      case 8:
         return <Step10WhatsApp />;
-      case 10:
+      case 9:
         return <Step11Calendar />;
-      case 11:
+      case 10:
         return <Step12Result />;
-      case 12:
+      case 11:
         return <Step13Features />;
-      case 13:
+      case 12:
         return <Step14Emergency />;
-      case 14:
+      case 13:
         return <Step15SocialProof />;
-      case 15:
+      case 14:
         return <Step16CTA />;
       default:
         return (

@@ -76,10 +76,10 @@ Quero implementar na minha clínica!`;
             transition={{ delay: 0.1 }}
             className="space-y-4"
           >
-            <h1 className="text-4xl font-bold text-primary">
+            <h1 className="text-2xl font-bold text-gray-800">
               SecretáriaPlus
             </h1>
-            <div className="w-24 h-1 bg-primary mx-auto rounded-full" />
+            <div className="w-24 h-1 bg-gray-800 mx-auto rounded-full" />
           </motion.div>
 
           <motion.div
@@ -89,13 +89,13 @@ Quero implementar na minha clínica!`;
             className="space-y-6"
           >
             <div className="flex items-center justify-center gap-3 mb-6">
-              <Rocket className="w-12 h-12 text-primary" />
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+              <Rocket className="w-8 h-8 text-gray-800" />
+              <h2 className="text-lg md:text-xl font-bold text-foreground">
                 Agora é hora de colocar a I.A pra funcionar na sua clínica a todo vapor!
               </h2>
             </div>
 
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg text-muted-foreground">
               Vamos juntos nessa? 🚀
             </p>
           </motion.div>
@@ -135,7 +135,7 @@ Quero implementar na minha clínica!`;
               Falar com consultor
             </CustomButton>
 
-            <div className="flex items-center justify-center gap-2 text-red-500 font-semibold">
+            <div className="flex items-center justify-center gap-2 text-orange-600 font-semibold">
               <AlertTriangle className="w-5 h-5" />
               <span className="text-sm">
                 Atenção: Só conseguimos atender 3 novas clínicas por semana.
@@ -143,22 +143,6 @@ Quero implementar na minha clínica!`;
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.0 }}
-            className="bg-primary/10 border border-primary rounded-xl p-6"
-          >
-            <h3 className="font-bold text-foreground mb-3">
-              🎁 Seus dados já foram pré-preenchidos!
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-muted-foreground">
-              <div>👤 {userData.nome}</div>
-              <div>📱 @{userData.instagram}</div>
-              <div>🏥 {userData.especialidade}</div>
-              <div>📧 {userData.email}</div>
-            </div>
-          </motion.div>
 
           <motion.div
             initial={{ opacity: 0 }}

@@ -76,7 +76,7 @@ export const DemoProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const nextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 15)); // Max 16 steps (0-15)
+    setCurrentStep(prev => Math.min(prev + 1, 14)); // Max 15 steps (0-14)
   };
 
   const prevStep = () => {
