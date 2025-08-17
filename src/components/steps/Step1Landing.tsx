@@ -26,51 +26,6 @@ export const Step1Landing = () => {
         instagramRequestTime: Date.now()
       });
       
-      // Fire-and-forget webhook to N8N
-      fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instagram: cleanInstagram })
-      }).then(response => response.json())
-        .then(data => {
-          if (data.perfil) {
-            // Save real Instagram data to localStorage
-            const instagramData = {
-              hasInstagramData: true,
-              realProfilePic: data.foto_perfil,
-              realPosts: [data.post1, data.post2, data.post3],
-              aiInsights: {
-                name: data.name,
-                where: data.where,
-                procedure1: data.procedure1,
-                procedure2: data.procedure2,
-                procedure3: data.procedure3,
-                rapport: data.rapport
-              }
-            };
-            localStorage.setItem('instagram-data', JSON.stringify(instagramData));
-            
-            // Start preloading images immediately after saving data
-            const imagesToPreload = [
-              data.foto_perfil,
-              data.post1,
-              data.post2,
-              data.post3
-            ].filter(Boolean);
-            
-            console.log('Starting immediate image preload:', imagesToPreload);
-            imagesToPreload.forEach(url => {
-              const img = new Image();
-              img.onload = () => console.log('Preloaded:', url);
-              img.onerror = () => console.log('Failed to preload:', url);
-              img.src = url;
-            });
-          }
-        })
-        .catch(() => {
-          // Silent fail - continue with mock data
-        });
-      
       nextStep();
     }
   };

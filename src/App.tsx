@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 
 // Import step components
 import { Step1Landing } from "@/components/steps/Step1Landing";
+import { Step2ProfileConfirmation } from "@/components/steps/Step2ProfileConfirmation";
 import { Step2Modal } from "@/components/steps/Step2Modal";
 import { Step3Pain } from "@/components/steps/Step3Pain";
 import { Step4Agitate } from "@/components/steps/Step4Agitate";
@@ -25,7 +26,7 @@ const DemoContent = () => {
   const { currentStep, resetDemo } = useDemo();
 
   const calculateProgress = (step: number) => {
-    return Math.min((step / 14) * 100, 100); // 15 steps total (0-14)
+    return Math.min((step / 15) * 100, 100); // 16 steps total (0-15)
   };
 
   const renderCurrentStep = () => {
@@ -33,32 +34,34 @@ const DemoContent = () => {
       case 0:
         return <Step1Landing />;
       case 1:
-        return <Step2Modal />;
+        return <Step2ProfileConfirmation />;
       case 2:
-        return <Step3Pain />;
+        return <Step2Modal />;
       case 3:
-        return <Step4Agitate />;
+        return <Step3Pain />;
       case 4:
-        return <Step5Solution />;
+        return <Step4Agitate />;
       case 5:
-        return <Step6Loading />;
+        return <Step5Solution />;
       case 6:
-        return <Step7Form />;
+        return <Step6Loading />;
       case 7:
-        return <Step9PreChat />;
+        return <Step7Form />;
       case 8:
-        return <Step10WhatsApp />;
+        return <Step9PreChat />;
       case 9:
-        return <Step11Calendar />;
+        return <Step10WhatsApp />;
       case 10:
-        return <Step12Result />;
+        return <Step11Calendar />;
       case 11:
-        return <Step13Features />;
+        return <Step12Result />;
       case 12:
-        return <Step14Emergency />;
+        return <Step13Features />;
       case 13:
-        return <Step15SocialProof />;
+        return <Step14Emergency />;
       case 14:
+        return <Step15SocialProof />;
+      case 15:
         return <Step16CTA />;
       default:
         return (
