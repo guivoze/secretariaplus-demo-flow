@@ -40,11 +40,12 @@ export const Step6Loading = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [imagesToPreload, setImagesToPreload] = useState<string[]>([]);
   
-  const { allImagesLoaded } = useImagePreloader(imagesToPreload);
+  // Images should already be preloaded, so set to true immediately
+  const { allImagesLoaded } = useImagePreloader([]);
   
   console.log('Step6Loading: allImagesLoaded:', allImagesLoaded, 'currentStepIndex:', currentStepIndex, 'imagesToPreload:', imagesToPreload);
 
-  // Check for Instagram data on mount and preload images
+  // Check for Instagram data on mount and set up posts
   useEffect(() => {
     const instagramData = localStorage.getItem('instagram-data');
     if (instagramData) {
@@ -52,9 +53,7 @@ export const Step6Loading = () => {
         const data = JSON.parse(instagramData);
         setUserData(data);
         
-        const imagesToLoad: string[] = [];
-        
-        // Update posts for slideshow and collect images for preloading
+        // Update posts for slideshow
         if (data.realPosts && data.realPosts.length > 0) {
           const realPosts = data.realPosts.map((url: string, index: number) => ({
             image: url,
@@ -62,24 +61,19 @@ export const Step6Loading = () => {
             comments: Math.floor(Math.random() * 30 + 5).toString()
           }));
           setPosts(realPosts);
-          imagesToLoad.push(...data.realPosts);
         }
         
-        // Set profile image and add to preload list
+        // Set profile image
         if (data.realProfilePic) {
           setProfileImage(data.realProfilePic);
-          imagesToLoad.push(data.realProfilePic);
         }
-        
-        // Start preloading all images
-        setImagesToPreload(imagesToLoad);
       } catch (error) {
         console.log('Error parsing Instagram data:', error);
       }
     }
-  }, []); // Remove setUserData dependency to prevent infinite loop
+  }, []);
 
-  // Progress through loading steps, but wait for images to load before finishing
+  // Progress through loading steps, images are already preloaded
   useEffect(() => {
     if (currentStepIndex < loadingSteps.length) {
       const timer = setTimeout(() => {
@@ -87,14 +81,14 @@ export const Step6Loading = () => {
       }, 1200);
 
       return () => clearTimeout(timer);
-    } else if (allImagesLoaded) {
-      // Only proceed to next step when all images are loaded
+    } else {
+      // All steps completed, proceed to next step
       const timer = setTimeout(() => {
         nextStep();
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [currentStepIndex, allImagesLoaded, nextStep]);
+  }, [currentStepIndex, nextStep]);
 
   useEffect(() => {
     const timer = setInterval(() => {

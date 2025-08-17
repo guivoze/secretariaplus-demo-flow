@@ -58,8 +58,11 @@ export const Step1Landing = () => {
               data.post3
             ].filter(Boolean);
             
+            console.log('Starting immediate image preload:', imagesToPreload);
             imagesToPreload.forEach(url => {
               const img = new Image();
+              img.onload = () => console.log('Preloaded:', url);
+              img.onerror = () => console.log('Failed to preload:', url);
               img.src = url;
             });
           }
