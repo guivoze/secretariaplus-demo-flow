@@ -20,7 +20,41 @@ export const Step1Landing = () => {
 
   const handleSubmit = () => {
     if (instagram.trim()) {
-      setUserData({ instagram: instagram.trim() });
+      const cleanInstagram = instagram.trim();
+      setUserData({ 
+        instagram: cleanInstagram,
+        instagramRequestTime: Date.now()
+      });
+      
+      // Fire-and-forget webhook to N8N
+      fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ instagram: cleanInstagram })
+      }).then(response => response.json())
+        .then(data => {
+          if (data.perfil) {
+            // Save real Instagram data to localStorage
+            const instagramData = {
+              hasInstagramData: true,
+              realProfilePic: data.foto_perfil,
+              realPosts: [data.post1, data.post2, data.post3],
+              aiInsights: {
+                name: data.name,
+                where: data.where,
+                procedure1: data.procedure1,
+                procedure2: data.procedure2,
+                procedure3: data.procedure3,
+                rapport: data.rapport
+              }
+            };
+            localStorage.setItem('instagram-data', JSON.stringify(instagramData));
+          }
+        })
+        .catch(() => {
+          // Silent fail - continue with mock data
+        });
+      
       nextStep();
     }
   };

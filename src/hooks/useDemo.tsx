@@ -13,6 +13,19 @@ interface UserData {
   profilePic: string | null;
   clinicName: string;
   procedures: string[];
+  // Real Instagram data
+  hasInstagramData: boolean;
+  realProfilePic: string | null;
+  realPosts: string[];
+  aiInsights: {
+    name: string;
+    where: string;
+    procedure1: string;
+    procedure2: string;
+    procedure3: string;
+    rapport: string;
+  } | null;
+  instagramRequestTime: number | null;
 }
 
 interface DemoContextType {
@@ -36,7 +49,12 @@ const initialUserData: UserData = {
   posts: '324',
   profilePic: null,
   clinicName: 'Clínica Exemplo',
-  procedures: ['Botox', 'Preenchimento', 'Limpeza de Pele']
+  procedures: ['Botox', 'Preenchimento', 'Limpeza de Pele'],
+  hasInstagramData: false,
+  realProfilePic: null,
+  realPosts: [],
+  aiInsights: null,
+  instagramRequestTime: null
 };
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
@@ -73,6 +91,7 @@ export const DemoProvider = ({ children }: { children: ReactNode }) => {
     setUserDataState(initialUserData);
     localStorage.removeItem('demo-step');
     localStorage.removeItem('demo-data');
+    localStorage.removeItem('instagram-data');
   };
 
   const nextStep = () => {

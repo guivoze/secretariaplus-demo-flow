@@ -32,9 +32,39 @@ const instagramPosts = [
 ];
 
 export const Step6Loading = () => {
-  const { nextStep, userData } = useDemo();
+  const { nextStep, userData, setUserData } = useDemo();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
+  const [posts, setPosts] = useState(instagramPosts);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  // Check for Instagram data on mount
+  useEffect(() => {
+    const instagramData = localStorage.getItem('instagram-data');
+    if (instagramData) {
+      try {
+        const data = JSON.parse(instagramData);
+        setUserData(data);
+        
+        // Update posts for slideshow
+        if (data.realPosts && data.realPosts.length > 0) {
+          const realPosts = data.realPosts.map((url: string, index: number) => ({
+            image: url,
+            likes: Math.floor(Math.random() * 200 + 50).toString(),
+            comments: Math.floor(Math.random() * 30 + 5).toString()
+          }));
+          setPosts(realPosts);
+        }
+        
+        // Set profile image
+        if (data.realProfilePic) {
+          setProfileImage(data.realProfilePic);
+        }
+      } catch (error) {
+        console.log('Error parsing Instagram data:', error);
+      }
+    }
+  }, [setUserData]);
 
   useEffect(() => {
     if (currentStepIndex < loadingSteps.length) {
@@ -53,11 +83,11 @@ export const Step6Loading = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentPostIndex(prev => (prev + 1) % instagramPosts.length);
+      setCurrentPostIndex(prev => (prev + 1) % posts.length);
     }, 2000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [posts]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
@@ -71,7 +101,7 @@ export const Step6Loading = () => {
           transition={{ duration: 0.8, ease: "easeInOut" }}
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(${instagramPosts[currentPostIndex].image})`,
+            backgroundImage: `url(${posts[currentPostIndex].image})`,
             filter: 'blur(10px)'
           }}
         />
@@ -88,11 +118,19 @@ export const Step6Loading = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="w-16 h-16 bg-gray-800 rounded-full mx-auto flex items-center justify-center"
+            className="w-16 h-16 bg-gray-800 rounded-full mx-auto flex items-center justify-center overflow-hidden"
           >
-            <span className="text-lg font-medium text-white">
-              {userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
-            </span>
+            {profileImage ? (
+              <img 
+                src={profileImage} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-lg font-medium text-white">
+                {userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
+              </span>
+            )}
           </motion.div>
 
           <div className="h-6 flex items-center justify-center">
