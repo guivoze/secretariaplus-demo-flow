@@ -10,6 +10,16 @@ import { Step3Pain } from "@/components/steps/Step3Pain";
 import { Step4Agitate } from "@/components/steps/Step4Agitate";
 import { Step5Solution } from "@/components/steps/Step5Solution";
 import { Step6Loading } from "@/components/steps/Step6Loading";
+import { Step7Form } from "@/components/steps/Step7Form";
+import { Step8Confirmation } from "@/components/steps/Step8Confirmation";
+import { Step9PreChat } from "@/components/steps/Step9PreChat";
+import { Step10WhatsApp } from "@/components/steps/Step10WhatsApp";
+import { Step11Calendar } from "@/components/steps/Step11Calendar";
+import { Step12Result } from "@/components/steps/Step12Result";
+import { Step13Features } from "@/components/steps/Step13Features";
+import { Step14Emergency } from "@/components/steps/Step14Emergency";
+import { Step15SocialProof } from "@/components/steps/Step15SocialProof";
+import { Step16CTA } from "@/components/steps/Step16CTA";
 
 const DemoContent = () => {
   const { currentStep, resetDemo } = useDemo();
@@ -32,17 +42,37 @@ const DemoContent = () => {
         return <Step5Solution />;
       case 5:
         return <Step6Loading />;
+      case 6:
+        return <Step7Form />;
+      case 7:
+        return <Step8Confirmation />;
+      case 8:
+        return <Step9PreChat />;
+      case 9:
+        return <Step10WhatsApp />;
+      case 10:
+        return <Step11Calendar />;
+      case 11:
+        return <Step12Result />;
+      case 12:
+        return <Step13Features />;
+      case 13:
+        return <Step14Emergency />;
+      case 14:
+        return <Step15SocialProof />;
+      case 15:
+        return <Step16CTA />;
       default:
         return (
           <div className="min-h-screen gradient-bg flex items-center justify-center">
             <div className="text-center">
-              <h1 className="text-3xl font-bold mb-4">Em desenvolvimento...</h1>
-              <p className="text-muted-foreground mb-6">Etapa {currentStep + 1} em breve!</p>
+              <h1 className="text-3xl font-bold mb-4">Demo concluída!</h1>
+              <p className="text-muted-foreground mb-6">Obrigado por testar a SecretáriaPlus!</p>
               <button 
                 onClick={resetDemo}
                 className="btn-primary px-6 py-3 rounded-2xl"
               >
-                Voltar ao início
+                Testar novamente
               </button>
             </div>
           </div>
