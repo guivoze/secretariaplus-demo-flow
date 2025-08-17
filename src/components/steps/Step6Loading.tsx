@@ -46,6 +46,7 @@ export const Step6Loading = () => {
     
     const instagramData = localStorage.getItem('instagram-data');
     console.log('Instagram data from localStorage:', instagramData);
+    console.log('Current profileImage state:', profileImage);
     
     if (instagramData) {
       try {
