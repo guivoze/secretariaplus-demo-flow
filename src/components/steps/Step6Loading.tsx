@@ -32,87 +32,62 @@ const instagramPosts = [
 ];
 
 export const Step6Loading = () => {
-  const { nextStep, userData } = useDemo();
+  const { nextStep, userData, setUserData } = useDemo();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [posts, setPosts] = useState(instagramPosts);
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [instagramName, setInstagramName] = useState<string>('');
 
   // Check for Instagram data on mount
   useEffect(() => {
-    console.log('Step6Loading: Iniciando...');
-    console.log('userData.instagram:', userData.instagram);
-    
     const instagramData = localStorage.getItem('instagram-data');
-    console.log('Instagram data from localStorage:', instagramData);
-    console.log('Current profileImage state:', profileImage);
-    
     if (instagramData) {
       try {
         const data = JSON.parse(instagramData);
-        console.log('Dados parseados:', data);
-        
-        // Set profile image and name
-        if (data.realProfilePic) {
-          setProfileImage(data.realProfilePic);
-          console.log('Profile image setada:', data.realProfilePic);
-        }
-        
-        if (data.aiInsights?.name) {
-          setInstagramName(data.aiInsights.name);
-          console.log('Nome setado:', data.aiInsights.name);
-        }
+        setUserData(data);
         
         // Update posts for slideshow
-        const realPosts = data.realPosts || [];
-        if (realPosts.length > 0) {
-          const postsWithMeta = realPosts.map((url: string) => ({
+        if (data.realPosts && data.realPosts.length > 0) {
+          const realPosts = data.realPosts.map((url: string, index: number) => ({
             image: url,
             likes: Math.floor(Math.random() * 200 + 50).toString(),
             comments: Math.floor(Math.random() * 30 + 5).toString()
           }));
-          setPosts(postsWithMeta);
-          console.log('Posts atualizados:', postsWithMeta);
+          setPosts(realPosts);
         }
         
+        // Set profile image
+        if (data.realProfilePic) {
+          setProfileImage(data.realProfilePic);
+        }
       } catch (error) {
-        console.error('Erro ao parsear dados do Instagram:', error);
+        console.log('Error parsing Instagram data:', error);
       }
-    } else {
-      console.log('Nenhum dado do Instagram encontrado, usando dados mock');
     }
-  }, []);
+  }, [setUserData]);
 
-  // Timer para avançar as etapas de loading
   useEffect(() => {
-    console.log('Timer effect - currentStepIndex:', currentStepIndex);
-    
     if (currentStepIndex < loadingSteps.length) {
       const timer = setTimeout(() => {
-        console.log('Avançando para próximo step:', currentStepIndex + 1);
         setCurrentStepIndex(prev => prev + 1);
       }, 1200);
 
       return () => clearTimeout(timer);
     } else {
-      // Quando terminar todas as etapas, avança para o próximo step
       const timer = setTimeout(() => {
-        console.log('Loading concluído, avançando para próximo step');
         nextStep();
       }, 1000);
       return () => clearTimeout(timer);
     }
   }, [currentStepIndex, nextStep]);
 
-  // Timer para o slideshow de posts
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentPostIndex(prev => (prev + 1) % posts.length);
     }, 2000);
 
     return () => clearInterval(timer);
-  }, [posts.length]);
+  }, [posts]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
@@ -150,15 +125,10 @@ export const Step6Loading = () => {
                 src={profileImage} 
                 alt="Profile" 
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  console.log('Erro ao carregar imagem, usando fallback');
-                  setProfileImage(null);
-                }}
               />
             ) : (
               <span className="text-lg font-medium text-white">
-                {instagramName ? instagramName.charAt(0).toUpperCase() : 
-                 userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
+                {userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
               </span>
             )}
           </motion.div>
