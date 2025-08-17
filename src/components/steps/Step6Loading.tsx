@@ -77,7 +77,7 @@ export const Step6Loading = () => {
         console.log('Error parsing Instagram data:', error);
       }
     }
-  }, [setUserData]);
+  }, []); // Remove setUserData dependency to prevent infinite loop
 
   // Progress through loading steps, but wait for images to load before finishing
   useEffect(() => {
