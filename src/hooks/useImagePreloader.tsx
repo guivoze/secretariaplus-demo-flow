@@ -26,7 +26,9 @@ export const useImagePreloader = (imageUrls: string[]) => {
     };
 
     const preloadAllImages = async () => {
+      console.log('Preloading images:', imageUrls);
       await Promise.all(imageUrls.map(url => preloadImage(url)));
+      console.log('All images preloaded, setting allImagesLoaded to true');
       setAllImagesLoaded(true);
     };
 

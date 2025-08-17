@@ -41,6 +41,8 @@ export const Step6Loading = () => {
   const [imagesToPreload, setImagesToPreload] = useState<string[]>([]);
   
   const { allImagesLoaded } = useImagePreloader(imagesToPreload);
+  
+  console.log('Step6Loading: allImagesLoaded:', allImagesLoaded, 'currentStepIndex:', currentStepIndex, 'imagesToPreload:', imagesToPreload);
 
   // Check for Instagram data on mount and preload images
   useEffect(() => {
