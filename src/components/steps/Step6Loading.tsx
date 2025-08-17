@@ -77,24 +77,27 @@ export const Step6Loading = () => {
   // Progress through loading steps, images are already preloaded
   useEffect(() => {
     if (currentStepIndex < loadingSteps.length) {
+      // Frase do rapport (index 2) dura mais tempo
+      const duration = currentStepIndex === 2 ? 4000 : 2000;
       const timer = setTimeout(() => {
         setCurrentStepIndex(prev => prev + 1);
-      }, 2000); // Aumentado para 2s por step
+      }, duration);
 
       return () => clearTimeout(timer);
     } else {
       // All steps completed, proceed to next step
       const timer = setTimeout(() => {
         nextStep();
-      }, 1500); // Aumentado tempo final
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [currentStepIndex, nextStep]);
 
+  // Background images change asynchronously
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentPostIndex(prev => (prev + 1) % posts.length);
-    }, 2000);
+    }, 3500); // Diferente do timing das frases
 
     return () => clearInterval(timer);
   }, [posts]);
@@ -102,17 +105,17 @@ export const Step6Loading = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Instagram posts slideshow background */}
-      <div className="absolute inset-0 opacity-40">
+      <div className="absolute inset-0 opacity-32">
         <motion.div
           key={currentPostIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 1.5, ease: "easeInOut" }}
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${posts[currentPostIndex].image})`,
-            filter: 'blur(8px)'
+            filter: 'blur(6px)'
           }}
         />
       </div>
