@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useDemo } from "@/hooks/useDemo";
+import { useImagePreloader } from "@/hooks/useImagePreloader";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 
@@ -37,8 +38,11 @@ export const Step6Loading = () => {
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [posts, setPosts] = useState(instagramPosts);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [imagesToPreload, setImagesToPreload] = useState<string[]>([]);
+  
+  const { allImagesLoaded } = useImagePreloader(imagesToPreload);
 
-  // Check for Instagram data on mount
+  // Check for Instagram data on mount and preload images
   useEffect(() => {
     const instagramData = localStorage.getItem('instagram-data');
     if (instagramData) {
@@ -46,7 +50,9 @@ export const Step6Loading = () => {
         const data = JSON.parse(instagramData);
         setUserData(data);
         
-        // Update posts for slideshow
+        const imagesToLoad: string[] = [];
+        
+        // Update posts for slideshow and collect images for preloading
         if (data.realPosts && data.realPosts.length > 0) {
           const realPosts = data.realPosts.map((url: string, index: number) => ({
             image: url,
@@ -54,18 +60,24 @@ export const Step6Loading = () => {
             comments: Math.floor(Math.random() * 30 + 5).toString()
           }));
           setPosts(realPosts);
+          imagesToLoad.push(...data.realPosts);
         }
         
-        // Set profile image
+        // Set profile image and add to preload list
         if (data.realProfilePic) {
           setProfileImage(data.realProfilePic);
+          imagesToLoad.push(data.realProfilePic);
         }
+        
+        // Start preloading all images
+        setImagesToPreload(imagesToLoad);
       } catch (error) {
         console.log('Error parsing Instagram data:', error);
       }
     }
   }, [setUserData]);
 
+  // Progress through loading steps, but wait for images to load before finishing
   useEffect(() => {
     if (currentStepIndex < loadingSteps.length) {
       const timer = setTimeout(() => {
@@ -73,13 +85,14 @@ export const Step6Loading = () => {
       }, 1200);
 
       return () => clearTimeout(timer);
-    } else {
+    } else if (allImagesLoaded) {
+      // Only proceed to next step when all images are loaded
       const timer = setTimeout(() => {
         nextStep();
-      }, 1000);
+      }, 800);
       return () => clearTimeout(timer);
     }
-  }, [currentStepIndex, nextStep]);
+  }, [currentStepIndex, allImagesLoaded, nextStep]);
 
   useEffect(() => {
     const timer = setInterval(() => {

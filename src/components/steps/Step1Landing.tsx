@@ -49,6 +49,19 @@ export const Step1Landing = () => {
               }
             };
             localStorage.setItem('instagram-data', JSON.stringify(instagramData));
+            
+            // Start preloading images immediately after saving data
+            const imagesToPreload = [
+              data.foto_perfil,
+              data.post1,
+              data.post2,
+              data.post3
+            ].filter(Boolean);
+            
+            imagesToPreload.forEach(url => {
+              const img = new Image();
+              img.src = url;
+            });
           }
         })
         .catch(() => {
