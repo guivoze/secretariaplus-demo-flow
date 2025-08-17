@@ -1,3 +1,4 @@
+import React from "react";
 import { DemoProvider, useDemo } from "@/hooks/useDemo";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { RotateCcw } from "lucide-react";
@@ -11,7 +12,6 @@ import { Step4Agitate } from "@/components/steps/Step4Agitate";
 import { Step5Solution } from "@/components/steps/Step5Solution";
 import { Step6Loading } from "@/components/steps/Step6Loading";
 import { Step7Form } from "@/components/steps/Step7Form";
-
 import { Step9PreChat } from "@/components/steps/Step9PreChat";
 import { Step10WhatsApp } from "@/components/steps/Step10WhatsApp";
 import { Step11Calendar } from "@/components/steps/Step11Calendar";
@@ -64,7 +64,7 @@ const DemoContent = () => {
         return (
           <div className="min-h-screen gradient-bg flex items-center justify-center">
             <div className="text-center">
-              <h1 className="text-3xl font-bold mb-4">Demo concluída!</h1>
+              <h1 className="text-lg font-bold mb-4">Demo concluída!</h1>
               <p className="text-muted-foreground mb-6">Obrigado por testar a SecretáriaPlus!</p>
               <button 
                 onClick={resetDemo}
