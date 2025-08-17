@@ -5,13 +5,11 @@ import { useImagePreloader } from "@/hooks/useImagePreloader";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 
-const loadingSteps = [
-  "Buscando seu Instagram...",
-  "Analisando seus posts...",
-  "Identificando seu público...",
-  "Configurando sua I.A...",
-  "Ajustando sua especialidade...",
-  "Finalizando configurações..."
+const getLoadingSteps = (rapportPhrase: string) => [
+  "Treinando IA baseado no seu perfil...",
+  "Refinando seu Prompt...",
+  rapportPhrase || "Criando conexão personalizada...",
+  "Puxando procedimentos..."
 ];
 
 const instagramPosts = [
@@ -42,6 +40,9 @@ export const Step6Loading = () => {
   
   // Images should already be preloaded, so set to true immediately
   const { allImagesLoaded } = useImagePreloader([]);
+  
+  // Get loading steps with rapport phrase
+  const loadingSteps = getLoadingSteps(userData.aiInsights?.rapport || "");
   
   console.log('Step6Loading: allImagesLoaded:', allImagesLoaded, 'currentStepIndex:', currentStepIndex, 'imagesToPreload:', imagesToPreload);
 
@@ -78,14 +79,14 @@ export const Step6Loading = () => {
     if (currentStepIndex < loadingSteps.length) {
       const timer = setTimeout(() => {
         setCurrentStepIndex(prev => prev + 1);
-      }, 1200);
+      }, 2000); // Aumentado para 2s por step
 
       return () => clearTimeout(timer);
     } else {
       // All steps completed, proceed to next step
       const timer = setTimeout(() => {
         nextStep();
-      }, 800);
+      }, 1500); // Aumentado tempo final
       return () => clearTimeout(timer);
     }
   }, [currentStepIndex, nextStep]);
@@ -101,7 +102,7 @@ export const Step6Loading = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Instagram posts slideshow background */}
-      <div className="absolute inset-0 opacity-20">
+      <div className="absolute inset-0 opacity-40">
         <motion.div
           key={currentPostIndex}
           initial={{ opacity: 0 }}
@@ -111,7 +112,7 @@ export const Step6Loading = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${posts[currentPostIndex].image})`,
-            filter: 'blur(10px)'
+            filter: 'blur(8px)'
           }}
         />
       </div>
