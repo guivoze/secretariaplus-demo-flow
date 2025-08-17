@@ -54,18 +54,18 @@ export const Step6Loading = () => {
         console.log('Dados parseados:', data);
         
         // Set profile image and name
-        if (data.foto_perfil) {
-          setProfileImage(data.foto_perfil);
-          console.log('Profile image setada:', data.foto_perfil);
+        if (data.realProfilePic) {
+          setProfileImage(data.realProfilePic);
+          console.log('Profile image setada:', data.realProfilePic);
         }
         
-        if (data.name) {
-          setInstagramName(data.name);
-          console.log('Nome setado:', data.name);
+        if (data.aiInsights?.name) {
+          setInstagramName(data.aiInsights.name);
+          console.log('Nome setado:', data.aiInsights.name);
         }
         
         // Update posts for slideshow
-        const realPosts = [data.post1, data.post2, data.post3].filter(Boolean);
+        const realPosts = data.realPosts || [];
         if (realPosts.length > 0) {
           const postsWithMeta = realPosts.map((url: string) => ({
             image: url,
