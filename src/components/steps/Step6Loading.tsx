@@ -32,37 +32,36 @@ const instagramPosts = [
 ];
 
 export const Step6Loading = () => {
-  const { nextStep, userData, setUserData } = useDemo();
+  const { nextStep, userData } = useDemo();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [posts, setPosts] = useState(instagramPosts);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [instagramName, setInstagramName] = useState<string>('');
 
   // Check for Instagram data on mount
   useEffect(() => {
-    console.log('Step6Loading: Checking for Instagram data...');
+    console.log('Step6Loading: Iniciando...');
+    console.log('userData.instagram:', userData.instagram);
+    
     const instagramData = localStorage.getItem('instagram-data');
     console.log('Instagram data from localStorage:', instagramData);
     
     if (instagramData) {
       try {
         const data = JSON.parse(instagramData);
-        console.log('Parsed Instagram data:', data);
+        console.log('Dados parseados:', data);
         
-        // Update user data safely
-        setUserData({
-          hasInstagramData: true,
-          realProfilePic: data.foto_perfil || null,
-          realPosts: [data.post1, data.post2, data.post3].filter(Boolean) || [],
-          aiInsights: {
-            name: data.name || '',
-            where: data.where || '',
-            procedure1: data.procedure1 || '',
-            procedure2: data.procedure2 || '',
-            procedure3: data.procedure3 || '',
-            rapport: data.rapport || ''
-          }
-        });
+        // Set profile image and name
+        if (data.foto_perfil) {
+          setProfileImage(data.foto_perfil);
+          console.log('Profile image setada:', data.foto_perfil);
+        }
+        
+        if (data.name) {
+          setInstagramName(data.name);
+          console.log('Nome setado:', data.name);
+        }
         
         // Update posts for slideshow
         const realPosts = [data.post1, data.post2, data.post3].filter(Boolean);
@@ -73,44 +72,46 @@ export const Step6Loading = () => {
             comments: Math.floor(Math.random() * 30 + 5).toString()
           }));
           setPosts(postsWithMeta);
-          console.log('Updated posts:', postsWithMeta);
+          console.log('Posts atualizados:', postsWithMeta);
         }
         
-        // Set profile image
-        if (data.foto_perfil) {
-          setProfileImage(data.foto_perfil);
-          console.log('Set profile image:', data.foto_perfil);
-        }
       } catch (error) {
-        console.error('Error parsing Instagram data:', error);
+        console.error('Erro ao parsear dados do Instagram:', error);
       }
     } else {
-      console.log('No Instagram data found, using mock data');
+      console.log('Nenhum dado do Instagram encontrado, usando dados mock');
     }
-  }, [setUserData]);
+  }, []);
 
+  // Timer para avançar as etapas de loading
   useEffect(() => {
+    console.log('Timer effect - currentStepIndex:', currentStepIndex);
+    
     if (currentStepIndex < loadingSteps.length) {
       const timer = setTimeout(() => {
+        console.log('Avançando para próximo step:', currentStepIndex + 1);
         setCurrentStepIndex(prev => prev + 1);
       }, 1200);
 
       return () => clearTimeout(timer);
     } else {
+      // Quando terminar todas as etapas, avança para o próximo step
       const timer = setTimeout(() => {
+        console.log('Loading concluído, avançando para próximo step');
         nextStep();
       }, 1000);
       return () => clearTimeout(timer);
     }
   }, [currentStepIndex, nextStep]);
 
+  // Timer para o slideshow de posts
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentPostIndex(prev => (prev + 1) % posts.length);
     }, 2000);
 
     return () => clearInterval(timer);
-  }, [posts]);
+  }, [posts.length]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
@@ -148,10 +149,15 @@ export const Step6Loading = () => {
                 src={profileImage} 
                 alt="Profile" 
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.log('Erro ao carregar imagem, usando fallback');
+                  setProfileImage(null);
+                }}
               />
             ) : (
               <span className="text-lg font-medium text-white">
-                {userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
+                {instagramName ? instagramName.charAt(0).toUpperCase() : 
+                 userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
               </span>
             )}
           </motion.div>
