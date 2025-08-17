@@ -40,29 +40,52 @@ export const Step6Loading = () => {
 
   // Check for Instagram data on mount
   useEffect(() => {
+    console.log('Step6Loading: Checking for Instagram data...');
     const instagramData = localStorage.getItem('instagram-data');
+    console.log('Instagram data from localStorage:', instagramData);
+    
     if (instagramData) {
       try {
         const data = JSON.parse(instagramData);
-        setUserData(data);
+        console.log('Parsed Instagram data:', data);
+        
+        // Update user data safely
+        setUserData({
+          hasInstagramData: true,
+          realProfilePic: data.foto_perfil || null,
+          realPosts: [data.post1, data.post2, data.post3].filter(Boolean) || [],
+          aiInsights: {
+            name: data.name || '',
+            where: data.where || '',
+            procedure1: data.procedure1 || '',
+            procedure2: data.procedure2 || '',
+            procedure3: data.procedure3 || '',
+            rapport: data.rapport || ''
+          }
+        });
         
         // Update posts for slideshow
-        if (data.realPosts && data.realPosts.length > 0) {
-          const realPosts = data.realPosts.map((url: string, index: number) => ({
+        const realPosts = [data.post1, data.post2, data.post3].filter(Boolean);
+        if (realPosts.length > 0) {
+          const postsWithMeta = realPosts.map((url: string) => ({
             image: url,
             likes: Math.floor(Math.random() * 200 + 50).toString(),
             comments: Math.floor(Math.random() * 30 + 5).toString()
           }));
-          setPosts(realPosts);
+          setPosts(postsWithMeta);
+          console.log('Updated posts:', postsWithMeta);
         }
         
         // Set profile image
-        if (data.realProfilePic) {
-          setProfileImage(data.realProfilePic);
+        if (data.foto_perfil) {
+          setProfileImage(data.foto_perfil);
+          console.log('Set profile image:', data.foto_perfil);
         }
       } catch (error) {
-        console.log('Error parsing Instagram data:', error);
+        console.error('Error parsing Instagram data:', error);
       }
+    } else {
+      console.log('No Instagram data found, using mock data');
     }
   }, [setUserData]);
 
