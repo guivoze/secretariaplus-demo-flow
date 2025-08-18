@@ -61,62 +61,18 @@ export const Step2ProfileConfirmation = () => {
     setSelectedProfile(profileAt);
   };
 
-  const [isConfirming, setIsConfirming] = useState(false);
-
-  const handleConfirm = async () => {
-    if (!selectedProfile || isConfirming) return;
-
-    setIsConfirming(true);
+  const handleConfirm = () => {
+    if (!selectedProfile) return;
 
     // Update user data with confirmed profile
     setUserData({ instagram: selectedProfile.replace('@', '') });
 
-    // Send confirmation to webhook
-    try {
-      const response = await fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instagram: selectedProfile.replace('@', '') })
-      });
-      
-      const data = await response.json();
-      
-      if (data.perfil) {
-        // Save real Instagram data to localStorage
-        const instagramData = {
-          hasInstagramData: true,
-          realProfilePic: data.foto_perfil,
-          realPosts: [data.post1, data.post2, data.post3],
-          aiInsights: {
-            name: data.name,
-            where: data.where,
-            procedure1: data.procedure1,
-            procedure2: data.procedure2,
-            procedure3: data.procedure3,
-            rapport: data.rapport
-          }
-        };
-        localStorage.setItem('instagram-data', JSON.stringify(instagramData));
-        
-        // Start preloading images immediately
-        const imagesToPreload = [
-          data.foto_perfil,
-          data.post1,
-          data.post2,
-          data.post3
-        ].filter(Boolean);
-        
-        console.log('Starting image preload after confirmation:', imagesToPreload);
-        imagesToPreload.forEach(url => {
-          const img = new Image();
-          img.onload = () => console.log('Preloaded:', url);
-          img.onerror = () => console.log('Failed to preload:', url);
-          img.src = url;
-        });
-      }
-    } catch (error) {
-      console.error('Error confirming profile:', error);
-    }
+    // Send confirmation to webhook (fire and forget)
+    fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ instagram: selectedProfile.replace('@', '') })
+    }).catch(error => console.error('Error confirming profile:', error));
 
     // Go directly to Step6Loading (step 4 in 0-indexed)
     setCurrentStep(4);
