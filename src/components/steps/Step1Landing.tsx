@@ -26,7 +26,7 @@ export const Step1Landing = () => {
         instagramRequestTime: Date.now()
       });
       
-      nextStep(); // Now goes to Step3Pain (step 1)
+      nextStep(); // Goes to Step2Modal
     }
   };
 

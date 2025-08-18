@@ -6,8 +6,9 @@ import { motion } from "framer-motion";
 
 // Import step components
 import { Step1Landing } from "@/components/steps/Step1Landing";
-import { Step2PersonalizationForm } from "@/components/steps/Step2PersonalizationForm";
 import { Step2Modal } from "@/components/steps/Step2Modal";
+import { Step2PersonalizationForm } from "@/components/steps/Step2PersonalizationForm";
+import { Step2ProfileConfirmation } from "@/components/steps/Step2ProfileConfirmation";
 import { Step3Pain } from "@/components/steps/Step3Pain";
 import { Step4Agitate } from "@/components/steps/Step4Agitate";
 import { Step5Solution } from "@/components/steps/Step5Solution";
@@ -34,34 +35,36 @@ const DemoContent = () => {
       case 0:
         return <Step1Landing />;
       case 1:
-        return <Step3Pain />;
+        return <Step2Modal />;
       case 2:
         return <Step2PersonalizationForm />;
       case 3:
-        return <Step2Modal />;
+        return <Step2ProfileConfirmation />;
       case 4:
-        return <Step4Agitate />;
+        return <Step3Pain />;
       case 5:
-        return <Step5Solution />;
+        return <Step4Agitate />;
       case 6:
-        return <Step6Loading />;
+        return <Step5Solution />;
       case 7:
-        return <Step7Form />;
+        return <Step6Loading />;
       case 8:
-        return <Step9PreChat />;
+        return <Step7Form />;
       case 9:
-        return <Step10WhatsApp />;
+        return <Step9PreChat />;
       case 10:
-        return <Step11Calendar />;
+        return <Step10WhatsApp />;
       case 11:
-        return <Step12Result />;
+        return <Step11Calendar />;
       case 12:
-        return <Step13Features />;
+        return <Step12Result />;
       case 13:
-        return <Step14Emergency />;
+        return <Step13Features />;
       case 14:
-        return <Step15SocialProof />;
+        return <Step14Emergency />;
       case 15:
+        return <Step15SocialProof />;
+      case 16:
         return <Step16CTA />;
       default:
         return (
