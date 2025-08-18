@@ -61,8 +61,12 @@ export const Step2ProfileConfirmation = () => {
     setSelectedProfile(profileAt);
   };
 
+  const [isConfirming, setIsConfirming] = useState(false);
+
   const handleConfirm = async () => {
-    if (!selectedProfile) return;
+    if (!selectedProfile || isConfirming) return;
+
+    setIsConfirming(true);
 
     // Update user data with confirmed profile
     setUserData({ instagram: selectedProfile.replace('@', '') });
@@ -114,8 +118,8 @@ export const Step2ProfileConfirmation = () => {
       console.error('Error confirming profile:', error);
     }
 
-    // Skip the modal and go directly to Step3Pain
-    setCurrentStep(3);
+    // Go directly to Step6Loading (step 4 in 0-indexed)
+    setCurrentStep(4);
   };
 
   if (isLoading) {
