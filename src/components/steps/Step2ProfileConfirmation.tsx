@@ -11,7 +11,7 @@ interface ProfileOption {
 }
 
 export const Step2ProfileConfirmation = () => {
-  const { userData, setUserData, setCurrentStep } = useDemo();
+  const { userData, setUserData, nextStep } = useDemo();
   const [profiles, setProfiles] = useState<ProfileOption[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
@@ -26,15 +26,7 @@ export const Step2ProfileConfirmation = () => {
           body: JSON.stringify({ instagram: userData.instagram })
         });
         
-        const responseText = await response.text();
-        console.log('Raw webhook response:', responseText);
-        
-        if (!responseText.trim()) {
-          throw new Error('Empty response from webhook');
-        }
-        
-        const data = JSON.parse(responseText);
-        console.log('Parsed webhook data:', data);
+        const data = await response.json();
         
         // Parse the response into profile options
         const profileOptions: ProfileOption[] = [];
@@ -46,10 +38,6 @@ export const Step2ProfileConfirmation = () => {
               photo: data[`profile${i}_photo`]
             });
           }
-        }
-        
-        if (profileOptions.length === 0) {
-          throw new Error('No profiles found in response');
         }
         
         setProfiles(profileOptions);
@@ -73,21 +61,60 @@ export const Step2ProfileConfirmation = () => {
     setSelectedProfile(profileAt);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedProfile) return;
 
     // Update user data with confirmed profile
     setUserData({ instagram: selectedProfile.replace('@', '') });
 
-    // Send confirmation to webhook (fire and forget)
-    fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ instagram: selectedProfile.replace('@', '') })
-    }).catch(error => console.error('Error confirming profile:', error));
+    // Send confirmation to webhook
+    try {
+      const response = await fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ instagram: selectedProfile.replace('@', '') })
+      });
+      
+      const data = await response.json();
+      
+      if (data.perfil) {
+        // Save real Instagram data to localStorage
+        const instagramData = {
+          hasInstagramData: true,
+          realProfilePic: data.foto_perfil,
+          realPosts: [data.post1, data.post2, data.post3],
+          aiInsights: {
+            name: data.name,
+            where: data.where,
+            procedure1: data.procedure1,
+            procedure2: data.procedure2,
+            procedure3: data.procedure3,
+            rapport: data.rapport
+          }
+        };
+        localStorage.setItem('instagram-data', JSON.stringify(instagramData));
+        
+        // Start preloading images immediately
+        const imagesToPreload = [
+          data.foto_perfil,
+          data.post1,
+          data.post2,
+          data.post3
+        ].filter(Boolean);
+        
+        console.log('Starting image preload after confirmation:', imagesToPreload);
+        imagesToPreload.forEach(url => {
+          const img = new Image();
+          img.onload = () => console.log('Preloaded:', url);
+          img.onerror = () => console.log('Failed to preload:', url);
+          img.src = url;
+        });
+      }
+    } catch (error) {
+      console.error('Error confirming profile:', error);
+    }
 
-    // Go to next step (Step3Pain)
-    setCurrentStep(2);
+    nextStep();
   };
 
   if (isLoading) {
@@ -144,7 +171,7 @@ export const Step2ProfileConfirmation = () => {
                   <p className="font-semibold text-foreground text-sm">
                     {profile.at}
                   </p>
-                  <p className="text-muted-foreground text-xs break-words">
+                  <p className="text-muted-foreground text-xs truncate">
                     {profile.username}
                   </p>
                 </div>
