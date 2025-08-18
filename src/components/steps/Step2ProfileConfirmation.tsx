@@ -14,7 +14,6 @@ export const Step2ProfileConfirmation = () => {
   const { userData, setUserData, nextStep, resetDemo } = useDemo();
   const [profiles, setProfiles] = useState<ProfileOption[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
   const [totalFound, setTotalFound] = useState<number>(0);
 
   useEffect(() => {
@@ -84,7 +83,6 @@ export const Step2ProfileConfirmation = () => {
         
         setProfiles(profileOptions);
         setTotalFound(profileOptions.length);
-        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching profiles:', error);
         // Fallback to single profile with mock data
@@ -93,7 +91,6 @@ export const Step2ProfileConfirmation = () => {
           username: userData.instagram,
           photo: 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
         }]);
-        setIsLoading(false);
       }
     };
 
@@ -140,17 +137,6 @@ export const Step2ProfileConfirmation = () => {
     // Go to next step immediately
     nextStep();
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-        <CustomCard variant="elevated" className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-gray-800 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-foreground">Buscando perfis...</p>
-        </CustomCard>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
