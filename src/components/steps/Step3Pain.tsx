@@ -75,7 +75,7 @@ export const Step3Pain = () => {
           delay: 0.5
         }}>
             <CustomButton onClick={nextStep} size="lg" className="px-12">
-              CONTINUAR
+              Bora ver na prática?
             </CustomButton>
           </motion.div>
         </CustomCard>
