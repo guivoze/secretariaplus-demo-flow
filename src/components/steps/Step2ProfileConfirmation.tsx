@@ -37,12 +37,16 @@ export const Step2ProfileConfirmation = () => {
           const foundCount = responseData.total_found || 0;
           setTotalFound(foundCount);
           
-          // If 0 profiles found, skip this step
+          // If 0 profiles found, skip this step immediately
           if (foundCount === 0) {
+            console.log('No profiles found, skipping to next step');
             nextStep();
             return;
           }
         }
+        
+        // Also check if no profiles were parsed below
+        let shouldSkip = false;
         
         // Parse the response format - it's an object, not an array
         const profileOptions: ProfileOption[] = [];
@@ -70,6 +74,13 @@ export const Step2ProfileConfirmation = () => {
         }
         
         console.log('Final profiles array:', profileOptions);
+        
+        // If no profiles found after parsing, skip this step
+        if (profileOptions.length === 0) {
+          console.log('No profiles parsed, skipping to next step');
+          nextStep();
+          return;
+        }
         
         setProfiles(profileOptions);
         setTotalFound(profileOptions.length);
