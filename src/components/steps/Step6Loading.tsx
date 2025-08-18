@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CustomCard } from "@/components/ui/custom-card";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useImagePreloader } from "@/hooks/useImagePreloader";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
@@ -31,7 +31,7 @@ const instagramPosts = [
 ];
 
 export const Step6Loading = () => {
-  const { nextStep, userData, setUserData } = useDemo();
+  const { nextStep, userData, setUserData } = useSupabaseDemo();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [posts, setPosts] = useState(instagramPosts);

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Phone, Video, MoreVertical, CheckCheck } from "lucide-react";
 
@@ -11,7 +11,7 @@ interface Message {
 }
 
 export const Step10WhatsApp = () => {
-  const { nextStep, userData } = useDemo();
+  const { nextStep, userData } = useSupabaseDemo();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [showNotification, setShowNotification] = useState(false);

@@ -2,11 +2,11 @@ import { useState } from "react";
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { CustomInput } from "@/components/ui/custom-input";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 
 export const Step7Form = () => {
-  const { userData, setUserData, nextStep } = useDemo();
+  const { userData, setUserData, nextStep } = useSupabaseDemo();
   const [formData, setFormData] = useState({
     nome: userData.nome || '',
     email: userData.email || '',

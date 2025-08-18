@@ -1,11 +1,11 @@
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 import { Rocket, AlertTriangle, CheckCircle, Phone, MessageCircle } from "lucide-react";
 
 export const Step16CTA = () => {
-  const { userData } = useDemo();
+  const { userData } = useSupabaseDemo();
 
   const benefits = [
     "✅ I.A treinada especificamente para estética",

@@ -14,13 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          message_metadata: Json | null
+          message_order: number
+          sender_type: string
+          session_id: string
+          timestamp_sent: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          message_metadata?: Json | null
+          message_order: number
+          sender_type: string
+          session_id: string
+          timestamp_sent?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          message_metadata?: Json | null
+          message_order?: number
+          sender_type?: string
+          session_id?: string
+          timestamp_sent?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "demo_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_sessions: {
+        Row: {
+          ai_insights: Json | null
+          completed_at: string | null
+          completion_percentage: number
+          created_at: string
+          current_step: number
+          custom_prompt: string | null
+          email: string | null
+          especialidade: string | null
+          faturamento: string | null
+          first_visit_at: string
+          followers_count: string | null
+          has_instagram_data: boolean
+          id: string
+          instagram_handle: string
+          last_visit_at: string
+          lead_score: number
+          nome: string | null
+          posts_count: string | null
+          profile_pic_url: string | null
+          real_posts: Json | null
+          real_profile_pic_url: string | null
+          referrer: string | null
+          session_id: string
+          time_spent_seconds: number
+          total_steps: number
+          total_visits: number
+          updated_at: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          ai_insights?: Json | null
+          completed_at?: string | null
+          completion_percentage?: number
+          created_at?: string
+          current_step?: number
+          custom_prompt?: string | null
+          email?: string | null
+          especialidade?: string | null
+          faturamento?: string | null
+          first_visit_at?: string
+          followers_count?: string | null
+          has_instagram_data?: boolean
+          id?: string
+          instagram_handle: string
+          last_visit_at?: string
+          lead_score?: number
+          nome?: string | null
+          posts_count?: string | null
+          profile_pic_url?: string | null
+          real_posts?: Json | null
+          real_profile_pic_url?: string | null
+          referrer?: string | null
+          session_id: string
+          time_spent_seconds?: number
+          total_steps?: number
+          total_visits?: number
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          ai_insights?: Json | null
+          completed_at?: string | null
+          completion_percentage?: number
+          created_at?: string
+          current_step?: number
+          custom_prompt?: string | null
+          email?: string | null
+          especialidade?: string | null
+          faturamento?: string | null
+          first_visit_at?: string
+          followers_count?: string | null
+          has_instagram_data?: boolean
+          id?: string
+          instagram_handle?: string
+          last_visit_at?: string
+          lead_score?: number
+          nome?: string | null
+          posts_count?: string | null
+          profile_pic_url?: string | null
+          real_posts?: Json | null
+          real_profile_pic_url?: string | null
+          referrer?: string | null
+          session_id?: string
+          time_spent_seconds?: number
+          total_steps?: number
+          total_visits?: number
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_session_id: {
+        Args: {
+          p_screen_info?: string
+          p_timezone?: string
+          p_user_agent?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

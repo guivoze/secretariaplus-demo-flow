@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 
 interface ProfileOption {
@@ -11,7 +11,7 @@ interface ProfileOption {
 }
 
 export const Step2ProfileConfirmation = () => {
-  const { userData, setUserData, nextStep, resetDemo } = useDemo();
+  const { userData, setUserData, nextStep, resetDemo } = useSupabaseDemo();
   const [profiles, setProfiles] = useState<ProfileOption[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [totalFound, setTotalFound] = useState<number>(0);

@@ -1,11 +1,11 @@
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 import { AlertTriangle, Phone, MessageSquare, Shield } from "lucide-react";
 
 export const Step14Emergency = () => {
-  const { nextStep } = useDemo();
+  const { nextStep } = useSupabaseDemo();
 
   return (
     <div className="min-h-screen gradient-bg flex items-center justify-center p-4">

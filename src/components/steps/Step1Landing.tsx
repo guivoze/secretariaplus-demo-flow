@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomInput } from "@/components/ui/custom-input";
 import { CustomCard } from "@/components/ui/custom-card";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 
 export const Step1Landing = () => {
-  const { userData, setUserData, nextStep } = useDemo();
+  const { userData, setUserData, nextStep } = useSupabaseDemo();
   const [instagram, setInstagram] = useState(userData.instagram || '');
   const [liveCount, setLiveCount] = useState(243);
 

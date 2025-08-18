@@ -1,11 +1,11 @@
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 import { Calendar, Clock, Users, TrendingUp } from "lucide-react";
 
 export const Step12Result = () => {
-  const { nextStep } = useDemo();
+  const { nextStep } = useSupabaseDemo();
 
   const benefits = [
     {

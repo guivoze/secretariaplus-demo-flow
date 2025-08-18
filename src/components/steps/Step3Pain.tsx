@@ -1,11 +1,11 @@
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 export const Step3Pain = () => {
   const {
     nextStep
-  } = useDemo();
+  } = useSupabaseDemo();
   return <div className="min-h-screen gradient-subtle flex items-center justify-center p-4">
       <motion.div initial={{
       opacity: 0,

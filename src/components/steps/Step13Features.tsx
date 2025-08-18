@@ -1,11 +1,11 @@
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 import { Database, Bot, MessageCircle, Sparkles } from "lucide-react";
 
 export const Step13Features = () => {
-  const { nextStep } = useDemo();
+  const { nextStep } = useSupabaseDemo();
 
   const features = [
     {

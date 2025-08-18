@@ -1,5 +1,5 @@
 import React from "react";
-import { DemoProvider, useDemo } from "@/hooks/useDemo";
+import { SupabaseDemoProvider, useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { RotateCcw } from "lucide-react";
 import { motion } from "framer-motion";
@@ -24,11 +24,22 @@ import { Step15SocialProof } from "@/components/steps/Step15SocialProof";
 import { Step16CTA } from "@/components/steps/Step16CTA";
 
 const DemoContent = () => {
-  const { currentStep, resetDemo } = useDemo();
+  const { currentStep, resetDemo, isLoading } = useSupabaseDemo();
 
   const calculateProgress = (step: number) => {
     return Math.min((step / 15) * 100, 100); // 16 steps total (0-15)
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando sessão...</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderCurrentStep = () => {
     switch (currentStep) {
@@ -109,9 +120,9 @@ const DemoContent = () => {
 
 const App = () => {
   return (
-    <DemoProvider>
+    <SupabaseDemoProvider>
       <DemoContent />
-    </DemoProvider>
+    </SupabaseDemoProvider>
   );
 };
 

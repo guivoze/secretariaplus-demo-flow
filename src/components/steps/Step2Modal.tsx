@@ -1,11 +1,11 @@
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 export const Step2Modal = () => {
   const {
     nextStep
-  } = useDemo();
+  } = useSupabaseDemo();
   return <div className="min-h-screen bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
       <motion.div initial={{
       opacity: 0,

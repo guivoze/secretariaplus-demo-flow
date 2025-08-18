@@ -1,11 +1,11 @@
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
-import { useDemo } from "@/hooks/useDemo";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 export const Step11Calendar = () => {
-  const { nextStep, userData } = useDemo();
+  const { nextStep, userData } = useSupabaseDemo();
 
   const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const monthDays = Array.from({ length: 31 }, (_, i) => i + 1);
