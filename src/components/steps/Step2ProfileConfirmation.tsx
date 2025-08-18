@@ -26,7 +26,15 @@ export const Step2ProfileConfirmation = () => {
           body: JSON.stringify({ instagram: userData.instagram })
         });
         
-        const data = await response.json();
+        const responseText = await response.text();
+        console.log('Raw webhook response:', responseText);
+        
+        if (!responseText.trim()) {
+          throw new Error('Empty response from webhook');
+        }
+        
+        const data = JSON.parse(responseText);
+        console.log('Parsed webhook data:', data);
         
         // Parse the response into profile options
         const profileOptions: ProfileOption[] = [];
@@ -38,6 +46,10 @@ export const Step2ProfileConfirmation = () => {
               photo: data[`profile${i}_photo`]
             });
           }
+        }
+        
+        if (profileOptions.length === 0) {
+          throw new Error('No profiles found in response');
         }
         
         setProfiles(profileOptions);
@@ -74,8 +86,8 @@ export const Step2ProfileConfirmation = () => {
       body: JSON.stringify({ instagram: selectedProfile.replace('@', '') })
     }).catch(error => console.error('Error confirming profile:', error));
 
-    // Go directly to Step6Loading (step 4 in 0-indexed)
-    setCurrentStep(4);
+    // Go to next step (Step3Pain)
+    setCurrentStep(2);
   };
 
   if (isLoading) {
