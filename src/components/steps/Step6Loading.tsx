@@ -5,11 +5,11 @@ import { useImagePreloader } from "@/hooks/useImagePreloader";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 
-const getLoadingSteps = (rapportPhrase: string) => [
+const getLoadingSteps = (rapport1: string, rapport2: string) => [
   "Treinando IA baseado no seu perfil...",
-  "Refinando seu Prompt...",
-  rapportPhrase || "Criando conexão personalizada...",
-  "Puxando procedimentos..."
+  rapport1 || "Analisando seus conteúdos...",
+  rapport2 || "Criando conexão personalizada...",
+  "Finalizando personalização..."
 ];
 
 const instagramPosts = [
@@ -41,8 +41,11 @@ export const Step6Loading = () => {
   // Images should already be preloaded, so set to true immediately
   const { allImagesLoaded } = useImagePreloader([]);
   
-  // Get loading steps with rapport phrase
-  const loadingSteps = getLoadingSteps(userData.aiInsights?.rapport || "");
+  // Get loading steps with rapport phrases
+  const loadingSteps = getLoadingSteps(
+    userData.aiInsights?.rapport1 || "", 
+    userData.aiInsights?.rapport2 || ""
+  );
   
   console.log('Step6Loading: allImagesLoaded:', allImagesLoaded, 'currentStepIndex:', currentStepIndex, 'imagesToPreload:', imagesToPreload);
 
@@ -74,11 +77,15 @@ export const Step6Loading = () => {
     }
   }, []);
 
-  // Progress through loading steps, images are already preloaded
+  // Progress through loading steps with custom timing
   useEffect(() => {
     if (currentStepIndex < loadingSteps.length) {
-      // Frase do rapport (index 2) dura mais tempo
-      const duration = currentStepIndex === 2 ? 4000 : 2000;
+      // Custom timing: primeira (2s), rapport1 (4s), rapport2 (3s), última (1.5s)
+      let duration = 2000;
+      if (currentStepIndex === 1) duration = 4000; // rapport1
+      else if (currentStepIndex === 2) duration = 3000; // rapport2
+      else if (currentStepIndex === 3) duration = 1500; // última
+      
       const timer = setTimeout(() => {
         setCurrentStepIndex(prev => prev + 1);
       }, duration);
@@ -115,7 +122,7 @@ export const Step6Loading = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${posts[currentPostIndex].image})`,
-            filter: 'blur(6px)'
+            filter: 'blur(3px)'
           }}
         />
       </div>
@@ -145,6 +152,21 @@ export const Step6Loading = () => {
               </span>
             )}
           </motion.div>
+
+          {/* Nome da pessoa com sparkles */}
+          {userData.aiInsights?.name && (
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="flex items-center justify-center gap-1"
+            >
+              <span className="text-sm text-gray-500">
+                {userData.aiInsights.name}
+              </span>
+              <i className="fa-solid fa-sparkles text-sm text-gray-500"></i>
+            </motion.div>
+          )}
 
           <div className="h-6 flex items-center justify-center">
             <motion.div

@@ -31,48 +31,8 @@ export const Step2PersonalizationForm = () => {
       especialidade: formData.especialidade
     });
 
-    // Start loading Instagram data in background while user proceeds
-    if (userData.instagram) {
-      fetch('https://n8nsplus.up.railway.app/webhook/query_insta', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instagram: userData.instagram })
-      }).then(response => response.json())
-        .then(data => {
-          console.log('Background Instagram query:', data);
-          
-          // Then fetch full Instagram data
-          if (data && data.user1) {
-            fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ instagram: data.user1 })
-            }).then(response => response.json())
-              .then(instagramData => {
-                if (instagramData.perfil) {
-                  const fullInstagramData = {
-                    hasInstagramData: true,
-                    realProfilePic: instagramData.foto_perfil,
-                    realPosts: [instagramData.post1, instagramData.post2, instagramData.post3],
-                    aiInsights: {
-                      name: instagramData.name,
-                      where: instagramData.where,
-                      procedure1: instagramData.procedure1,
-                      procedure2: instagramData.procedure2,
-                      procedure3: instagramData.procedure3,
-                      rapport: instagramData.rapport
-                    }
-                  };
-                  localStorage.setItem('instagram-data', JSON.stringify(fullInstagramData));
-                  console.log('Instagram data cached:', fullInstagramData);
-                }
-              })
-              .catch(error => console.error('Error caching Instagram data:', error));
-          }
-        })
-        .catch(error => console.error('Error with background query:', error));
-    }
-
+    // Proceed to profile confirmation step
+    // Webhook will be called only after profile confirmation
     nextStep();
   };
 

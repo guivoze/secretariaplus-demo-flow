@@ -23,7 +23,8 @@ interface UserData {
     procedure1: string;
     procedure2: string;
     procedure3: string;
-    rapport: string;
+    rapport1: string;
+    rapport2: string;
   } | null;
   instagramRequestTime: number | null;
 }

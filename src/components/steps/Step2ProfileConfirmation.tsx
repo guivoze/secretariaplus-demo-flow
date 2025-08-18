@@ -82,18 +82,24 @@ export const Step2ProfileConfirmation = () => {
   const handleConfirm = () => {
     if (!selectedProfile) return;
 
+    const confirmedUsername = selectedProfile.replace('@', '');
+    
     // Update user data with confirmed profile
-    setUserData({ instagram: selectedProfile.replace('@', '') });
+    setUserData({ instagram: confirmedUsername });
 
-    // Send confirmation to webhook in background (no await)
+    // This is the ONLY place where get_insta webhook should be called
+    // Start Instagram scraping in background after profile confirmation
+    console.log('Starting Instagram scrape for confirmed profile:', confirmedUsername);
+    
     fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ instagram: selectedProfile.replace('@', '') })
+      body: JSON.stringify({ instagram: confirmedUsername })
     }).then(response => response.json())
       .then(data => {
+        console.log('Instagram scrape completed:', data);
         if (data.perfil) {
-          // Save real Instagram data to localStorage
+          // Save real Instagram data to localStorage for loading step
           const instagramData = {
             hasInstagramData: true,
             realProfilePic: data.foto_perfil,
@@ -104,15 +110,17 @@ export const Step2ProfileConfirmation = () => {
               procedure1: data.procedure1,
               procedure2: data.procedure2,
               procedure3: data.procedure3,
-              rapport: data.rapport
+              rapport1: data.rapport1,
+              rapport2: data.rapport2
             }
           };
           localStorage.setItem('instagram-data', JSON.stringify(instagramData));
+          console.log('Instagram data cached for loading step:', instagramData);
         }
       })
-      .catch(error => console.error('Error confirming profile:', error));
+      .catch(error => console.error('Error during Instagram scrape:', error));
 
-    // Go to next step immediately
+    // Proceed to next step immediately (seamless UX)
     nextStep();
   };
 
