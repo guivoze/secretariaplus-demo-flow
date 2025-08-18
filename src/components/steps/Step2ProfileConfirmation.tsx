@@ -28,15 +28,20 @@ export const Step2ProfileConfirmation = () => {
         
         const data = await response.json();
         
-        // Parse the response into profile options
+        // Parse the new response format
         const profileOptions: ProfileOption[] = [];
-        for (let i = 1; i <= 4; i++) {
-          if (data[`profile${i}_at`]) {
-            profileOptions.push({
-              at: data[`profile${i}_at`],
-              username: data[`profile${i}_username`],
-              photo: data[`profile${i}_photo`]
-            });
+        if (data && data.length > 0) {
+          const result = data[0];
+          
+          // Add each user found
+          for (let i = 1; i <= 3; i++) {
+            if (result[`user${i}`]) {
+              profileOptions.push({
+                at: `@${result[`user${i}`]}`,
+                username: result[`name${i}`] || result[`user${i}`],
+                photo: result[`pfp${i}`] || 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
+              });
+            }
           }
         }
         
@@ -61,59 +66,40 @@ export const Step2ProfileConfirmation = () => {
     setSelectedProfile(profileAt);
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = () => {
     if (!selectedProfile) return;
 
     // Update user data with confirmed profile
     setUserData({ instagram: selectedProfile.replace('@', '') });
 
-    // Send confirmation to webhook
-    try {
-      const response = await fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instagram: selectedProfile.replace('@', '') })
-      });
-      
-      const data = await response.json();
-      
-      if (data.perfil) {
-        // Save real Instagram data to localStorage
-        const instagramData = {
-          hasInstagramData: true,
-          realProfilePic: data.foto_perfil,
-          realPosts: [data.post1, data.post2, data.post3],
-          aiInsights: {
-            name: data.name,
-            where: data.where,
-            procedure1: data.procedure1,
-            procedure2: data.procedure2,
-            procedure3: data.procedure3,
-            rapport: data.rapport
-          }
-        };
-        localStorage.setItem('instagram-data', JSON.stringify(instagramData));
-        
-        // Start preloading images immediately
-        const imagesToPreload = [
-          data.foto_perfil,
-          data.post1,
-          data.post2,
-          data.post3
-        ].filter(Boolean);
-        
-        console.log('Starting image preload after confirmation:', imagesToPreload);
-        imagesToPreload.forEach(url => {
-          const img = new Image();
-          img.onload = () => console.log('Preloaded:', url);
-          img.onerror = () => console.log('Failed to preload:', url);
-          img.src = url;
-        });
-      }
-    } catch (error) {
-      console.error('Error confirming profile:', error);
-    }
+    // Send confirmation to webhook in background (no await)
+    fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ instagram: selectedProfile.replace('@', '') })
+    }).then(response => response.json())
+      .then(data => {
+        if (data.perfil) {
+          // Save real Instagram data to localStorage
+          const instagramData = {
+            hasInstagramData: true,
+            realProfilePic: data.foto_perfil,
+            realPosts: [data.post1, data.post2, data.post3],
+            aiInsights: {
+              name: data.name,
+              where: data.where,
+              procedure1: data.procedure1,
+              procedure2: data.procedure2,
+              procedure3: data.procedure3,
+              rapport: data.rapport
+            }
+          };
+          localStorage.setItem('instagram-data', JSON.stringify(instagramData));
+        }
+      })
+      .catch(error => console.error('Error confirming profile:', error));
 
+    // Go to next step immediately
     nextStep();
   };
 
