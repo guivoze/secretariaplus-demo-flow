@@ -30,11 +30,10 @@ export const Step2ProfileConfirmation = () => {
         
         console.log('Webhook response:', data);
         
-        // Parse the new response format
+        // Parse the response format - it's an object, not an array
         const profileOptions: ProfileOption[] = [];
-        if (data && Array.isArray(data) && data.length > 0) {
-          const result = data[0];
-          console.log('Result object:', result);
+        if (data && typeof data === 'object') {
+          console.log('Processing object:', data);
           
           // Add each user found
           for (let i = 1; i <= 3; i++) {
@@ -42,13 +41,13 @@ export const Step2ProfileConfirmation = () => {
             const nameKey = `name${i}`;
             const pfpKey = `pfp${i}`;
             
-            console.log(`Checking ${userKey}:`, result[userKey]);
+            console.log(`Checking ${userKey}:`, data[userKey]);
             
-            if (result[userKey]) {
+            if (data[userKey]) {
               const profile = {
-                at: `@${result[userKey]}`,
-                username: result[nameKey] || result[userKey],
-                photo: result[pfpKey] || 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
+                at: `@${data[userKey]}`,
+                username: data[nameKey] || data[userKey],
+                photo: data[pfpKey] || 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
               };
               console.log('Adding profile:', profile);
               profileOptions.push(profile);
