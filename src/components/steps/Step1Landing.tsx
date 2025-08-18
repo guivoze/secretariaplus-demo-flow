@@ -18,13 +18,26 @@ export const Step1Landing = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (instagram.trim()) {
       const cleanInstagram = instagram.trim();
       setUserData({ 
         instagram: cleanInstagram,
         instagramRequestTime: Date.now()
       });
+      
+      // Call webhook in background immediately
+      fetch('https://n8nsplus.up.railway.app/webhook/query_insta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ instagram: cleanInstagram })
+      }).then(response => response.json())
+        .then(data => {
+          console.log('Profile query response:', data);
+          // Store response for later use
+          localStorage.setItem('profile-query-result', JSON.stringify(data));
+        })
+        .catch(error => console.error('Error querying profiles:', error));
       
       nextStep(); // Goes to Step2Modal
     }

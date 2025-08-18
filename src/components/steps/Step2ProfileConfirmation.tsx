@@ -17,48 +17,30 @@ export const Step2ProfileConfirmation = () => {
   const [totalFound, setTotalFound] = useState<number>(0);
 
   useEffect(() => {
-    // Call the query webhook to get profile options
-    const queryProfiles = async () => {
+    // Get cached profile query result
+    const cachedResult = localStorage.getItem('profile-query-result');
+    if (cachedResult) {
       try {
-        const response = await fetch('https://n8nsplus.up.railway.app/webhook/query_insta', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ instagram: userData.instagram })
-        });
+        const data = JSON.parse(cachedResult);
+        console.log('Using cached profile data:', data);
         
-        const data = await response.json();
+        // Check total_found and skip if 0
+        const foundCount = data.total_found || 0;
+        setTotalFound(foundCount);
         
-        console.log('Webhook response:', data);
-        
-        // Check if it's an array response (new format)
-        if (Array.isArray(data) && data.length > 0) {
-          const responseData = data[0];
-          const foundCount = responseData.total_found || 0;
-          setTotalFound(foundCount);
-          
-          // If 0 profiles found, skip this step immediately
-          if (foundCount === 0) {
-            console.log('No profiles found, skipping to next step');
-            nextStep();
-            return;
-          }
+        if (foundCount === 0) {
+          console.log('No profiles found, skipping to next step');
+          nextStep();
+          return;
         }
         
-        // Also check if no profiles were parsed below
-        let shouldSkip = false;
-        
-        // Parse the response format - it's an object, not an array
+        // Parse profile options if found > 0
         const profileOptions: ProfileOption[] = [];
         if (data && typeof data === 'object') {
-          console.log('Processing object:', data);
-          
-          // Add each user found
           for (let i = 1; i <= 3; i++) {
             const userKey = `user${i}`;
             const nameKey = `name${i}`;
             const pfpKey = `pfp${i}`;
-            
-            console.log(`Checking ${userKey}:`, data[userKey]);
             
             if (data[userKey]) {
               const profile = {
@@ -66,36 +48,32 @@ export const Step2ProfileConfirmation = () => {
                 username: data[nameKey] || data[userKey],
                 photo: data[pfpKey] || 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
               };
-              console.log('Adding profile:', profile);
               profileOptions.push(profile);
             }
           }
         }
         
         console.log('Final profiles array:', profileOptions);
-        
-        // If no profiles found after parsing, skip this step
-        if (profileOptions.length === 0) {
-          console.log('No profiles parsed, skipping to next step');
-          nextStep();
-          return;
-        }
-        
         setProfiles(profileOptions);
         setTotalFound(profileOptions.length);
       } catch (error) {
-        console.error('Error fetching profiles:', error);
-        // Fallback to single profile with mock data
+        console.error('Error parsing cached data:', error);
+        // Fallback
         setProfiles([{
           at: `@${userData.instagram}`,
           username: userData.instagram,
           photo: 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
         }]);
       }
-    };
-
-    queryProfiles();
-  }, [userData.instagram]);
+    } else {
+      // No cached data, fallback
+      setProfiles([{
+        at: `@${userData.instagram}`,
+        username: userData.instagram,
+        photo: 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
+      }]);
+    }
+  }, [userData.instagram, nextStep]);
 
   const handleProfileSelect = (profileAt: string) => {
     setSelectedProfile(profileAt);
