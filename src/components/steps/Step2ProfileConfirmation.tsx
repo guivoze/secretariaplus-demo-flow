@@ -11,10 +11,11 @@ interface ProfileOption {
 }
 
 export const Step2ProfileConfirmation = () => {
-  const { userData, setUserData, nextStep } = useDemo();
+  const { userData, setUserData, nextStep, resetDemo } = useDemo();
   const [profiles, setProfiles] = useState<ProfileOption[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const [totalFound, setTotalFound] = useState<number>(0);
 
   useEffect(() => {
     // Call the query webhook to get profile options
@@ -29,6 +30,19 @@ export const Step2ProfileConfirmation = () => {
         const data = await response.json();
         
         console.log('Webhook response:', data);
+        
+        // Check if it's an array response (new format)
+        if (Array.isArray(data) && data.length > 0) {
+          const responseData = data[0];
+          const foundCount = responseData.total_found || 0;
+          setTotalFound(foundCount);
+          
+          // If 0 profiles found, skip this step
+          if (foundCount === 0) {
+            nextStep();
+            return;
+          }
+        }
         
         // Parse the response format - it's an object, not an array
         const profileOptions: ProfileOption[] = [];
@@ -58,6 +72,7 @@ export const Step2ProfileConfirmation = () => {
         console.log('Final profiles array:', profileOptions);
         
         setProfiles(profileOptions);
+        setTotalFound(profileOptions.length);
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching profiles:', error);
@@ -139,8 +154,8 @@ export const Step2ProfileConfirmation = () => {
             <h2 className="text-xl font-bold text-foreground">
               Confirma pra gente!
             </h2>
-            <p className="text-muted-foreground">
-              Qual destes é o seu perfil?
+            <p className="text-muted-foreground text-sm">
+              Você escreveu: @{userData.instagram} e encontramos...
             </p>
           </div>
 
@@ -182,14 +197,25 @@ export const Step2ProfileConfirmation = () => {
             ))}
           </div>
 
-          <CustomButton
-            onClick={handleConfirm}
-            disabled={!selectedProfile}
-            className="w-full"
-            size="lg"
-          >
-            CONFIRMAR PERFIL
-          </CustomButton>
+          <div className="space-y-3">
+            <CustomButton
+              onClick={handleConfirm}
+              disabled={!selectedProfile}
+              className="w-full"
+              size="lg"
+            >
+              CONFIRMAR PERFIL
+            </CustomButton>
+
+            <CustomButton
+              onClick={resetDemo}
+              variant="outline"
+              className="w-full bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200"
+              size="lg"
+            >
+              Vish, não é nenhum desses! Digitei errado.
+            </CustomButton>
+          </div>
         </CustomCard>
       </motion.div>
     </div>
