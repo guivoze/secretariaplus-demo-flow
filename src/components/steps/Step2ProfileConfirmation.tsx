@@ -28,22 +28,35 @@ export const Step2ProfileConfirmation = () => {
         
         const data = await response.json();
         
+        console.log('Webhook response:', data);
+        
         // Parse the new response format
         const profileOptions: ProfileOption[] = [];
-        if (data && data.length > 0) {
+        if (data && Array.isArray(data) && data.length > 0) {
           const result = data[0];
+          console.log('Result object:', result);
           
           // Add each user found
           for (let i = 1; i <= 3; i++) {
-            if (result[`user${i}`]) {
-              profileOptions.push({
-                at: `@${result[`user${i}`]}`,
-                username: result[`name${i}`] || result[`user${i}`],
-                photo: result[`pfp${i}`] || 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
-              });
+            const userKey = `user${i}`;
+            const nameKey = `name${i}`;
+            const pfpKey = `pfp${i}`;
+            
+            console.log(`Checking ${userKey}:`, result[userKey]);
+            
+            if (result[userKey]) {
+              const profile = {
+                at: `@${result[userKey]}`,
+                username: result[nameKey] || result[userKey],
+                photo: result[pfpKey] || 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
+              };
+              console.log('Adding profile:', profile);
+              profileOptions.push(profile);
             }
           }
         }
+        
+        console.log('Final profiles array:', profileOptions);
         
         setProfiles(profileOptions);
         setIsLoading(false);
