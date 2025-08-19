@@ -1,6 +1,7 @@
 import React from "react";
 import { SupabaseDemoProvider, useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { SessionResumeModal } from "@/components/ui/session-resume-modal";
 import { RotateCcw } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -24,7 +25,15 @@ import { Step15SocialProof } from "@/components/steps/Step15SocialProof";
 import { Step16CTA } from "@/components/steps/Step16CTA";
 
 const DemoContent = () => {
-  const { currentStep, resetDemo, isLoading } = useSupabaseDemo();
+  const { 
+    currentStep, 
+    resetDemo, 
+    isLoading, 
+    showResumeModal, 
+    foundPreviousSession, 
+    resumePreviousSession, 
+    startNewTest 
+  } = useSupabaseDemo();
 
   const calculateProgress = (step: number) => {
     return Math.min((step / 15) * 100, 100); // 16 steps total (0-15)
@@ -102,6 +111,14 @@ const DemoContent = () => {
       
       {/* Current Step */}
       {renderCurrentStep()}
+      
+      {/* Session Resume Modal */}
+      <SessionResumeModal
+        isOpen={showResumeModal}
+        instagramHandle={foundPreviousSession?.instagram_handle || ''}
+        onResume={resumePreviousSession}
+        onNewTest={startNewTest}
+      />
       
       {/* Global Reset Button */}
       <motion.button

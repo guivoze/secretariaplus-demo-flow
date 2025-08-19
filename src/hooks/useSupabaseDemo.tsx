@@ -54,6 +54,11 @@ interface SupabaseDemoContextType {
   addChatMessage: (content: string, sender: 'user' | 'assistant', metadata?: any) => Promise<void>;
   generateCustomPrompt: () => string;
   getLeadScore: () => number;
+  // Session resume features
+  showResumeModal: boolean;
+  foundPreviousSession: any | null;
+  resumePreviousSession: () => void;
+  startNewTest: () => void;
 }
 
 const initialUserData: UserData = {
@@ -114,69 +119,18 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [dbSessionId, setDbSessionId] = useState<string | null>(null);
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [foundPreviousSession, setFoundPreviousSession] = useState<any | null>(null);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  // Generate or retrieve session ID
+  // Generate session ID - always start at Step 0
   const initializeSession = useCallback(async () => {
     try {
       const fingerprint = generateBrowserFingerprint();
-      const sessionKey = `demo-session-${fingerprint}`;
       
-      // Check localStorage first
-      let storedSessionId = localStorage.getItem(sessionKey);
-      
-      if (storedSessionId) {
-        // Try to find existing session in Supabase
-        const { data: existingSession } = await supabase
-          .from('demo_sessions')
-          .select('*')
-          .eq('session_id', storedSessionId)
-          .single();
-
-        if (existingSession) {
-          // Resume existing session
-          setSessionId(storedSessionId);
-          setDbSessionId(existingSession.id);
-          setCurrentStep(existingSession.current_step);
-          
-          // Restore user data
-          const restoredData: UserData = {
-            instagram: existingSession.instagram_handle,
-            nome: existingSession.nome || '',
-            email: existingSession.email || '',
-            whatsapp: existingSession.whatsapp || '',
-            especialidade: existingSession.especialidade || '',
-            faturamento: existingSession.faturamento || '',
-            followers: existingSession.followers_count || '1.2K',
-            posts: existingSession.posts_count || '324',
-            profilePic: existingSession.profile_pic_url,
-            clinicName: 'Clínica Exemplo',
-            procedures: ['Botox', 'Preenchimento', 'Limpeza de Pele'],
-            hasInstagramData: existingSession.has_instagram_data,
-            realProfilePic: existingSession.real_profile_pic_url,
-            realPosts: existingSession.real_posts ? existingSession.real_posts as string[] : [],
-            aiInsights: existingSession.ai_insights as any,
-            instagramRequestTime: existingSession.created_at ? new Date(existingSession.created_at).getTime() : null
-          };
-          
-          setUserDataState(restoredData);
-          
-          // Update visit count
-          await supabase
-            .from('demo_sessions')
-            .update({ 
-              total_visits: existingSession.total_visits + 1,
-              last_visit_at: new Date().toISOString()
-            })
-            .eq('id', existingSession.id);
-            
-          return;
-        }
-      }
-      
-      // Create new session ID
+      // Always create new session ID for fresh start
       const newSessionId = `${fingerprint}_${Date.now()}`;
       setSessionId(newSessionId);
-      localStorage.setItem(sessionKey, newSessionId);
       
     } catch (error) {
       console.error('Error initializing session:', error);
@@ -185,6 +139,29 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
       setSessionId(fallbackId);
     } finally {
       setIsLoading(false);
+    }
+  }, []);
+
+  // Search for previous sessions by Instagram handle
+  const searchPreviousSession = useCallback(async (instagramHandle: string) => {
+    if (!instagramHandle.trim()) return;
+    
+    try {
+      const { data: existingSession } = await supabase
+        .from('demo_sessions')
+        .select('*')
+        .eq('instagram_handle', instagramHandle.trim())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (existingSession) {
+        setFoundPreviousSession(existingSession);
+        setShowResumeModal(true);
+      }
+    } catch (error) {
+      // No previous session found or error - continue normally
+      console.log('No previous session found for Instagram:', instagramHandle);
     }
   }, []);
 
@@ -365,16 +342,80 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [dbSessionId, loadChatMessages]);
 
+  // Resume previous session
+  const resumePreviousSession = useCallback(() => {
+    if (!foundPreviousSession) return;
+    
+    // Update current session to use existing DB session
+    setDbSessionId(foundPreviousSession.id);
+    setCurrentStep(foundPreviousSession.current_step);
+    
+    // Restore user data
+    const restoredData: UserData = {
+      instagram: foundPreviousSession.instagram_handle,
+      nome: foundPreviousSession.nome || '',
+      email: foundPreviousSession.email || '',
+      whatsapp: foundPreviousSession.whatsapp || '',
+      especialidade: foundPreviousSession.especialidade || '',
+      faturamento: foundPreviousSession.faturamento || '',
+      followers: foundPreviousSession.followers_count || '1.2K',
+      posts: foundPreviousSession.posts_count || '324',
+      profilePic: foundPreviousSession.profile_pic_url,
+      clinicName: 'Clínica Exemplo',
+      procedures: ['Botox', 'Preenchimento', 'Limpeza de Pele'],
+      hasInstagramData: foundPreviousSession.has_instagram_data,
+      realProfilePic: foundPreviousSession.real_profile_pic_url,
+      realPosts: foundPreviousSession.real_posts ? foundPreviousSession.real_posts as string[] : [],
+      aiInsights: foundPreviousSession.ai_insights as any,
+      instagramRequestTime: foundPreviousSession.created_at ? new Date(foundPreviousSession.created_at).getTime() : null
+    };
+    
+    setUserDataState(restoredData);
+    setShowResumeModal(false);
+    setFoundPreviousSession(null);
+  }, [foundPreviousSession]);
+
+  // Start new test (keep current session, close modal)
+  const startNewTest = useCallback(() => {
+    setShowResumeModal(false);
+    setFoundPreviousSession(null);
+    // Continue with current session - new row will be created on first save
+  }, []);
+
   const setUserData = (data: Partial<UserData>) => {
-    setUserDataState(prev => ({ ...prev, ...data }));
+    setUserDataState(prev => {
+      const newData = { ...prev, ...data };
+      
+      // If Instagram handle is being updated, search for previous sessions
+      if (data.instagram && data.instagram !== prev.instagram && data.instagram.trim()) {
+        // Clear existing timeout
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
+        }
+        
+        // Set new timeout for search (debounce)
+        const timeout = setTimeout(() => {
+          searchPreviousSession(data.instagram);
+        }, 1500);
+        
+        setSearchTimeout(timeout);
+      }
+      
+      return newData;
+    });
   };
 
   const resetDemo = () => {
     setCurrentStep(0);
     setUserDataState(initialUserData);
     setChatMessages([]);
-    // Clear localStorage
-    localStorage.clear();
+    setDbSessionId(null);
+    setShowResumeModal(false);
+    setFoundPreviousSession(null);
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+      setSearchTimeout(null);
+    }
     // Force new session
     initializeSession();
   };
@@ -402,7 +443,11 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
       chatMessages,
       addChatMessage,
       generateCustomPrompt,
-      getLeadScore
+      getLeadScore,
+      showResumeModal,
+      foundPreviousSession,
+      resumePreviousSession,
+      startNewTest
     }}>
       {children}
     </SupabaseDemoContext.Provider>
