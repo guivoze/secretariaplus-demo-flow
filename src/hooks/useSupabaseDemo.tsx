@@ -156,8 +156,8 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
         .limit(1)
         .single();
 
-      // Only show modal if session exists, has data, and progressed beyond initial steps
-      if (existingSession && !error && existingSession.current_step > 1) {
+      // Only show modal if session exists, has data, and progressed beyond step 0
+      if (existingSession && !error && existingSession.current_step > 0) {
         setFoundPreviousSession(existingSession);
         setShowResumeModal(true);
       }
