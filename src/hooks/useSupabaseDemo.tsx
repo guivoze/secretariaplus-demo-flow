@@ -147,15 +147,17 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
     if (!instagramHandle.trim()) return;
     
     try {
-      const { data: existingSession } = await supabase
+      const { data: existingSession, error } = await supabase
         .from('demo_sessions')
         .select('*')
         .eq('instagram_handle', instagramHandle.trim())
+        .gt('current_step', 0) // Only sessions that progressed beyond step 0
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
 
-      if (existingSession) {
+      // Only show modal if session exists, has data, and progressed beyond initial steps
+      if (existingSession && !error && existingSession.current_step > 1) {
         setFoundPreviousSession(existingSession);
         setShowResumeModal(true);
       }
