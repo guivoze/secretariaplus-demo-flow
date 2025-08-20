@@ -167,7 +167,7 @@ export const Step2ProfileConfirmation = () => {
                   <p className="font-semibold text-foreground text-sm">
                     {profile.at}
                   </p>
-                  <p className="text-muted-foreground text-xs truncate">
+                  <p className="text-muted-foreground text-xs break-words">
                     {profile.username}
                   </p>
                 </div>

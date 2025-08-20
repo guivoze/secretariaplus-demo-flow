@@ -147,17 +147,33 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
     if (!instagramHandle.trim()) return;
     
     try {
-      const { data: existingSession, error } = await supabase
+      // Always close any previous modal state before a new search
+      setShowResumeModal(false);
+      setFoundPreviousSession(null);
+
+      let query = supabase
         .from('demo_sessions')
         .select('*')
         .eq('instagram_handle', instagramHandle.trim())
         .gt('current_step', 0) // Only sessions that progressed beyond step 0
         .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
 
-      // Only show modal if session exists, has data, and progressed beyond step 0
-      if (existingSession && !error && existingSession.current_step > 0) {
+      // Exclude the current in-memory session row (in case it was just created/updated)
+      if (sessionId) {
+        query = query.neq('session_id', sessionId);
+      }
+
+      const { data: existingSession, error } = await query.single();
+
+      // Only show modal if session exists, has data, and is not the current DB session
+      if (
+        existingSession &&
+        !error &&
+        existingSession.current_step > 0 &&
+        existingSession.session_id !== sessionId &&
+        existingSession.id !== dbSessionId
+      ) {
         setFoundPreviousSession(existingSession);
         setShowResumeModal(true);
       }
@@ -165,11 +181,17 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
       // No previous session found or error - continue normally
       console.log('No previous session found for Instagram:', instagramHandle);
     }
-  }, []);
+  }, [sessionId, dbSessionId]);
 
   // Save session to Supabase
   const saveSession = useCallback(async () => {
     if (!sessionId) return;
+    // Evita criar/atualizar linha enquanto o modal está aberto
+    if (showResumeModal) return;
+    // Evita criar linha antes do usuário informar o instagram
+    if (!userData.instagram || !userData.instagram.trim()) return;
+    // SÓ CRIA ROW DEPOIS DE REALMENTE PROGREDIR (step 2+)
+    if (currentStep < 2) return;
     
     try {
       const utmParams = getUTMParams();
@@ -221,14 +243,14 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
 
   // Auto-save when important data changes
   useEffect(() => {
-    if (sessionId && !isLoading) {
+    if (sessionId && !isLoading && !showResumeModal && userData.instagram && currentStep >= 2) {
       const timer = setTimeout(() => {
         saveSession();
       }, 1000); // Debounce saves
       
       return () => clearTimeout(timer);
     }
-  }, [userData, currentStep, sessionId, isLoading, saveSession]);
+  }, [userData, currentStep, sessionId, isLoading, showResumeModal, saveSession]);
 
   // Load chat messages
   const loadChatMessages = useCallback(async () => {
@@ -348,7 +370,8 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
   const resumePreviousSession = useCallback(() => {
     if (!foundPreviousSession) return;
     
-    // Update current session to use existing DB session
+    // Update current session to use existing DB session (reutilizar a mesma row)
+    setSessionId(foundPreviousSession.session_id);
     setDbSessionId(foundPreviousSession.id);
     setCurrentStep(foundPreviousSession.current_step);
     
@@ -379,10 +402,16 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
 
   // Start new test (keep current session, close modal)
   const startNewTest = useCallback(() => {
+    // Close modal and clear any previous-session linkage
     setShowResumeModal(false);
     setFoundPreviousSession(null);
-    // Continue with current session - new row will be created on first save
-  }, []);
+    setDbSessionId(null);
+    // Volta para o passo 0 (novo fluxo) mas NÃO altera/limpa a row antiga no DB
+    setCurrentStep(0);
+    // Mantemos os dados atuais em memória para experiência fluida;
+    // a próxima gravação criará uma NOVA row com novo session_id
+    initializeSession();
+  }, [initializeSession]);
 
   const setUserData = (data: Partial<UserData>) => {
     setUserDataState(prev => {

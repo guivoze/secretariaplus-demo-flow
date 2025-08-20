@@ -7,11 +7,11 @@ import { motion } from "framer-motion";
 
 const specialties = [
   "HOF",
-  "Odonto", 
-  "Dermatologia",
+  "Odonto",
+  "Harmonização Corporal",
+  "Dermato",
   "Cir. Plástica",
-  "Estética geral (salão, micro)",
-  "Maquiagem"
+  "Estética Geral (salão, micro, make)"
 ];
 
 export const Step2PersonalizationForm = () => {
@@ -54,7 +54,7 @@ export const Step2PersonalizationForm = () => {
           <div className="space-y-4">
             <CustomInput
               label="Qual seu nome?"
-              placeholder="Digite seu nome"
+              placeholder="Seu Nome"
               value={formData.nome}
               onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
             />

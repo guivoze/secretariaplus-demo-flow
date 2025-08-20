@@ -79,8 +79,9 @@ export const Step1Landing = () => {
                 prefix="@"
                 placeholder="digita o @ certinho, tem uma surpresa pra você. 🎁"
                 value={instagram}
-                onChange={(e) => setInstagram(e.target.value)}
+                onChange={(e) => setInstagram(e.target.value.toLowerCase())}
                 className="text-center"
+                style={{ textTransform: 'lowercase' }}
               />
 
               <CustomButton
