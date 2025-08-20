@@ -1,97 +1,92 @@
 import { useState, useEffect, useRef } from "react";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
+import { useChatMessages } from "@/hooks/useChatMessages";
+import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Phone, Video, MoreVertical, CheckCheck } from "lucide-react";
+import { toast } from "sonner";
 
 interface Message {
-  id: number;
+  id: string;
   text: string;
   sender: 'user' | 'bot';
   timestamp: string;
 }
 
 export const Step10WhatsApp = () => {
-  const { nextStep, userData } = useSupabaseDemo();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { nextStep, userData, sessionId } = useSupabaseDemo();
+  const { chatMessages, sendUserMessage, sendAssistantMessage } = useChatMessages();
   const [inputValue, setInputValue] = useState('');
   const [showNotification, setShowNotification] = useState(false);
   const [chatDarkened, setChatDarkened] = useState(false);
   const [showFinishButton, setShowFinishButton] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const botResponses: { [key: string]: string } = {
-    'preço': 'Nossos valores começam a partir de R$ 800. Gostaria de agendar uma avaliação gratuita?',
-    'valor': 'Nossos valores começam a partir de R$ 800. Gostaria de agendar uma avaliação gratuita?',
-    'horário': 'Temos horários disponíveis essa semana! Que tal quinta às 15h?',
-    'botox': 'O botox é um dos nossos procedimentos mais procurados! Resultados naturais e duradouros.',
-    'toxina': 'A toxina botulínica é excelente para suavizar rugas de expressão. Quer saber mais?',
-    'agendar': 'Perfeito! Vou agendar para você. Me confirma seu nome completo e telefone?',
-    'sim': 'Ótimo! Agendamento confirmado para quinta-feira às 15h ✅',
-    'ok': 'Maravilha! Qualquer dúvida estou aqui para ajudar 😊',
-    'oi': 'Olá! Seja bem-vinda à nossa clínica! Como posso ajudar você hoje?',
-    'olá': 'Oi! Que bom ter você aqui! Em que posso ajudar?',
-    'bom dia': 'Bom dia! Como posso ajudar você hoje?',
-    'boa tarde': 'Boa tarde! Em que posso ser útil?',
-    default: 'Como posso ajudar você hoje? Temos diversos procedimentos disponíveis!'
-  };
-
-  const getResponse = (message: string): string => {
-    const lowerMessage = message.toLowerCase();
-    for (const keyword in botResponses) {
-      if (lowerMessage.includes(keyword)) {
-        return botResponses[keyword];
-      }
-    }
-    return botResponses.default;
-  };
+  // Convert chatMessages to local Message format
+  const messages: Message[] = chatMessages.map(msg => ({
+    id: msg.id,
+    text: msg.content,
+    sender: msg.sender === 'user' ? 'user' : 'bot',
+    timestamp: new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  }));
 
   useEffect(() => {
-    // Initial bot message
-    const initialMessage: Message = {
-      id: 1,
-      text: `Olá! Seja bem-vinda à ${userData.clinicName || 'nossa clínica'}! Como posso ajudar você hoje? 😊`,
-      sender: 'bot',
-      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
-    
-    setTimeout(() => {
-      setMessages([initialMessage]);
-    }, 500);
-  }, [userData.clinicName]);
+    // Send initial bot message if no messages exist
+    if (chatMessages.length === 0) {
+      const initialMessage = `Olá! Seja bem-vinda à ${userData.clinicName || 'nossa clínica'}! Como posso ajudar você hoje? 😊`;
+      sendAssistantMessage(initialMessage);
+    }
+  }, [chatMessages.length, userData.clinicName, sendAssistantMessage]);
 
   useEffect(() => {
     if (messages.length >= 8) {
       setShowFinishButton(true);
     }
-  }, [messages]);
+  }, [messages.length]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = () => {
-    if (!inputValue.trim()) return;
+  const sendMessage = async () => {
+    if (!inputValue.trim() || isLoading) return;
 
-    const userMessage: Message = {
-      id: messages.length + 1,
-      text: inputValue,
-      sender: 'user',
-      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
+    const userMessage = inputValue.trim();
     setInputValue('');
 
-    // Bot response after delay
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: messages.length + 2,
-        text: getResponse(inputValue),
-        sender: 'bot',
-        timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, botResponse]);
-    }, 1000 + Math.random() * 2000); // Random delay 1-3 seconds
+    try {
+      // Send user message
+      await sendUserMessage(userMessage);
+
+      // Call AI completion
+      const { data, error } = await supabase.functions.invoke('chat-completion', {
+        body: {
+          sessionId: sessionId,
+          message: userMessage
+        }
+      });
+
+      if (error) {
+        console.error('Error calling chat completion:', error);
+        throw error;
+      }
+
+      if (data?.success && data?.message) {
+        // AI response is already saved by the edge function
+        // The useChatMessages hook will automatically update
+        console.log('AI response received:', data.message);
+      } else {
+        throw new Error('No AI response received');
+      }
+
+    } catch (error) {
+      console.error('Error in chat:', error);
+      toast.error('Erro ao enviar mensagem. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const finishConversation = () => {
@@ -166,6 +161,24 @@ export const Step10WhatsApp = () => {
             </motion.div>
           ))}
         </AnimatePresence>
+        
+        {/* Loading indicator */}
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-start"
+          >
+            <div className="bg-white text-black rounded-2xl rounded-bl-md p-3 shadow-sm">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+        
         <div ref={messagesEndRef} />
       </div>
 
@@ -197,11 +210,11 @@ export const Step10WhatsApp = () => {
             placeholder="Digite uma mensagem"
             className="flex-1 outline-none"
             style={{ fontSize: '16px' }}
-            disabled={chatDarkened}
+            disabled={chatDarkened || isLoading}
           />
           <button
             onClick={sendMessage}
-            disabled={!inputValue.trim() || chatDarkened}
+            disabled={!inputValue.trim() || chatDarkened || isLoading}
             className="text-[#075e54] disabled:text-gray-400"
           >
             <Send className="w-5 h-5" />
