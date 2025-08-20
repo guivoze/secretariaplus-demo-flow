@@ -58,18 +58,31 @@ export const Step6Loading = () => {
         setUserData(data);
         
         // Update posts for slideshow
-        if (data.realPosts && data.realPosts.length > 0) {
-          const realPosts = data.realPosts.map((url: string, index: number) => ({
-            image: url,
-            likes: Math.floor(Math.random() * 200 + 50).toString(),
-            comments: Math.floor(Math.random() * 30 + 5).toString()
-          }));
-          setPosts(realPosts);
+        if (Array.isArray(data.realPosts)) {
+          const validPostUrls: string[] = data.realPosts
+            .filter((url: any) => typeof url === 'string' && url.trim().length > 0);
+
+          if (validPostUrls.length > 0) {
+            const realPosts = validPostUrls.map((url: string) => ({
+              image: url,
+              likes: Math.floor(Math.random() * 200 + 50).toString(),
+              comments: Math.floor(Math.random() * 30 + 5).toString()
+            }));
+            setPosts(realPosts);
+          } else {
+            setPosts(instagramPosts);
+          }
+        } else {
+          setPosts(instagramPosts);
         }
         
         // Set profile image
-        if (data.realProfilePic) {
+        if (typeof data.realProfilePic === 'string' && data.realProfilePic.trim().length > 0) {
           setProfileImage(data.realProfilePic);
+        } else if (typeof data.profilePic === 'string' && data.profilePic.trim().length > 0) {
+          setProfileImage(data.profilePic);
+        } else {
+          setProfileImage(null);
         }
       } catch (error) {
         console.log('Error parsing Instagram data:', error);

@@ -100,10 +100,13 @@ export const Step2ProfileConfirmation = () => {
         console.log('Instagram scrape completed:', data);
         if (data.perfil) {
           // Save real Instagram data to localStorage for loading step
+          const candidatePosts = [data.post1, data.post2, data.post3]
+            .filter((p: any) => typeof p === 'string' && p.trim().length > 0);
+
           const instagramData = {
             hasInstagramData: true,
-            realProfilePic: data.foto_perfil,
-            realPosts: [data.post1, data.post2, data.post3],
+            realProfilePic: typeof data.foto_perfil === 'string' && data.foto_perfil.trim().length > 0 ? data.foto_perfil : null,
+            realPosts: candidatePosts,
             aiInsights: {
               name: data.name,
               where: data.where,

@@ -2,25 +2,73 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
-import { MessageCircle, User, Bot } from "lucide-react";
+import { MessageCircle, User, Bot, Phone, Video, MoreVertical, Send } from "lucide-react";
 
 export const Step9PreChat = () => {
-  const { nextStep } = useSupabaseDemo();
+  const { nextStep, userData } = useSupabaseDemo();
+
+  const WhatsAppPreview = () => {
+    const timestamp = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return (
+      <div className="absolute inset-0 min-h-screen bg-[#e5ddd5] pointer-events-none">
+        {/* Header */}
+        <div className="bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg">
+          <div className="w-10 h-10 rounded-full bg-black/10 overflow-hidden flex items-center justify-center">
+            {userData.realProfilePic ? (
+              <img src={userData.realProfilePic} alt="profile" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center font-bold text-black bg-primary">
+                {(userData.instagram || 'SP').charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold">{userData.aiInsights?.name || userData.instagram || 'SecretáriaPlus'}</h3>
+            <p className="text-sm text-green-200">online</p>
+          </div>
+          <div className="flex gap-4">
+            <Video className="w-5 h-5" />
+            <Phone className="w-5 h-5" />
+            <MoreVertical className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* One greeting message bubble (static) */}
+        <div className="p-4 space-y-3">
+          <div className="flex justify-start">
+            <div className="max-w-[80%] p-3 rounded-2xl shadow-sm bg-white text-black rounded-bl-md">
+              <p className="text-sm">Olá, tudo bom? Como posso ajudar você? 🤩</p>
+              <div className="flex items-center gap-1 mt-1 justify-start">
+                <span className="text-xs text-gray-500">{timestamp}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Disabled input area */}
+        <div className="fixed bottom-0 left-0 right-0 bg-[#f0f0f0] p-4 border-t">
+          <div className="flex items-center gap-3 bg-white rounded-full px-4 py-2">
+            <input type="text" placeholder="Digite uma mensagem" className="flex-1 outline-none" style={{ fontSize: '16px' }} disabled />
+            <button disabled className="text-gray-400">
+              <Send className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm relative">
-      {/* Background placeholder image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-30"
-        style={{
-          backgroundImage: `url(https://via.placeholder.com/1920x1080/E5C197/000000?text=Clinica+Background)`
-        }}
-      />
-      
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+      {/* WhatsApp preview background */}
+      <WhatsAppPreview />
+      {/* Dim + blur fixed overlays (no animation) */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-none" />
+
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-full max-w-lg relative z-10"
       >
         <CustomCard variant="elevated" className="text-center space-y-6">

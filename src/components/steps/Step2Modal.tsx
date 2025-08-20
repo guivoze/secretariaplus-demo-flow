@@ -26,7 +26,7 @@ export const Step2Modal = () => {
   // Initial WhatsApp message using Instagram handle
   const initialMessage: Message = {
     id: 1,
-    text: `Olá! Seja bem-vinda à ${clinicName}! Como posso ajudar você hoje? 😊`,
+    text: 'Olá, tudo bom? Como posso ajudar você? 🤩',
     sender: 'bot',
     timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   };

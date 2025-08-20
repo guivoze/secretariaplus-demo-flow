@@ -114,11 +114,17 @@ export const Step10WhatsApp = () => {
     <div className="min-h-screen bg-[#e5ddd5] relative">
       {/* WhatsApp Header */}
       <div className="bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg">
-        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-black">
-          SP
+        <div className="w-10 h-10 rounded-full bg-black/10 overflow-hidden flex items-center justify-center">
+          {userData.realProfilePic ? (
+            <img src={userData.realProfilePic} alt="profile" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center font-bold text-black bg-primary">
+              {(userData.instagram || 'SP').charAt(0).toUpperCase()}
+            </div>
+          )}
         </div>
         <div className="flex-1">
-          <h3 className="font-semibold">SecretáriaPlus</h3>
+          <h3 className="font-semibold">{userData.aiInsights?.name || userData.instagram || 'SecretáriaPlus'}</h3>
           <p className="text-sm text-green-200">online</p>
         </div>
         <div className="flex gap-4">

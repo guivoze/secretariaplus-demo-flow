@@ -16,6 +16,8 @@ export const Step7Form = () => {
   const firstName = userData.nome ? userData.nome.split(' ')[0] : '';
   const procedure1 = userData.aiInsights?.procedure1 || '';
   const location = userData.aiInsights?.where || '';
+  const hasProcedure = !!(procedure1 && procedure1.trim());
+  const hasLocation = !!(location && location.trim());
   const backgroundImage = userData.realProfilePic || null;
 
   const isFormValid = formData.email && formData.whatsapp;
@@ -65,13 +67,19 @@ export const Step7Form = () => {
             className="text-center space-y-4"
           >
             <h2 className="text-xl font-bold text-foreground leading-relaxed">
-              MUITO legal, <span className="font-semibold">{firstName}</span>! Já vimos que você se destaca com{' '}
-              <span className="font-semibold">{procedure1}</span>
-              {location && (
+              MUITO legal, <span className="font-semibold">{firstName}</span>!
+              {hasProcedure && (
                 <>
-                  {' '}e atende em <span className="font-semibold">{location}</span>
+                  {' '}Já vimos que você se destaca com{' '}
+                  <span className="font-semibold">{procedure1}</span>
+                  {hasLocation && (
+                    <>
+                      {' '}e atende em <span className="font-semibold">{location}</span>
+                    </>
+                  )}
+                  .
                 </>
-              )}.
+              )}
             </h2>
             <p className="text-muted-foreground">
               Mas pra gente enriquecer ainda mais o treinamento da IA…
@@ -115,7 +123,7 @@ export const Step7Form = () => {
               className="w-full"
               size="lg"
             >
-              BORA!
+              Conversar com minha nova secretária ✨
             </CustomButton>
           </motion.div>
         </CustomCard>
