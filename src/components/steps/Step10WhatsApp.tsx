@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +22,8 @@ export const Step10WhatsApp = () => {
   const [showFinishButton, setShowFinishButton] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Convert chatMessages to local Message format
   const messages: Message[] = chatMessages.map(msg => ({
@@ -45,9 +47,24 @@ export const Step10WhatsApp = () => {
     }
   }, [messages.length]);
 
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
+    messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, []);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    scrollToBottom('smooth');
+  }, [messages, scrollToBottom]);
+
+  useEffect(() => {
+    const vv = (window as any).visualViewport as VisualViewport | undefined;
+    if (!vv) return;
+    const onResize = () => setTimeout(() => scrollToBottom('auto'), 50);
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, [scrollToBottom]);
 
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -92,6 +109,7 @@ export const Step10WhatsApp = () => {
       toast.error('Erro ao enviar mensagem. Tente novamente.');
     } finally {
       setIsLoading(false);
+      requestAnimationFrame(() => scrollToBottom('smooth'));
     }
   };
 
@@ -111,10 +129,15 @@ export const Step10WhatsApp = () => {
     }
   };
 
+  const handleInputFocus = () => {
+    scrollToBottom('auto');
+    setTimeout(() => scrollToBottom('auto'), 250);
+  };
+
   return (
-    <div className="min-h-screen bg-[#e5ddd5] relative">
+    <div className="h-[100dvh] flex flex-col bg-[#e5ddd5] relative overflow-hidden">
       {/* WhatsApp Header */}
-      <div className="bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg">
+      <div className="bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg shrink-0 sticky top-0 z-30">
         <div className="w-10 h-10 rounded-full bg-black/10 overflow-hidden flex items-center justify-center">
           {userData.realProfilePic ? (
             <img src={userData.realProfilePic} alt="profile" className="w-full h-full object-cover" />
@@ -136,9 +159,13 @@ export const Step10WhatsApp = () => {
       </div>
 
       {/* Messages Area */}
-      <div className={`flex-1 p-4 pb-20 space-y-3 transition-all duration-500 ${
-        chatDarkened ? 'opacity-30' : ''
-      }`}>
+      <div
+        ref={messagesContainerRef}
+        className={`flex-1 overflow-y-auto p-4 space-y-3 transition-all duration-500 ${
+          chatDarkened ? 'opacity-30' : ''
+        }`}
+        style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' as any }}
+      >
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
@@ -203,16 +230,21 @@ export const Step10WhatsApp = () => {
         )}
       </AnimatePresence>
 
-      {/* Input Area */}
-      <div className={`fixed bottom-0 left-0 right-0 bg-[#f0f0f0] p-4 border-t transition-all duration-500 ${
-        chatDarkened ? 'opacity-30' : ''
-      }`}>
+      {/* Input Area (flow, not fixed) */}
+      <div
+        className={`shrink-0 bg-[#f0f0f0] p-4 border-t transition-all duration-500 ${
+          chatDarkened ? 'opacity-30' : ''
+        }`}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         <div className="flex items-center gap-3 bg-white rounded-full px-4 py-2">
           <input
+            ref={inputRef}
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
+            onFocus={handleInputFocus}
             placeholder="Digite uma mensagem"
             className="flex-1 outline-none"
             style={{ fontSize: '16px' }}
