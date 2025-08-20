@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,25 +21,29 @@ export const Step10WhatsApp = () => {
   const [chatDarkened, setChatDarkened] = useState(false);
   const [showFinishButton, setShowFinishButton] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasInitialMessage, setHasInitialMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Convert chatMessages to local Message format
-  const messages: Message[] = chatMessages.map(msg => ({
-    id: msg.id,
-    text: msg.content,
-    sender: msg.sender === 'user' ? 'user' : 'bot',
-    timestamp: new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-  }));
+  // Memoize message conversion to prevent unnecessary re-renders
+  const messages: Message[] = useMemo(() => 
+    chatMessages.map(msg => ({
+      id: msg.id,
+      text: msg.content,
+      sender: msg.sender === 'user' ? 'user' : 'bot',
+      timestamp: new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    })), [chatMessages]
+  );
 
+  // Initialize chat with welcome message - only once
   useEffect(() => {
-    // Mensagem inicial fixa - sempre aparece quando não há mensagens
-    if (chatMessages.length === 0) {
+    if (chatMessages.length === 0 && !hasInitialMessage) {
       const initialMessage = "Olá! Seja bem-vinda à Clínica Exemplo! Como posso ajudar você hoje? 😊";
       sendAssistantMessage(initialMessage);
+      setHasInitialMessage(true);
     }
-  }, [chatMessages.length, sendAssistantMessage]);
+  }, [chatMessages.length, hasInitialMessage, sendAssistantMessage]);
 
   useEffect(() => {
     if (messages.length >= 8) {
@@ -54,9 +58,10 @@ export const Step10WhatsApp = () => {
     }
   }, []);
 
+  // Only scroll when messages actually change, not on every render
   useEffect(() => {
     scrollToBottom('smooth');
-  }, [messages, scrollToBottom]);
+  }, [messages.length, scrollToBottom]);
 
   useEffect(() => {
     const vv = (window as any).visualViewport as VisualViewport | undefined;
@@ -66,7 +71,7 @@ export const Step10WhatsApp = () => {
     return () => vv.removeEventListener('resize', onResize);
   }, [scrollToBottom]);
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (!inputValue.trim() || isLoading) return;
 
     const userMessage = inputValue.trim();
@@ -107,13 +112,15 @@ export const Step10WhatsApp = () => {
     } catch (error) {
       console.error('Error in chat:', error);
       toast.error('Erro ao enviar mensagem. Tente novamente.');
+      // Restore input value on error
+      setInputValue(userMessage);
     } finally {
       setIsLoading(false);
       requestAnimationFrame(() => scrollToBottom('smooth'));
     }
-  };
+  }, [inputValue, isLoading, sendUserMessage, sendAssistantMessage, sessionId, scrollToBottom]);
 
-  const finishConversation = () => {
+  const finishConversation = useCallback(() => {
     setChatDarkened(true);
     setTimeout(() => {
       setShowNotification(true);
@@ -121,18 +128,22 @@ export const Step10WhatsApp = () => {
         nextStep();
       }, 3000);
     }, 500);
-  };
+  }, [nextStep]);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       sendMessage();
     }
-  };
+  }, [sendMessage]);
 
-  const handleInputFocus = () => {
+  const handleInputFocus = useCallback(() => {
     scrollToBottom('auto');
     setTimeout(() => scrollToBottom('auto'), 250);
-  };
+  }, [scrollToBottom]);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  }, []);
 
   return (
     <div className="h-[100dvh] flex flex-col bg-[#e5ddd5] relative overflow-hidden">
@@ -166,12 +177,14 @@ export const Step10WhatsApp = () => {
         }`}
         style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' as any }}
       >
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           {messages.map((message) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
               className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
@@ -181,7 +194,7 @@ export const Step10WhatsApp = () => {
                     : 'bg-white text-black rounded-bl-md'
                 }`}
               >
-                <p className="text-sm">{message.text}</p>
+                <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                 <div className={`flex items-center gap-1 mt-1 ${
                   message.sender === 'user' ? 'justify-end' : 'justify-start'
                 }`}>
@@ -200,6 +213,7 @@ export const Step10WhatsApp = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
             className="flex justify-start"
           >
             <div className="bg-white text-black rounded-2xl rounded-bl-md p-3 shadow-sm">
@@ -242,7 +256,7 @@ export const Step10WhatsApp = () => {
             ref={inputRef}
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             onFocus={handleInputFocus}
             placeholder="Digite uma mensagem"
@@ -253,7 +267,7 @@ export const Step10WhatsApp = () => {
           <button
             onClick={sendMessage}
             disabled={!inputValue.trim() || chatDarkened || isLoading}
-            className="text-[#075e54] disabled:text-gray-400"
+            className="text-[#075e54] disabled:text-gray-400 transition-colors"
           >
             <Send className="w-5 h-5" />
           </button>
