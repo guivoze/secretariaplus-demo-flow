@@ -56,20 +56,7 @@ serve(async (req) => {
 
     console.log('Chat history:', chatHistory?.length || 0, 'messages');
 
-    // Save user message
-    const { error: saveUserError } = await supabase
-      .from('chat_messages')
-      .insert({
-        session_id: sessionData.id,
-        content: message,
-        sender_type: 'user',
-        message_order: (chatHistory?.length || 0) + 1
-      });
-
-    if (saveUserError) {
-      console.error('Error saving user message:', saveUserError);
-      throw new Error('Error saving user message');
-    }
+    // User message already saved by frontend
 
     // Build conversation history for OpenAI
     const conversationHistory = chatHistory?.map(msg => ({
@@ -137,20 +124,7 @@ Você deve:
 
     console.log('AI response:', aiMessage);
 
-    // Save AI message
-    const { error: saveAIError } = await supabase
-      .from('chat_messages')
-      .insert({
-        session_id: sessionData.id,
-        content: aiMessage,
-        sender_type: 'assistant',
-        message_order: (chatHistory?.length || 0) + 2
-      });
-
-    if (saveAIError) {
-      console.error('Error saving AI message:', saveAIError);
-      // Don't throw here - still return the message even if save fails
-    }
+    // AI message will be saved by frontend
 
     return new Response(
       JSON.stringify({ 
