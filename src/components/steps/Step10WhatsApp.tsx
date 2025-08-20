@@ -32,12 +32,12 @@ export const Step10WhatsApp = () => {
   }));
 
   useEffect(() => {
-    // Só mostrar mensagem inicial se realmente não houver mensagens E o usuário ainda não interagiu
+    // Mensagem inicial fixa - sempre aparece quando não há mensagens
     if (chatMessages.length === 0) {
-      // Não enviar automaticamente - aguardar primeira interação do usuário
-      console.log('Chat inicializado - aguardando primeira mensagem do usuário');
+      const initialMessage = "Olá! Seja bem-vinda à Clínica Exemplo! Como posso ajudar você hoje? 😊";
+      sendAssistantMessage(initialMessage);
     }
-  }, [chatMessages.length]);
+  }, [chatMessages.length, sendAssistantMessage]);
 
   useEffect(() => {
     if (messages.length >= 8) {
@@ -52,7 +52,6 @@ export const Step10WhatsApp = () => {
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
-    setIsLoading(true);
     const userMessage = inputValue.trim();
     setInputValue('');
 
@@ -62,15 +61,12 @@ export const Step10WhatsApp = () => {
       // Send user message first
       await sendUserMessage(userMessage);
 
-      // If it's the first message, send initial bot greeting
-      if (chatMessages.length === 0) {
-        const initialMessage = `Olá! Seja bem-vinda à ${userData.clinicName || 'nossa clínica'}! Como posso ajudar você hoje? 😊`;
-        await sendAssistantMessage(initialMessage);
-        setIsLoading(false);
-        return;
-      }
+      // Show typing indicator with delay
+      setTimeout(() => {
+        setIsLoading(true);
+      }, 500);
 
-      // Call AI completion for subsequent messages
+      // Call AI completion
       const { data, error } = await supabase.functions.invoke('chat-completion', {
         body: {
           sessionId: sessionId,
@@ -85,8 +81,8 @@ export const Step10WhatsApp = () => {
 
       if (data?.success && data?.message) {
         console.log('AI response received:', data.message);
-        // The AI response is already saved by the edge function
-        // useChatMessages will automatically update the UI
+        // Manually add the AI response to ensure it appears immediately
+        await sendAssistantMessage(data.message);
       } else {
         throw new Error('No AI response received');
       }

@@ -149,7 +149,7 @@ Você deve:
 
     if (saveAIError) {
       console.error('Error saving AI message:', saveAIError);
-      throw new Error('Error saving AI message');
+      // Don't throw here - still return the message even if save fails
     }
 
     return new Response(
