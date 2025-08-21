@@ -81,7 +81,7 @@ serve(async (req) => {
         type: 'function',
         function: {
           name: 'get_date',
-          description: 'Retorna a data e hora atuais no fuso America/Sao_Paulo e ISO',
+          description: 'Retorna a data e hora atuais ajustadas ao fuso America/Sao_Paulo',
           parameters: {
             type: 'object',
             properties: {},
@@ -163,11 +163,19 @@ serve(async (req) => {
             const args = fn.arguments ? JSON.parse(fn.arguments) : {};
             if (fn.name === 'get_date') {
               const tz = 'America/Sao_Paulo';
-              const now = new Date();
-              const fmtDate = new Intl.DateTimeFormat('pt-BR', { timeZone: tz, day: '2-digit', month: '2-digit', year: 'numeric' }).format(now);
-              const fmtTime = new Intl.DateTimeFormat('pt-BR', { timeZone: tz, hour: '2-digit', minute: '2-digit' }).format(now);
+              const nowUTC = new Date();
+              const parts = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(nowUTC);
+              const y = parts.find(p => p.type === 'year')?.value;
+              const m = parts.find(p => p.type === 'month')?.value;
+              const d = parts.find(p => p.type === 'day')?.value;
+              const hh = parts.find(p => p.type === 'hour')?.value;
+              const mm = parts.find(p => p.type === 'minute')?.value;
+              const ss = parts.find(p => p.type === 'second')?.value;
+              const localISO = `${y}-${m}-${d}T${hh}:${mm}:${ss}-03:00`;
+              const fmtDate = new Intl.DateTimeFormat('pt-BR', { timeZone: tz, day: '2-digit', month: '2-digit', year: 'numeric' }).format(nowUTC);
+              const fmtTime = new Intl.DateTimeFormat('pt-BR', { timeZone: tz, hour: '2-digit', minute: '2-digit' }).format(nowUTC);
               result = {
-                iso: now.toISOString(),
+                iso: localISO,
                 timeZone: tz,
                 dateBR: fmtDate,
                 timeBR: fmtTime

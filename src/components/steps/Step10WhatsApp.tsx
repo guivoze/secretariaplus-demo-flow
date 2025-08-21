@@ -124,8 +124,9 @@ export const Step10WhatsApp = () => {
 				if (data.appointment && data.appointment.dateISO) {
 					console.log('[chat-ui] appointment received:', data.appointment);
 					setAppointment(data.appointment);
-					setShowNotification(true);
-					setTimeout(() => { nextStep(); }, 1200);
+					// Exibir toast e dar tempo para leitura da mensagem antes de navegar
+					setTimeout(() => { setShowNotification(true); }, 400);
+					setTimeout(() => { setShowNotification(false); nextStep(); }, 2500);
 				}
 			} else {
 				throw new Error('No AI response received');
@@ -247,11 +248,7 @@ export const Step10WhatsApp = () => {
 
 			{/* Finish Button */}
 			<AnimatePresence>
-				{showFinishButton && !chatDarkened && (
-					<motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} onClick={finishConversation} className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-primary text-black px-6 py-3 rounded-full font-semibold shadow-lg z-40 flex items-center gap-2">
-						✅ Finalizar conversa e ver agendamento
-					</motion.button>
-				)}
+				{/* hidden debug button removed */}
 			</AnimatePresence>
 
 			{/* Input Area - perfectly glued to keyboard */}

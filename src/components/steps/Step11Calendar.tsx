@@ -24,7 +24,7 @@ export const Step11Calendar = () => {
     { time: selectedTime, patient: `${selectedPatient} - ${selectedProcedure}`, available: false, isNew: true },
     { time: '16:00', patient: '', available: true },
     { time: '17:00', patient: '', available: true },
-  ];
+  ].sort((a, b) => a.time.localeCompare(b.time));
 
   return (
     <div className="min-h-screen gradient-subtle p-4">
