@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.55.0';
+import { BASE_PROMPT_TEMPLATE } from './prompt.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -67,27 +68,9 @@ serve(async (req) => {
     // Add current user message
     conversationHistory.push({ role: 'user', content: message });
 
-    // Build custom prompt
-    const basePrompt = `Você é uma assistente virtual especializada em marketing digital e Instagram para profissionais da saúde. Você trabalha para uma agência que ajuda médicos e dentistas a crescerem no Instagram.
-
-Informações sobre o lead:
-- Nome: ${sessionData.nome || 'Não informado'}
-- Instagram: @${sessionData.instagram_handle}
-- Especialidade: ${sessionData.especialidade || 'Não informado'}
-- Faturamento: ${sessionData.faturamento || 'Não informado'}
-- Seguidores: ${sessionData.followers_count || 'Não informado'}
-- Posts: ${sessionData.posts_count || 'Não informado'}
-
-${sessionData.custom_prompt ? `Análise personalizada: ${sessionData.custom_prompt}` : ''}
-
-Você deve:
-- Ser amigável e profissional
-- Fazer perguntas relevantes sobre os desafios do lead no Instagram
-- Oferecer insights valiosos sobre marketing digital para área da saúde
-- Sugerir estratégias específicas baseadas no perfil
-- Eventualmente propor um agendamento para uma consultoria gratuita
-- Usar um tom conversacional, como se fosse WhatsApp
-- Manter as respostas concisas (máximo 3-4 linhas)`;
+    // Build prompt from fixed template and slot {{CUSTOM_PROMPT}}
+    const filledPrompt = BASE_PROMPT_TEMPLATE
+      .replace('{{CUSTOM_PROMPT}}', sessionData.custom_prompt || '');
 
     console.log('Sending request to OpenAI...');
 
@@ -101,7 +84,7 @@ Você deve:
       body: JSON.stringify({
         model: 'gpt-4.1-mini-2025-04-14',
         messages: [
-          { role: 'system', content: basePrompt },
+          { role: 'system', content: filledPrompt },
           ...conversationHistory
         ],
         max_tokens: 300,

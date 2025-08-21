@@ -11,7 +11,7 @@ interface ProfileOption {
 }
 
 export const Step2ProfileConfirmation = () => {
-  const { userData, setUserData, nextStep, resetDemo } = useSupabaseDemo();
+  const { userData, setUserData, nextStep, resetDemo, sessionId } = useSupabaseDemo();
   const [profiles, setProfiles] = useState<ProfileOption[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [totalFound, setTotalFound] = useState<number>(0);
@@ -94,7 +94,7 @@ export const Step2ProfileConfirmation = () => {
     fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ instagram: confirmedUsername })
+      body: JSON.stringify({ instagram: confirmedUsername, session_id: sessionId })
     }).then(response => response.json())
       .then(data => {
         console.log('Instagram scrape completed:', data);

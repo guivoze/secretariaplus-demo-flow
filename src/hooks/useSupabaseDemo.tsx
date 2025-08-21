@@ -213,7 +213,6 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
         real_profile_pic_url: userData.realProfilePic,
         real_posts: userData.realPosts,
         ai_insights: userData.aiInsights,
-        custom_prompt: generateCustomPrompt(),
         user_agent: navigator.userAgent,
         ...utmParams
       };

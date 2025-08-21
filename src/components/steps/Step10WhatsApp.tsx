@@ -266,7 +266,8 @@ export const Step10WhatsApp = () => {
 						placeholder="Digite uma mensagem"
 						className="flex-1 outline-none bg-transparent" 
 						style={{ fontSize: '16px' }} 
-						disabled={chatDarkened || isLoading}
+						readOnly={isLoading}                    // bloqueia digitação sem perder foco
+						aria-disabled={chatDarkened || isLoading}
 						autoComplete="off"
 						autoCorrect="off"
 						autoCapitalize="off"
