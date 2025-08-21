@@ -22,12 +22,14 @@ export const Step10WhatsApp = () => {
 	const [showFinishButton, setShowFinishButton] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [hasInitialMessage, setHasInitialMessage] = useState(false);
-	const [inputBarHeight, setInputBarHeight] = useState(72);
-	const [keyboardOffset, setKeyboardOffset] = useState(0); // NEW
+	const [keyboardHeight, setKeyboardHeight] = useState(0);
+	const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+	const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const messagesContainerRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const inputBarRef = useRef<HTMLDivElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
 
 	// Lock outer scroll while on chat to avoid double scroll
 	useEffect(() => {
@@ -66,29 +68,47 @@ export const Step10WhatsApp = () => {
 		}
 	}, [messages.length]);
 
-	const measureInputBar = useCallback(() => {
-		if (inputBarRef.current) {
-			setInputBarHeight(inputBarRef.current.offsetHeight || 72);
-		}
-	}, []);
-
-	// Track iOS keyboard via VisualViewport and glue the input bar to it
+	// Advanced mobile keyboard detection for consistent UX
 	useEffect(() => {
-		const vv = (window as any).visualViewport as VisualViewport | undefined;
-		if (!vv) return;
-		const handler = () => {
-			const offset = Math.max(0, (window.innerHeight - vv.height - vv.offsetTop));
-			setKeyboardOffset(offset);
-			measureInputBar();
+		const handleResize = () => {
+			const currentHeight = window.innerHeight;
+			const heightDiff = viewportHeight - currentHeight;
+			
+			if (heightDiff > 150) { // Keyboard is open
+				setKeyboardHeight(heightDiff);
+				setIsKeyboardOpen(true);
+			} else { // Keyboard is closed
+				setKeyboardHeight(0);
+				setIsKeyboardOpen(false);
+			}
 		};
-		vv.addEventListener('resize', handler);
-		vv.addEventListener('scroll', handler);
-		handler();
+
+		const handleVisualViewport = () => {
+			if (window.visualViewport) {
+				const vv = window.visualViewport;
+				const keyboardHeight = window.innerHeight - vv.height;
+				setKeyboardHeight(keyboardHeight > 50 ? keyboardHeight : 0);
+				setIsKeyboardOpen(keyboardHeight > 50);
+			}
+		};
+
+		// Use Visual Viewport API when available (better for iOS)
+		if (window.visualViewport) {
+			window.visualViewport.addEventListener('resize', handleVisualViewport);
+			window.visualViewport.addEventListener('scroll', handleVisualViewport);
+		}
+
+		// Fallback for Android and older browsers
+		window.addEventListener('resize', handleResize);
+		
 		return () => {
-			vv.removeEventListener('resize', handler);
-			vv.removeEventListener('scroll', handler);
+			if (window.visualViewport) {
+				window.visualViewport.removeEventListener('resize', handleVisualViewport);
+				window.visualViewport.removeEventListener('scroll', handleVisualViewport);
+			}
+			window.removeEventListener('resize', handleResize);
 		};
-	}, [measureInputBar]);
+	}, [viewportHeight]);
 
 	const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
 		messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
@@ -102,16 +122,12 @@ export const Step10WhatsApp = () => {
 		scrollToBottom('smooth');
 	}, [messages.length, scrollToBottom]);
 
+	// Auto-scroll when keyboard changes
 	useEffect(() => {
-		const vv = (window as any).visualViewport as VisualViewport | undefined;
-		if (!vv) return;
-		const onResize = () => setTimeout(() => {
-			measureInputBar();
-			scrollToBottom('auto');
-		}, 50);
-		vv.addEventListener('resize', onResize);
-		return () => vv.removeEventListener('resize', onResize);
-	}, [scrollToBottom, measureInputBar]);
+		if (isKeyboardOpen) {
+			setTimeout(() => scrollToBottom('auto'), 100);
+		}
+	}, [isKeyboardOpen, scrollToBottom]);
 
 	const sendMessage = useCallback(async () => {
 		if (!inputValue.trim() || isLoading) return;
@@ -148,7 +164,16 @@ export const Step10WhatsApp = () => {
 	}, [nextStep]);
 
 	const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-		if (e.key === 'Enter') sendMessage();
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			sendMessage();
+			// Keep keyboard open after sending
+			setTimeout(() => {
+				if (inputRef.current) {
+					inputRef.current.focus();
+				}
+			}, 100);
+		}
 	}, [sendMessage]);
 
 	const handleInputFocus = useCallback(() => {
@@ -186,11 +211,16 @@ export const Step10WhatsApp = () => {
 				</div>
 			</div>
 
-			{/* Messages Area - padded to avoid overlap with input bar */}
+			{/* Messages Area - dynamically padded for keyboard */}
 			<div
 				ref={messagesContainerRef}
-				className={`flex-1 overflow-y-auto p-4 space-y-3 transition-all duration-500 ${chatDarkened ? 'opacity-30' : ''}`}
-				style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' as any, paddingBottom: inputBarHeight + 24 }}
+				className={`flex-1 overflow-y-auto p-4 space-y-3 transition-all duration-200 ${chatDarkened ? 'opacity-30' : ''}`}
+				style={{ 
+					overscrollBehavior: 'contain', 
+					WebkitOverflowScrolling: 'touch',
+					paddingBottom: keyboardHeight > 0 ? keyboardHeight + 80 : 80,
+					maxHeight: `calc(100dvh - 64px - ${keyboardHeight}px)`
+				}}
 			>
 				<AnimatePresence mode="popLayout">
 					{messages.map((message) => (
@@ -228,15 +258,48 @@ export const Step10WhatsApp = () => {
 				)}
 			</AnimatePresence>
 
-			{/* Input Area - fixed to keyboard */}
+			{/* Input Area - perfectly glued to keyboard */}
 			<div
 				ref={inputBarRef}
-				className={`fixed inset-x-0 bg-[#f0f0f0] border-t z-40 transition-transform duration-150 ${chatDarkened ? 'opacity-30' : ''}`}
-				style={{ padding: '16px', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)', bottom: keyboardOffset }}
+				className={`fixed inset-x-0 bg-[#f0f0f0] border-t z-50 transition-all duration-200 ${chatDarkened ? 'opacity-30' : ''}`}
+				style={{ 
+					padding: '16px', 
+					paddingBottom: `calc(env(safe-area-inset-bottom, 0px) + 16px)`,
+					bottom: keyboardHeight > 0 ? keyboardHeight : 0,
+					transform: 'translateZ(0)',
+					willChange: 'transform'
+				}}
 			>
 				<div className="mx-4 flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
-					<input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyPress={handleKeyPress} onFocus={handleInputFocus} placeholder="Digite uma mensagem" className="flex-1 outline-none bg-transparent" style={{ fontSize: '16px' }} disabled={chatDarkened || isLoading} />
-					<button onClick={sendMessage} disabled={!inputValue.trim() || chatDarkened || isLoading} className="text-[#075e54] disabled:text-gray-400 transition-colors">
+					<input 
+						ref={inputRef} 
+						type="text" 
+						value={inputValue} 
+						onChange={handleInputChange} 
+						onKeyPress={handleKeyPress} 
+						onFocus={handleInputFocus} 
+						placeholder="Digite uma mensagem" 
+						className="flex-1 outline-none bg-transparent" 
+						style={{ fontSize: '16px' }} 
+						disabled={chatDarkened || isLoading}
+						autoComplete="off"
+						autoCorrect="off"
+						autoCapitalize="off"
+						spellCheck="false"
+					/>
+					<button 
+						onClick={() => {
+							sendMessage();
+							// Keep focus on input after sending
+							setTimeout(() => {
+								if (inputRef.current) {
+									inputRef.current.focus();
+								}
+							}, 50);
+						}} 
+						disabled={!inputValue.trim() || chatDarkened || isLoading} 
+						className="text-[#075e54] disabled:text-gray-400 transition-colors p-1"
+					>
 						<Send className="w-5 h-5" />
 					</button>
 				</div>
