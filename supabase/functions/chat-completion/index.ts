@@ -41,7 +41,7 @@ serve(async (req) => {
       throw new Error('Session not found');
     }
 
-    console.log('Session data found:', sessionData);
+    console.log('[chat-fn] Session data found for session_id:', sessionId, 'db id:', sessionData.id);
 
     // Get conversation history
     const { data: chatHistory, error: chatError } = await supabase
@@ -55,12 +55,12 @@ serve(async (req) => {
       throw new Error('Error fetching chat history');
     }
 
-    console.log('Chat history:', chatHistory?.length || 0, 'messages');
+    console.log('[chat-fn] Chat history count:', chatHistory?.length || 0);
 
     // User message already saved by frontend
 
     // Build conversation history for OpenAI
-    const conversationHistory = chatHistory?.map(msg => ({
+    const conversationHistory: any[] = chatHistory?.map(msg => ({
       role: msg.sender_type === 'user' ? 'user' : 'assistant',
       content: msg.content
     })) || [];
@@ -72,47 +72,147 @@ serve(async (req) => {
     const filledPrompt = BASE_PROMPT_TEMPLATE
       .replace('{{CUSTOM_PROMPT}}', sessionData.custom_prompt || '');
 
-    console.log('Sending request to OpenAI...');
+    console.log('[chat-fn] Using system prompt (first 400 chars):', String(filledPrompt).slice(0, 400));
+    console.log('[chat-fn] Sending request to OpenAI...');
 
-    // Call OpenAI
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
+    // Define tools for function calling
+    const tools = [
+      {
+        type: 'function',
+        function: {
+          name: 'get_date',
+          description: 'Retorna a data e hora atuais no fuso America/Sao_Paulo e ISO',
+          parameters: {
+            type: 'object',
+            properties: {},
+            additionalProperties: false
+          }
+        }
       },
-      body: JSON.stringify({
-        model: 'gpt-4.1-mini-2025-04-14',
-        messages: [
-          { role: 'system', content: filledPrompt },
-          ...conversationHistory
-        ],
-        max_tokens: 300,
-        temperature: 0.7,
-      }),
-    });
+      {
+        type: 'function',
+        function: {
+          name: 'appointment',
+          description: 'Registra um agendamento confirmado na conversa',
+          parameters: {
+            type: 'object',
+            properties: {
+              dateISO: { type: 'string', description: 'Data/hora em ISO 8601 (ex: 2025-08-20T15:35:00-03:00)' },
+              displayDate: { type: 'string', description: 'Data por extenso para UI (ex: 20 de Agosto, 2025)' },
+              displayTime: { type: 'string', description: 'Hora no formato HH:mm (ex: 15:35)' },
+              patientName: { type: 'string' },
+              procedure: { type: 'string' }
+            },
+            required: ['dateISO', 'displayDate', 'displayTime'],
+            additionalProperties: false
+          }
+        }
+      }
+    ];
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
+    let messages: any[] = [
+      { role: 'system', content: filledPrompt },
+      ...conversationHistory,
+      { role: 'user', content: message }
+    ];
+
+    let appointmentPayload: any | null = null;
+    let aiMessage: string | null = null;
+
+    // Up to 3 tool-call iterations
+    for (let i = 0; i < 3; i++) {
+      console.log('[chat-fn] Iteration', i + 1, 'messages length:', messages.length);
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4.1-mini-2025-04-14',
+          messages,
+          tools,
+          tool_choice: 'auto',
+          max_tokens: 300,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenAI API error:', errorText);
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const choice = data.choices?.[0];
+      const msg = choice?.message;
+
+      if (!msg) throw new Error('No message from OpenAI');
+
+      // If there are tool calls, execute them and append results
+      const toolCalls = msg.tool_calls || [];
+      if (toolCalls.length > 0) {
+        console.log('[chat-fn] Tool calls received:', toolCalls.map((t: any) => t.function?.name));
+        messages.push({ role: msg.role, content: msg.content || '', tool_calls: toolCalls });
+
+        for (const tc of toolCalls) {
+          const fn = tc.function;
+          let result: any = {};
+          try {
+            const args = fn.arguments ? JSON.parse(fn.arguments) : {};
+            if (fn.name === 'get_date') {
+              const tz = 'America/Sao_Paulo';
+              const now = new Date();
+              const fmtDate = new Intl.DateTimeFormat('pt-BR', { timeZone: tz, day: '2-digit', month: '2-digit', year: 'numeric' }).format(now);
+              const fmtTime = new Intl.DateTimeFormat('pt-BR', { timeZone: tz, hour: '2-digit', minute: '2-digit' }).format(now);
+              result = {
+                iso: now.toISOString(),
+                timeZone: tz,
+                dateBR: fmtDate,
+                timeBR: fmtTime
+              };
+              console.log('[chat-fn] get_date ->', result);
+            } else if (fn.name === 'appointment') {
+              const { dateISO, displayDate, displayTime, patientName, procedure } = args;
+              appointmentPayload = { dateISO, displayDate, displayTime, patientName: patientName || null, procedure: procedure || null };
+              result = { ok: true };
+              console.log('[chat-fn] appointment payload stored:', appointmentPayload);
+            } else {
+              result = { error: 'Unknown tool' };
+            }
+          } catch (e) {
+            result = { error: String(e) };
+            console.error('[chat-fn] Tool error:', e);
+          }
+
+          messages.push({
+            role: 'tool',
+            tool_call_id: tc.id,
+            name: fn.name,
+            content: JSON.stringify(result)
+          });
+        }
+
+        // continue loop to let the model use tool results
+        continue;
+      }
+
+      // No tool calls: capture final content
+      aiMessage = msg.content || '';
+      console.log('[chat-fn] Final AI message length:', aiMessage.length);
+      break;
     }
 
-    const data = await response.json();
-    const aiMessage = data.choices[0]?.message?.content;
+    if (!aiMessage) aiMessage = '…';
 
-    if (!aiMessage) {
-      throw new Error('No response from OpenAI');
-    }
-
-    console.log('AI response:', aiMessage);
-
-    // AI message will be saved by frontend
+    console.log('[chat-fn] Returning success. Has appointment?', Boolean(appointmentPayload));
 
     return new Response(
       JSON.stringify({ 
         message: aiMessage,
-        success: true 
+        success: true,
+        appointment: appointmentPayload
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

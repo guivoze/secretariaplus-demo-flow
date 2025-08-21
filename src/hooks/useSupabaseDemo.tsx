@@ -59,6 +59,15 @@ interface SupabaseDemoContextType {
   foundPreviousSession: any | null;
   resumePreviousSession: () => void;
   startNewTest: () => void;
+  // Appointment handed off by LLM tool
+  appointment: {
+    dateISO: string;
+    displayDate: string;
+    displayTime: string;
+    patientName?: string | null;
+    procedure?: string | null;
+  } | null;
+  setAppointment: (a: SupabaseDemoContextType['appointment']) => void;
 }
 
 const initialUserData: UserData = {
@@ -122,6 +131,7 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [foundPreviousSession, setFoundPreviousSession] = useState<any | null>(null);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [appointment, setAppointment] = useState<SupabaseDemoContextType['appointment']>(null);
 
   // Generate session ID - always start at Step 0
   const initializeSession = useCallback(async () => {
@@ -478,6 +488,8 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
       foundPreviousSession,
       resumePreviousSession,
       startNewTest
+      , appointment
+      , setAppointment
     }}>
       {children}
     </SupabaseDemoContext.Provider>

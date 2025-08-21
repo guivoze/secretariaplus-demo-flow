@@ -53,7 +53,7 @@ export const Step2PersonalizationForm = () => {
 
           <div className="space-y-4">
             <CustomInput
-              label="Qual seu nome?"
+              label="Qual seu nome completo?"
               placeholder="Seu Nome"
               value={formData.nome}
               onChange={(e) => setFormData({ ...formData, nome: e.target.value })}

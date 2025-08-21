@@ -15,7 +15,7 @@ interface Message {
 }
 
 export const Step10WhatsApp = () => {
-	const { nextStep, userData, sessionId } = useSupabaseDemo();
+	const { nextStep, userData, sessionId, setAppointment } = useSupabaseDemo();
 	const { chatMessages, sendUserMessage, sendAssistantMessage } = useChatMessages();
 	const [inputValue, setInputValue] = useState('');
 	const [showNotification, setShowNotification] = useState(false);
@@ -111,19 +111,27 @@ export const Step10WhatsApp = () => {
 		const userMessage = inputValue.trim();
 		setInputValue('');
 		try {
+			console.log('[chat-ui] sending user message:', userMessage);
 			await sendUserMessage(userMessage);
 			setTimeout(() => setIsLoading(true), 300);
 			const { data, error } = await supabase.functions.invoke('chat-completion', {
 				body: { sessionId: sessionId, message: userMessage }
 			});
 			if (error) throw error;
+			console.log('[chat-ui] function response:', data);
 			if (data?.success && data?.message) {
 				await sendAssistantMessage(data.message);
+				if (data.appointment && data.appointment.dateISO) {
+					console.log('[chat-ui] appointment received:', data.appointment);
+					setAppointment(data.appointment);
+					setShowNotification(true);
+					setTimeout(() => { nextStep(); }, 1200);
+				}
 			} else {
 				throw new Error('No AI response received');
 			}
 		} catch (error) {
-			console.error('Error in chat:', error);
+			console.error('[chat-ui] Error in chat:', error);
 			toast.error('Erro ao enviar mensagem. Tente novamente.');
 			setInputValue(userMessage);
 		} finally {

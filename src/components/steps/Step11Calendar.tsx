@@ -5,17 +5,23 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 export const Step11Calendar = () => {
-  const { nextStep, userData } = useSupabaseDemo();
+  const { nextStep, userData, appointment } = useSupabaseDemo();
+  console.log('[calendar-ui] appointment from context:', appointment);
 
   const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const monthDays = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  const selectedTime = appointment?.displayTime || '15:35';
+  const selectedPatient = appointment?.patientName || 'Paciente';
+  const selectedProcedure = appointment?.procedure || (userData.especialidade || 'preenchimento');
+  const headerDate = appointment?.displayDate || '20 de Agosto, 2025';
 
   const appointments = [
     { time: '09:00', patient: '', available: true },
     { time: '10:00', patient: '', available: true },
     { time: '11:00', patient: '', available: true },
     { time: '14:00', patient: '', available: true },
-    { time: '15:35', patient: 'Ana Cláudia - Preenchimento', available: false, isNew: true },
+    { time: selectedTime, patient: `${selectedPatient} - ${selectedProcedure}`, available: false, isNew: true },
     { time: '16:00', patient: '', available: true },
     { time: '17:00', patient: '', available: true },
   ];
@@ -37,7 +43,7 @@ export const Step11Calendar = () => {
           >
             <h2 className="text-xl font-bold text-foreground flex items-center justify-center gap-2">
               <Calendar className="w-6 h-6 text-gray-800" />
-              20 de Agosto, 2025
+              {headerDate}
             </h2>
           </motion.div>
 
@@ -96,8 +102,8 @@ export const Step11Calendar = () => {
               🎉 Agendamento realizado automaticamente!
             </h4>
             <p className="text-sm text-muted-foreground">
-              A I.A acabou de agendar Ana Cláudia para {userData.especialidade || 'preenchimento'} 
-              no dia 20/08 às 15:35. Tudo sem sua intervenção!
+              A I.A acabou de agendar {selectedPatient} para {selectedProcedure} 
+              no dia {headerDate} às {selectedTime}. Tudo sem sua intervenção!
             </p>
           </motion.div>
 

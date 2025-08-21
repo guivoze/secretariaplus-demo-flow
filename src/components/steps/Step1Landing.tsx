@@ -77,7 +77,7 @@ export const Step1Landing = () => {
             <div className="space-y-4">
               <CustomInput
                 prefix="@"
-                placeholder="digita o @ certinho, tem uma surpresa pra você. 🎁"
+                placeholder="drabelguerra"
                 value={instagram}
                 onChange={(e) => setInstagram(e.target.value.toLowerCase())}
                 className="text-center"
