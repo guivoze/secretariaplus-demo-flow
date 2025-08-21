@@ -1,17 +1,22 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Phone, Video, MoreVertical, CheckCheck } from "lucide-react";
+import { Phone, Video, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
-
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'bot';
-  timestamp: string;
-}
+import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
+import '@/styles/whatsapp-chat.css';
+import {
+  MainContainer,
+  ChatContainer,
+  MessageList,
+  Message,
+  MessageInput,
+  ConversationHeader,
+  Avatar,
+  TypingIndicator
+} from '@chatscope/chat-ui-kit-react';
 
 export const Step10WhatsApp = () => {
   const { nextStep, userData, sessionId } = useSupabaseDemo();
@@ -22,19 +27,6 @@ export const Step10WhatsApp = () => {
   const [showFinishButton, setShowFinishButton] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasInitialMessage, setHasInitialMessage] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Memoize message conversion to prevent unnecessary re-renders
-  const messages: Message[] = useMemo(() => 
-    chatMessages.map(msg => ({
-      id: msg.id,
-      text: msg.content,
-      sender: msg.sender === 'user' ? 'user' : 'bot',
-      timestamp: new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    })), [chatMessages]
-  );
 
   // Initialize chat with welcome message - only once
   useEffect(() => {
@@ -45,36 +37,17 @@ export const Step10WhatsApp = () => {
     }
   }, [chatMessages.length, hasInitialMessage, sendAssistantMessage]);
 
+  // Show finish button after enough messages
   useEffect(() => {
-    if (messages.length >= 8) {
+    if (chatMessages.length >= 8) {
       setShowFinishButton(true);
     }
-  }, [messages.length]);
+  }, [chatMessages.length]);
 
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
-    messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-    }
-  }, []);
+  const sendMessage = useCallback(async (innerHtml: string, textContent: string) => {
+    const userMessage = textContent.trim();
+    if (!userMessage || isLoading) return;
 
-  // Only scroll when messages actually change, not on every render
-  useEffect(() => {
-    scrollToBottom('smooth');
-  }, [messages.length, scrollToBottom]);
-
-  useEffect(() => {
-    const vv = (window as any).visualViewport as VisualViewport | undefined;
-    if (!vv) return;
-    const onResize = () => setTimeout(() => scrollToBottom('auto'), 50);
-    vv.addEventListener('resize', onResize);
-    return () => vv.removeEventListener('resize', onResize);
-  }, [scrollToBottom]);
-
-  const sendMessage = useCallback(async () => {
-    if (!inputValue.trim() || isLoading) return;
-
-    const userMessage = inputValue.trim();
     setInputValue('');
 
     try {
@@ -83,10 +56,8 @@ export const Step10WhatsApp = () => {
       // Send user message first
       await sendUserMessage(userMessage);
 
-      // Show typing indicator with delay
-      setTimeout(() => {
-        setIsLoading(true);
-      }, 500);
+      // Show typing indicator
+      setIsLoading(true);
 
       // Call AI completion
       const { data, error } = await supabase.functions.invoke('chat-completion', {
@@ -103,7 +74,6 @@ export const Step10WhatsApp = () => {
 
       if (data?.success && data?.message) {
         console.log('AI response received:', data.message);
-        // Manually add the AI response to ensure it appears immediately
         await sendAssistantMessage(data.message);
       } else {
         throw new Error('No AI response received');
@@ -112,13 +82,10 @@ export const Step10WhatsApp = () => {
     } catch (error) {
       console.error('Error in chat:', error);
       toast.error('Erro ao enviar mensagem. Tente novamente.');
-      // Restore input value on error
-      setInputValue(userMessage);
     } finally {
       setIsLoading(false);
-      requestAnimationFrame(() => scrollToBottom('smooth'));
     }
-  }, [inputValue, isLoading, sendUserMessage, sendAssistantMessage, sessionId, scrollToBottom]);
+  }, [isLoading, sendUserMessage, sendAssistantMessage, sessionId]);
 
   const finishConversation = useCallback(() => {
     setChatDarkened(true);
@@ -130,104 +97,81 @@ export const Step10WhatsApp = () => {
     }, 500);
   }, [nextStep]);
 
-  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      sendMessage();
-    }
-  }, [sendMessage]);
+  // Custom WhatsApp-like styles
+  const containerStyle = {
+    height: '100vh',
+    width: '100%',
+    position: 'relative' as const,
+    backgroundColor: '#e5ddd5',
+    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d0d0d0' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+  };
 
-  const handleInputFocus = useCallback(() => {
-    scrollToBottom('auto');
-    setTimeout(() => scrollToBottom('auto'), 250);
-  }, [scrollToBottom]);
+  const chatContainerStyle = {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column' as const,
+  };
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  }, []);
+  const messageListStyle = {
+    paddingBottom: '1rem',
+    paddingTop: '1rem',
+  };
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-[#e5ddd5] relative overflow-hidden">
-      {/* WhatsApp Header */}
-      <div className="bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg shrink-0 sticky top-0 z-30">
-        <div className="w-10 h-10 rounded-full bg-black/10 overflow-hidden flex items-center justify-center">
-          {userData.realProfilePic ? (
-            <img src={userData.realProfilePic} alt="profile" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center font-bold text-black bg-primary">
-              {(userData.instagram || 'SP').charAt(0).toUpperCase()}
-            </div>
-          )}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-semibold">{userData.aiInsights?.name || userData.instagram || 'SecretáriaPlus'}</h3>
-          <p className="text-sm text-green-200">online</p>
-        </div>
-        <div className="flex gap-4">
-          <Video className="w-5 h-5" />
-          <Phone className="w-5 h-5" />
-          <MoreVertical className="w-5 h-5" />
-        </div>
-      </div>
-
-      {/* Messages Area */}
-      <div
-        ref={messagesContainerRef}
-        className={`flex-1 overflow-y-auto p-4 space-y-3 transition-all duration-500 ${
-          chatDarkened ? 'opacity-30' : ''
-        }`}
-        style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' as any }}
-      >
-        <AnimatePresence mode="popLayout">
-          {messages.map((message) => (
-            <motion.div
-              key={message.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[80%] p-3 rounded-2xl shadow-sm ${
-                  message.sender === 'user'
-                    ? 'bg-[#dcf8c6] text-black rounded-br-md'
-                    : 'bg-white text-black rounded-bl-md'
-                }`}
-              >
-                <p className="text-sm whitespace-pre-wrap">{message.text}</p>
-                <div className={`flex items-center gap-1 mt-1 ${
-                  message.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}>
-                  <span className="text-xs text-gray-500">{message.timestamp}</span>
-                  {message.sender === 'user' && (
-                    <CheckCheck className="w-3 h-3 text-blue-500" />
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        
-        {/* Loading indicator */}
-        {isLoading && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="flex justify-start"
+    <div style={containerStyle}>
+      <MainContainer className={chatDarkened ? 'opacity-30 transition-all duration-500' : 'transition-all duration-500'}>
+        <ChatContainer style={chatContainerStyle}>
+          <ConversationHeader>
+            <Avatar 
+              src={userData.realProfilePic || undefined}
+              name={userData.aiInsights?.name || userData.instagram || 'SecretáriaPlus'}
+            />
+            <ConversationHeader.Content 
+              userName={userData.aiInsights?.name || userData.instagram || 'SecretáriaPlus'}
+              info="online"
+            />
+            <ConversationHeader.Actions>
+              <Video className="w-5 h-5 cursor-pointer" />
+              <Phone className="w-5 h-5 cursor-pointer mx-2" />
+              <MoreVertical className="w-5 h-5 cursor-pointer" />
+            </ConversationHeader.Actions>
+          </ConversationHeader>
+          
+          <MessageList 
+            style={messageListStyle}
+            typingIndicator={isLoading ? <TypingIndicator content="Digitando..." /> : null}
           >
-            <div className="bg-white text-black rounded-2xl rounded-bl-md p-3 shadow-sm">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-        
-        <div ref={messagesEndRef} />
-      </div>
+            {chatMessages.map((msg) => (
+              <Message
+                key={msg.id}
+                model={{
+                  message: msg.content,
+                  sentTime: new Date(msg.timestamp).toLocaleTimeString('pt-BR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  }),
+                  sender: msg.sender === 'user' ? 'user' : 'assistant',
+                  direction: msg.sender === 'user' ? 'outgoing' : 'incoming',
+                  position: 'single'
+                }}
+              />
+            ))}
+          </MessageList>
+          
+          <MessageInput 
+            placeholder="Digite uma mensagem" 
+            value={inputValue}
+            onChange={setInputValue}
+            onSend={sendMessage}
+            disabled={chatDarkened || isLoading}
+            attachButton={false}
+            style={{
+              backgroundColor: '#f0f0f0',
+              borderTop: '1px solid #e0e0e0',
+            }}
+          />
+        </ChatContainer>
+      </MainContainer>
 
       {/* Finish Button */}
       <AnimatePresence>
@@ -237,42 +181,12 @@ export const Step10WhatsApp = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={finishConversation}
-            className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-primary text-black px-6 py-3 rounded-full font-semibold shadow-lg z-40 flex items-center gap-2"
+            className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-primary text-black px-6 py-3 rounded-full font-semibold shadow-lg z-50 flex items-center gap-2"
           >
             ✅ Finalizar conversa e ver agendamento
           </motion.button>
         )}
       </AnimatePresence>
-
-      {/* Input Area (flow, not fixed) */}
-      <div
-        className={`shrink-0 bg-[#f0f0f0] p-4 border-t transition-all duration-500 ${
-          chatDarkened ? 'opacity-30' : ''
-        }`}
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
-        <div className="flex items-center gap-3 bg-white rounded-full px-4 py-2">
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            onFocus={handleInputFocus}
-            placeholder="Digite uma mensagem"
-            className="flex-1 outline-none"
-            style={{ fontSize: '16px' }}
-            disabled={chatDarkened || isLoading}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!inputValue.trim() || chatDarkened || isLoading}
-            className="text-[#075e54] disabled:text-gray-400 transition-colors"
-          >
-            <Send className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
 
       {/* Notification Toast */}
       <AnimatePresence>
