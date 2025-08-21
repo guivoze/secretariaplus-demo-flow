@@ -58,16 +58,14 @@ export const Step2Modal = () => {
 
   // WhatsApp Background Component (non-interactive) - identical to Step10
   const WhatsAppBackground = () => (
-    <div className="min-h-screen bg-[#e5ddd5] relative pointer-events-none transform-gpu" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
-      {/* WhatsApp Header */}
-      <div className="bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg">
+    <div className="chat-root pointer-events-none">
+      {/* Header com mesmo comportamento do Step10 */}
+      <div className="chat-header bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg">
         <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-black">
           {userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'SP'}
         </div>
         <div className="flex-1">
-          <h3 className="font-semibold">
-            {userData.instagram || 'SecretáriaPlus'}
-          </h3>
+          <h3 className="font-semibold">{userData.instagram || 'SecretáriaPlus'}</h3>
           <p className="text-sm text-green-200">online</p>
         </div>
         <div className="flex gap-4">
@@ -77,15 +75,12 @@ export const Step2Modal = () => {
         </div>
       </div>
 
-      {/* Messages Area - identical to Step10 */}
-      <div className="flex-1 p-4 pb-20 space-y-3">
+      {/* Área de mensagens com padding inferior fixo como Step10 */}
+      <div className="chat-messages flex-1 p-4 space-y-3" style={{ paddingBottom: 80 }}>
         {showMessage && (
           <div className="flex justify-start">
             {messageAnimated ? (
-              <div
-                className="max-w-[80%] p-3 rounded-2xl shadow-sm bg-white text-black rounded-bl-md transform-gpu"
-                style={{ willChange: 'transform', transform: 'translateZ(0)' }}
-              >
+              <div className="max-w-[80%] p-3 rounded-2xl shadow-sm bg-white text-black rounded-bl-md">
                 <p className="text-sm">{initialMessage.text}</p>
                 <div className="flex items-center gap-1 mt-1 justify-start">
                   <span className="text-xs text-gray-500">{initialMessage.timestamp}</span>
@@ -97,8 +92,7 @@ export const Step2Modal = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 onAnimationComplete={() => setMessageAnimated(true)}
-                className="max-w-[80%] p-3 rounded-2xl shadow-sm bg-white text-black rounded-bl-md transform-gpu"
-                style={{ willChange: 'transform' }}
+                className="max-w-[80%] p-3 rounded-2xl shadow-sm bg-white text-black rounded-bl-md"
               >
                 <p className="text-sm">{initialMessage.text}</p>
                 <div className="flex items-center gap-1 mt-1 justify-start">
@@ -110,22 +104,11 @@ export const Step2Modal = () => {
         )}
       </div>
 
-      {/* Input Area - ensure visible above blur overlay (z-20) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#f0f0f0] p-4 border-t" style={{ zIndex: 22 }}>
-        <div className="flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
-          <input
-            type="text"
-            placeholder="Digite uma mensagem"
-            className="flex-1 outline-none"
-            style={{ fontSize: '16px' }}
-            disabled
-          />
-          <button
-            disabled
-            className="text-gray-400"
-          >
-            <Send className="w-5 h-5" />
-          </button>
+      {/* Barra de input idêntica em layout ao Step10 */}
+      <div className="chat-inputbar bg-[#f0f0f0] border-t" style={{ bottom: 0 }}>
+        <div className="mx-4 flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
+          <input type="text" placeholder="Digite uma mensagem" className="flex-1 outline-none bg-transparent" style={{ fontSize: '16px' }} disabled />
+          <button disabled className="text-gray-400"><Send className="w-5 h-5" /></button>
         </div>
       </div>
     </div>
