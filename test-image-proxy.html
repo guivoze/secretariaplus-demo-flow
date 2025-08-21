@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - API de Proxy de Imagens</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        img { max-width: 100%; height: auto; margin: 10px 0; }
+        .loading { color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Teste da API de Proxy de Imagens</h1>
+    
+    <div class="test-section">
+        <h2>📋 Instruções:</h2>
+        <ol>
+            <li>Aguarde o deploy da Vercel finalizar</li>
+            <li>Substitua <code>SEU-PROJETO.vercel.app</code> pela sua URL real</li>
+            <li>Teste com uma URL de imagem do Instagram válida</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Teste da API:</h2>
+        <form id="testForm">
+            <label for="baseUrl">URL base do seu projeto Vercel:</label><br>
+            <input type="text" id="baseUrl" placeholder="https://seu-projeto.vercel.app" style="width: 300px; margin: 10px 0;"><br>
+            
+            <label for="imageUrl">URL da imagem do Instagram:</label><br>
+            <input type="text" id="imageUrl" placeholder="https://scontent.cdninstagram.com/..." style="width: 300px; margin: 10px 0;"><br>
+            
+            <button type="submit">Testar Proxy</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Exemplo de uso no N8N:</h2>
+        <pre><code>function wes(u, w = 400) {
+  if (!u) return null;
+  const base = "https://SEU-PROJETO.vercel.app/api/img";
+  return `${base}?url=${encodeURIComponent(u)}&w=${w}&q=70`;
+}</code></pre>
+    </div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const imageUrl = document.getElementById('imageUrl').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!baseUrl || !imageUrl) {
+                resultDiv.innerHTML = '<div class="error">❌ Preencha ambos os campos!</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="loading">⏳ Testando...</div>';
+            
+            try {
+                const proxyUrl = `${baseUrl}/api/img?url=${encodeURIComponent(imageUrl)}&w=400&q=70`;
+                
+                // Teste de carregamento
+                const img = new Image();
+                img.onload = () => {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Sucesso!</h3>
+                            <p><strong>URL do proxy:</strong> <a href="${proxyUrl}" target="_blank">${proxyUrl}</a></p>
+                            <img src="${proxyUrl}" alt="Imagem via proxy" style="border: 2px solid #28a745;">
+                        </div>
+                    `;
+                };
+                img.onerror = () => {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Erro!</h3>
+                            <p>Não foi possível carregar a imagem via proxy.</p>
+                            <p><strong>URL testada:</strong> ${proxyUrl}</p>
+                            <p>Verifique se o deploy da Vercel foi finalizado e se a URL está correta.</p>
+                        </div>
+                    `;
+                };
+                img.src = proxyUrl;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Erro!</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
