@@ -25,6 +25,10 @@ export const Step10WhatsApp = () => {
 	const [hasInitialMessage, setHasInitialMessage] = useState(false);
 	const { height: keyboardHeight, open: isKeyboardOpen } = useKeyboardGlue();
 	const [isInputFocused, setIsInputFocused] = useState(false);
+	const [lockInput, setLockInput] = useState(false);
+	const [stagedChunks, setStagedChunks] = useState<string[]>([]);
+	const [visibleChunkCount, setVisibleChunkCount] = useState(0);
+	const [isChunkTyping, setIsChunkTyping] = useState(false);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const messagesContainerRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -121,6 +125,29 @@ export const Step10WhatsApp = () => {
 			console.log('[chat-ui] function response:', data);
 			if (data?.success && data?.message) {
 				await sendAssistantMessage(data.message);
+				const chunks = data.message
+					.split(/\n\s*\n+/)
+					.map((c: string) => c.trim())
+					.filter((c: string) => c.length > 0);
+				if (chunks.length > 1) {
+					setLockInput(true);
+					setStagedChunks(chunks);
+					setVisibleChunkCount(1);
+					(async () => {
+						for (let i = 1; i < chunks.length; i++) {
+							setIsChunkTyping(true);
+							await new Promise(r => setTimeout(r, 1500));
+							setIsChunkTyping(false);
+							setVisibleChunkCount(prev => prev + 1);
+							requestAnimationFrame(() => scrollToBottom('smooth'));
+						}
+						setLockInput(false);
+					})();
+				} else {
+					setStagedChunks([]);
+					setVisibleChunkCount(0);
+					setIsChunkTyping(false);
+				}
 				if (data.appointment && data.appointment.dateISO) {
 					console.log('[chat-ui] appointment received:', data.appointment);
 					setAppointment(data.appointment);
@@ -220,17 +247,56 @@ export const Step10WhatsApp = () => {
 				}}
 			>
 				<AnimatePresence mode="popLayout">
-					{messages.map((message) => (
-						<motion.div key={message.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.2 }} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-							<div className={`max-w-[80%] p-3 rounded-2xl shadow-sm ${message.sender === 'user' ? 'bg-[#dcf8c6] text-black rounded-br-md' : 'bg-white text-black rounded-bl-md'}`}>
-								<p className="text-sm whitespace-pre-wrap">{message.text}</p>
-								<div className={`flex items-center gap-1 mt-1 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-									<span className="text-xs text-gray-500">{message.timestamp}</span>
-									{message.sender === 'user' && (<CheckCheck className="w-3 h-3 text-blue-500" />)}
-								</div>
+					{messages.map((message) => {
+						const isAssistant = message.sender !== 'user';
+						if (!isAssistant) {
+							return (
+								<motion.div key={message.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.2 }} className={`flex justify-end`}>
+									<div className={`max-w-[80%] p-3 rounded-2xl shadow-sm bg-[#dcf8c6] text-black rounded-br-md`}>
+										<p className="text-sm whitespace-pre-wrap">{message.text}</p>
+										<div className={`flex items-center gap-1 mt-1 justify-end`}>
+											<span className="text-xs text-gray-500">{message.timestamp}</span>
+											<CheckCheck className="w-3 h-3 text-blue-500" />
+										</div>
+									</div>
+								</motion.div>
+							);
+						}
+						const chunks = message.text.split(/\n\s*\n+/).map(c => c.trim()).filter(Boolean);
+						const lastAssistantId = (() => {
+							for (let j = messages.length - 1; j >= 0; j--) {
+								if (messages[j].sender !== 'user') return messages[j].id;
+							}
+							return null;
+						})();
+						const isLastAssistant = lastAssistantId === message.id;
+						const count = isLastAssistant && stagedChunks.length > 1 ? Math.max(visibleChunkCount, 1) : chunks.length;
+						return (
+							<div key={message.id} className="space-y-2">
+								{chunks.slice(0, count).map((c, idc) => (
+									<motion.div key={`${message.id}-${idc}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className={`flex justify-start`}>
+										<div className={`max-w-[80%] p-3 rounded-2xl shadow-sm bg-white text-black rounded-bl-md`}>
+											<p className="text-sm whitespace-pre-wrap">{c}</p>
+											<div className={`flex items-center gap-1 mt-1 justify-start`}>
+												<span className="text-xs text-gray-500">{message.timestamp}</span>
+											</div>
+										</div>
+									</motion.div>
+								))}
+								{isLastAssistant && isChunkTyping && (
+									<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="flex justify-start">
+										<div className="bg-white text-black rounded-2xl rounded-bl-md p-3 shadow-sm">
+											<div className="flex space-x-1">
+												<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+												<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+												<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+											</div>
+										</div>
+									</motion.div>
+								)}
 							</div>
-						</motion.div>
-					))}
+						);
+					})}
 				</AnimatePresence>
 				{isLoading && (
 					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex justify-start">
@@ -272,7 +338,7 @@ export const Step10WhatsApp = () => {
 						className="flex-1 outline-none bg-transparent" 
 						style={{ fontSize: '16px' }} 
 						readOnly={isLoading}                    // bloqueia digitação sem perder foco
-						aria-disabled={chatDarkened || isLoading}
+						aria-disabled={chatDarkened || isLoading || lockInput}
 						autoComplete="off"
 						autoCorrect="off"
 						autoCapitalize="off"
