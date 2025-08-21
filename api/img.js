@@ -1,3 +1,5 @@
+import sharp from 'sharp';
+
 export default async function handler(req, res) {
   // Configurar CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -8,11 +10,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = req.query.url;
+    const { url, w = '300', q = '80' } = req.query;
     
     if (!url) {
       return res.status(400).json({ error: 'Missing url parameter' });
     }
+
+    const width = parseInt(w, 10);
+    const quality = parseInt(q, 10);
 
     // Reconstruir URL se necessário
     const targetUrl = url.startsWith('http') ? url : `https://${url}`;
@@ -31,12 +36,24 @@ export default async function handler(req, res) {
 
     const buffer = await response.arrayBuffer();
     
+    // Redimensionar e otimizar com Sharp
+    const optimizedBuffer = await sharp(Buffer.from(buffer))
+      .resize(width, width, { 
+        fit: 'cover',
+        position: 'center'
+      })
+      .jpeg({ 
+        quality: quality,
+        progressive: true 
+      })
+      .toBuffer();
+
     // Headers de cache
-    res.setHeader('Content-Type', response.headers.get('content-type') || 'image/jpeg');
+    res.setHeader('Content-Type', 'image/jpeg');
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     
-    // Enviar imagem
-    res.send(Buffer.from(buffer));
+    // Enviar imagem otimizada
+    res.send(optimizedBuffer);
 
   } catch (error) {
     console.error('Proxy error:', error);
