@@ -45,8 +45,8 @@ export const Step9PreChat = () => {
           </div>
         </div>
 
-        {/* Disabled input area (visível sobre o blur) */}
-        <div className="fixed bottom-0 left-0 right-0 bg-[#f0f0f0] p-4 border-t" style={{ zIndex: 20 }}>
+        {/* Disabled input area - deve ficar sob o blur/modal */}
+        <div className="fixed bottom-0 left-0 right-0 bg-[#f0f0f0] p-4 border-t" style={{ zIndex: 5 }}>
           <div className="flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
             <input type="text" placeholder="Digite uma mensagem" className="flex-1 outline-none" style={{ fontSize: '16px' }} disabled />
             <button disabled className="text-gray-400">
