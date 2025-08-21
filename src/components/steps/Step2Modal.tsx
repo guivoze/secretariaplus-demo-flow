@@ -110,9 +110,9 @@ export const Step2Modal = () => {
         )}
       </div>
 
-      {/* Input Area - identical to Step10 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#f0f0f0] p-4 border-t">
-        <div className="flex items-center gap-3 bg-white rounded-full px-4 py-2">
+      {/* Input Area - ensure visible above blur overlay (z-20) */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#f0f0f0] p-4 border-t" style={{ zIndex: 22 }}>
+        <div className="flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
           <input
             type="text"
             placeholder="Digite uma mensagem"
