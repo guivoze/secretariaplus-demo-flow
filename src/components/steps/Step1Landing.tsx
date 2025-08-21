@@ -82,6 +82,11 @@ export const Step1Landing = () => {
                 onChange={(e) => setInstagram(e.target.value.toLowerCase())}
                 className="text-center"
                 style={{ textTransform: 'lowercase' }}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                inputMode="text"
               />
 
               <CustomButton

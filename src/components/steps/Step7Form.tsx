@@ -20,7 +20,12 @@ export const Step7Form = () => {
   const hasLocation = !!(location && location.trim());
   const backgroundImage = userData.realProfilePic || null;
 
-  const isFormValid = formData.email && formData.whatsapp;
+  const isValidEmail = (email: string) => {
+    // Simples validação RFC 5322-like (suficiente para UX)
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+  };
+
+  const isFormValid = isValidEmail(formData.email) && formData.whatsapp;
 
   const handleSubmit = () => {
     if (isFormValid) {
@@ -108,6 +113,10 @@ export const Step7Form = () => {
               placeholder="draana@gmail.com"
               value={formData.email}
               onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              inputMode="email"
+              autoComplete="email"
+              autoCorrect="off"
+              autoCapitalize="none"
             />
           </motion.div>
 
