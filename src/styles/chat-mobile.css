@@ -1,28 +1,31 @@
-/* Travar scroll global e evitar "duplo scroll" */
+/* Travar scroll global e evitar "duplo scroll" no documento */
 html, body {
   height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
 }
 
-/* Container raiz do chat ocupa viewport dinâmica */
+/* Raiz do chat ocupa a viewport e fica ancorada (evita scroll do body no iOS) */
 .chat-root {
-  height: 100dvh; /* dinâmico; adapta com barras/teclado */
-  position: relative;
+  position: fixed; /* <- antes era relative; fixa a tela do chat */
+  inset: 0;
+  height: 100dvh;              /* dinâmico */
   display: flex;
   flex-direction: column;
   background: #e5ddd5;
+  overscroll-behavior: contain; /* bloqueia overscroll bounce */
 }
 
-/* Área de mensagens: único scroll da tela */
+/* ÚNICO scroll da tela */
 .chat-messages {
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  overflow-anchor: none;        /* <- evita "anchor jump" ao adicionar msg */
 }
 
-/* Header sticky estável */
+/* Header sticky estável dentro do container com scroll */
 .chat-header {
   position: sticky;
   top: 0;
@@ -30,7 +33,7 @@ html, body {
   will-change: transform;
 }
 
-/* Barra de input fixa, "colada" no teclado */
+/* Barra de input fixa e "colada" ao teclado (via bottom dinam.) */
 .chat-inputbar {
   position: fixed;
   left: 0; right: 0;
@@ -39,4 +42,17 @@ html, body {
   will-change: transform;
   padding: 16px;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+/* Controles globais: não atrapalhar o teclado; sobem junto via var --kb */
+.global-controls {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + var(--kb, 0px)); /* sobe com o teclado */
+  z-index: 60;
+}
+
+/* Opcional: em telas pequenas, esconder os controles globais */
+@media (max-width: 640px) {
+  .global-controls { display: none; }
 }

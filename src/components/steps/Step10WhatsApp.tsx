@@ -24,6 +24,7 @@ export const Step10WhatsApp = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [hasInitialMessage, setHasInitialMessage] = useState(false);
 	const { height: keyboardHeight, open: isKeyboardOpen } = useKeyboardGlue();
+	const [isInputFocused, setIsInputFocused] = useState(false);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const messagesContainerRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -41,6 +42,14 @@ export const Step10WhatsApp = () => {
 			document.documentElement.style.overflow = prevHtml;
 		};
 	}, []);
+
+	// Quando o teclado abrir/fechar, manter o body no topo (iOS evita "puxões")
+	useEffect(() => {
+		if (!isKeyboardOpen) {
+			// garante que o documento não "escapou" do topo
+			window.scrollTo(0, 0);
+		}
+	}, [isKeyboardOpen]);
 
 	// Memoize message conversion to prevent unnecessary re-renders
 	const messages: Message[] = useMemo(() => 
@@ -70,9 +79,14 @@ export const Step10WhatsApp = () => {
 	// Removido: detecção própria; agora usamos useKeyboardGlue()
 
 	const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
-		messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
-		if (messagesContainerRef.current) {
-			messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+		// Evitar scrollIntoView no iOS (pode causar body-scroll); use só scrollTop
+		const el = messagesContainerRef.current;
+		if (el) {
+			if (behavior === 'smooth') {
+				el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+			} else {
+				el.scrollTop = el.scrollHeight;
+			}
 		}
 	}, []);
 
@@ -115,7 +129,9 @@ export const Step10WhatsApp = () => {
 		} finally {
 			setIsLoading(false);
 			requestAnimationFrame(() => {
-				if (inputRef.current) inputRef.current.focus(); // manter teclado aberto
+				if (inputRef.current) {
+					inputRef.current.focus();   // manter teclado aberto após enviar
+				}
 				scrollToBottom('smooth');
 			});
 		}
@@ -143,13 +159,22 @@ export const Step10WhatsApp = () => {
 	}, [sendMessage]);
 
 	const handleInputFocus = useCallback(() => {
+		setIsInputFocused(true);
 		scrollToBottom('auto');
-		setTimeout(() => scrollToBottom('auto'), 250);
+		setTimeout(() => scrollToBottom('auto'), 200);
 	}, [scrollToBottom]);
+
+	const handleInputBlur = useCallback(() => {
+		// Só consideramos "fechar teclado" quando perder foco de verdade
+		setIsInputFocused(false);
+	}, []);
 
 	const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 		setInputValue(e.target.value);
 	}, []);
+
+	// Altura efetiva só quando o input está focado (evita falsos positivos do Safari)
+	const effectiveKB = isInputFocused ? keyboardHeight : 0;
 
 	return (
 		<div className="chat-root relative overflow-hidden">
@@ -182,7 +207,7 @@ export const Step10WhatsApp = () => {
 				ref={messagesContainerRef}
 				className={`chat-messages flex-1 p-4 space-y-3 transition-all duration-200 ${chatDarkened ? 'opacity-30' : ''}`}
 				style={{ 
-					paddingBottom: (keyboardHeight > 0 ? keyboardHeight : 0) + 80
+					paddingBottom: (effectiveKB > 0 ? effectiveKB : 0) + 80
 				}}
 			>
 				<AnimatePresence mode="popLayout">
@@ -226,7 +251,7 @@ export const Step10WhatsApp = () => {
 				ref={inputBarRef}
 				className={`chat-inputbar bg-[#f0f0f0] border-t transition-all duration-150 ${chatDarkened ? 'opacity-30' : ''}`}
 				style={{ 
-					bottom: keyboardHeight > 0 ? keyboardHeight : 0
+					bottom: effectiveKB > 0 ? effectiveKB : 0
 				}}
 			>
 				<div className="mx-4 flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
@@ -236,8 +261,9 @@ export const Step10WhatsApp = () => {
 						value={inputValue} 
 						onChange={handleInputChange} 
 						onKeyPress={handleKeyPress} 
-						onFocus={handleInputFocus} 
-						placeholder="Digite uma mensagem" 
+						onFocus={handleInputFocus}
+						onBlur={handleInputBlur}
+						placeholder="Digite uma mensagem"
 						className="flex-1 outline-none bg-transparent" 
 						style={{ fontSize: '16px' }} 
 						disabled={chatDarkened || isLoading}

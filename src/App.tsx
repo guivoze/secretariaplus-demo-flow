@@ -122,7 +122,7 @@ const DemoContent = () => {
       />
       
       {/* Global Controls: Back and Reset */}
-      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
+      <div className="global-controls flex items-center gap-2">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
