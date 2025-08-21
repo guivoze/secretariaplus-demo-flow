@@ -1,0 +1,42 @@
+/* Travar scroll global e evitar "duplo scroll" */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* Container raiz do chat ocupa viewport dinâmica */
+.chat-root {
+  height: 100dvh; /* dinâmico; adapta com barras/teclado */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #e5ddd5;
+}
+
+/* Área de mensagens: único scroll da tela */
+.chat-messages {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Header sticky estável */
+.chat-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  will-change: transform;
+}
+
+/* Barra de input fixa, "colada" no teclado */
+.chat-inputbar {
+  position: fixed;
+  left: 0; right: 0;
+  z-index: 50;
+  transform: translateZ(0);
+  will-change: transform;
+  padding: 16px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+}

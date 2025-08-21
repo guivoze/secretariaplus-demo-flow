@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useChatMessages } from "@/hooks/useChatMessages";
+import { useKeyboardGlue } from "@/hooks/useKeyboardGlue";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Phone, Video, MoreVertical, CheckCheck } from "lucide-react";
@@ -22,9 +23,7 @@ export const Step10WhatsApp = () => {
 	const [showFinishButton, setShowFinishButton] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [hasInitialMessage, setHasInitialMessage] = useState(false);
-	const [keyboardHeight, setKeyboardHeight] = useState(0);
-	const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-	const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+	const { height: keyboardHeight, open: isKeyboardOpen } = useKeyboardGlue();
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const messagesContainerRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -68,47 +67,7 @@ export const Step10WhatsApp = () => {
 		}
 	}, [messages.length]);
 
-	// Advanced mobile keyboard detection for consistent UX
-	useEffect(() => {
-		const handleResize = () => {
-			const currentHeight = window.innerHeight;
-			const heightDiff = viewportHeight - currentHeight;
-			
-			if (heightDiff > 150) { // Keyboard is open
-				setKeyboardHeight(heightDiff);
-				setIsKeyboardOpen(true);
-			} else { // Keyboard is closed
-				setKeyboardHeight(0);
-				setIsKeyboardOpen(false);
-			}
-		};
-
-		const handleVisualViewport = () => {
-			if (window.visualViewport) {
-				const vv = window.visualViewport;
-				const keyboardHeight = window.innerHeight - vv.height;
-				setKeyboardHeight(keyboardHeight > 50 ? keyboardHeight : 0);
-				setIsKeyboardOpen(keyboardHeight > 50);
-			}
-		};
-
-		// Use Visual Viewport API when available (better for iOS)
-		if (window.visualViewport) {
-			window.visualViewport.addEventListener('resize', handleVisualViewport);
-			window.visualViewport.addEventListener('scroll', handleVisualViewport);
-		}
-
-		// Fallback for Android and older browsers
-		window.addEventListener('resize', handleResize);
-		
-		return () => {
-			if (window.visualViewport) {
-				window.visualViewport.removeEventListener('resize', handleVisualViewport);
-				window.visualViewport.removeEventListener('scroll', handleVisualViewport);
-			}
-			window.removeEventListener('resize', handleResize);
-		};
-	}, [viewportHeight]);
+	// Removido: detecção própria; agora usamos useKeyboardGlue()
 
 	const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
 		messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
@@ -122,12 +81,16 @@ export const Step10WhatsApp = () => {
 		scrollToBottom('smooth');
 	}, [messages.length, scrollToBottom]);
 
-	// Auto-scroll when keyboard changes
 	useEffect(() => {
 		if (isKeyboardOpen) {
-			setTimeout(() => scrollToBottom('auto'), 100);
+			setTimeout(() => scrollToBottom('auto'), 50);
 		}
 	}, [isKeyboardOpen, scrollToBottom]);
+
+	// Evitar perder foco ao tocar no botão de enviar (iOS dispara blur antes do click)
+	const keepFocusPointerDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+		e.preventDefault();
+	}, []);
 
 	const sendMessage = useCallback(async () => {
 		if (!inputValue.trim() || isLoading) return;
@@ -151,7 +114,10 @@ export const Step10WhatsApp = () => {
 			setInputValue(userMessage);
 		} finally {
 			setIsLoading(false);
-			requestAnimationFrame(() => scrollToBottom('smooth'));
+			requestAnimationFrame(() => {
+				if (inputRef.current) inputRef.current.focus(); // manter teclado aberto
+				scrollToBottom('smooth');
+			});
 		}
 	}, [inputValue, isLoading, sendUserMessage, sendAssistantMessage, sessionId, scrollToBottom]);
 
@@ -186,9 +152,9 @@ export const Step10WhatsApp = () => {
 	}, []);
 
 	return (
-		<div className="h-[100dvh] flex flex-col bg-[#e5ddd5] relative overflow-hidden">
+		<div className="chat-root relative overflow-hidden">
 			{/* WhatsApp Header - fixed and stabilized */}
-			<div className="bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg shrink-0 sticky top-0 z-30"
+			<div className="chat-header bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg shrink-0"
 				style={{ transform: 'translateZ(0)', willChange: 'transform' }}
 			>
 				<div className="w-10 h-10 rounded-full bg-black/10 overflow-hidden flex items-center justify-center">
@@ -214,12 +180,9 @@ export const Step10WhatsApp = () => {
 			{/* Messages Area - dynamically padded for keyboard */}
 			<div
 				ref={messagesContainerRef}
-				className={`flex-1 overflow-y-auto p-4 space-y-3 transition-all duration-200 ${chatDarkened ? 'opacity-30' : ''}`}
+				className={`chat-messages flex-1 p-4 space-y-3 transition-all duration-200 ${chatDarkened ? 'opacity-30' : ''}`}
 				style={{ 
-					overscrollBehavior: 'contain', 
-					WebkitOverflowScrolling: 'touch',
-					paddingBottom: keyboardHeight > 0 ? keyboardHeight + 80 : 80,
-					maxHeight: `calc(100dvh - 64px - ${keyboardHeight}px)`
+					paddingBottom: (keyboardHeight > 0 ? keyboardHeight : 0) + 80
 				}}
 			>
 				<AnimatePresence mode="popLayout">
@@ -261,13 +224,9 @@ export const Step10WhatsApp = () => {
 			{/* Input Area - perfectly glued to keyboard */}
 			<div
 				ref={inputBarRef}
-				className={`fixed inset-x-0 bg-[#f0f0f0] border-t z-50 transition-all duration-200 ${chatDarkened ? 'opacity-30' : ''}`}
+				className={`chat-inputbar bg-[#f0f0f0] border-t transition-all duration-150 ${chatDarkened ? 'opacity-30' : ''}`}
 				style={{ 
-					padding: '16px', 
-					paddingBottom: `calc(env(safe-area-inset-bottom, 0px) + 16px)`,
-					bottom: keyboardHeight > 0 ? keyboardHeight : 0,
-					transform: 'translateZ(0)',
-					willChange: 'transform'
+					bottom: keyboardHeight > 0 ? keyboardHeight : 0
 				}}
 			>
 				<div className="mx-4 flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
@@ -288,9 +247,10 @@ export const Step10WhatsApp = () => {
 						spellCheck="false"
 					/>
 					<button 
+						onMouseDown={keepFocusPointerDown}
+						onTouchStart={keepFocusPointerDown}
 						onClick={() => {
 							sendMessage();
-							// Keep focus on input after sending
 							setTimeout(() => {
 								if (inputRef.current) {
 									inputRef.current.focus();
