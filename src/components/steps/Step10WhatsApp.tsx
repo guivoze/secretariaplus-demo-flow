@@ -105,6 +105,18 @@ export const Step10WhatsApp = () => {
 		}
 	}, [isKeyboardOpen, scrollToBottom]);
 
+	useEffect(() => {
+		if (isChunkTyping) {
+			// garante rolagem total quando bolha de "digitando" aparece
+			requestAnimationFrame(() => scrollToBottom('smooth'));
+		}
+	}, [isChunkTyping, scrollToBottom]);
+
+	useEffect(() => {
+		// a cada novo chunk visível, gruda no fundo
+		requestAnimationFrame(() => scrollToBottom('smooth'));
+	}, [visibleChunkCount, scrollToBottom]);
+
 	// Evitar perder foco ao tocar no botão de enviar (iOS dispara blur antes do click)
 	const keepFocusPointerDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
 		e.preventDefault();
@@ -151,9 +163,9 @@ export const Step10WhatsApp = () => {
 				if (data.appointment && data.appointment.dateISO) {
 					console.log('[chat-ui] appointment received:', data.appointment);
 					setAppointment(data.appointment);
-					// Exibir toast e dar tempo para leitura da mensagem antes de navegar
-					setTimeout(() => { setShowNotification(true); }, 400);
-					setTimeout(() => { setShowNotification(false); nextStep(); }, 2500);
+					// Exibir toast com mais delay e manter por mais tempo
+					setTimeout(() => { setShowNotification(true); }, 900);
+					setTimeout(() => { setShowNotification(false); nextStep(); }, 3900);
 				}
 			} else {
 				throw new Error('No AI response received');
@@ -294,6 +306,7 @@ export const Step10WhatsApp = () => {
 										</div>
 									</motion.div>
 								)}
+								<div ref={messagesEndRef} />
 							</div>
 						);
 					})}
@@ -309,7 +322,6 @@ export const Step10WhatsApp = () => {
 						</div>
 					</motion.div>
 				)}
-				<div ref={messagesEndRef} />
 			</div>
 
 			{/* Finish Button */}
@@ -368,7 +380,8 @@ export const Step10WhatsApp = () => {
 				{showNotification && (
 					<>
 						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/60 z-40" />
-						<motion.div initial={{ opacity: 0, y: -100 }} animate={{ opacity: 1, y: 0 }} className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-lg shadow-2xl p-4 max-w-sm w-full mx-4">
+						<motion.div initial={{ opacity: 0, y: -100 }} animate={{ opacity: 1, y: 0 }} className="fixed top-4 inset-x-0 z-50 px-4">
+							<div className="mx-auto max-w-sm bg-white rounded-lg shadow-2xl p-4">
 							<div className="flex items-start gap-3">
 								<div className="text-green-500 text-2xl">✅</div>
 								<div className="flex-1">
@@ -377,6 +390,7 @@ export const Step10WhatsApp = () => {
 									<p className="text-xs text-gray-500 mt-1">acabou de marcar {userData.especialidade || 'botox'} para 20/08/25, às 15:35</p>
 								</div>
 							</div>
+						</div>
 						</motion.div>
 					</>
 				)}

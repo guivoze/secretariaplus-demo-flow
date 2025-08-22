@@ -63,7 +63,7 @@ export const SessionResumeModal = ({
                   className="flex-1"
                   size="lg"
                 >
-                  Continuar teste anterior
+                  Voltar de onde parei
                 </CustomButton>
                 
                 <CustomButton
@@ -72,7 +72,7 @@ export const SessionResumeModal = ({
                   className="flex-1"
                   size="lg"
                 >
-                  Fazer novo teste
+                  Quero fazer um novo teste
                 </CustomButton>
               </motion.div>
             </CustomCard>

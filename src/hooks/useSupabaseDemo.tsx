@@ -176,7 +176,7 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
 
       const { data: existingSession, error } = await query.single();
 
-      // Only show modal if session exists, has data, and is not the current DB session
+      // Only show modal AFTER profile is confirmed (mover lógica: o chamador controla o momento)
       if (
         existingSession &&
         !error &&
