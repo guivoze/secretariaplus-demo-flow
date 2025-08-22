@@ -156,6 +156,22 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // Restore step on refresh
+  useEffect(() => {
+    const savedStep = localStorage.getItem('current-step');
+    if (savedStep) {
+      const stepNum = parseInt(savedStep, 10);
+      if (!Number.isNaN(stepNum)) {
+        setCurrentStep(stepNum);
+      }
+    }
+  }, []);
+
+  // Persist step on change
+  useEffect(() => {
+    localStorage.setItem('current-step', String(currentStep));
+  }, [currentStep]);
+
   // Search for previous sessions by Instagram handle
   const searchPreviousSession = useCallback(async (instagramHandle: string) => {
     if (!instagramHandle.trim()) return;
