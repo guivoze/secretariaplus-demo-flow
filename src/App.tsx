@@ -25,136 +25,122 @@ import { Step15SocialProof } from "@/components/steps/Step15SocialProof";
 import { Step16CTA } from "@/components/steps/Step16CTA";
 
 const DemoContent = () => {
-  const { 
-    currentStep, 
-    resetDemo, 
-    prevStep,
-    isLoading, 
-    showResumeModal, 
-    foundPreviousSession, 
-    resumePreviousSession, 
-    startNewTest 
-  } = useSupabaseDemo();
+	const { 
+		currentStep, 
+		resetDemo, 
+		prevStep,
+		isLoading, 
+		showResumeModal, 
+		foundPreviousSession, 
+		resumePreviousSession, 
+		startNewTest,
+		closeResumeModal // ADDED
+	} = useSupabaseDemo();
 
-  const calculateProgress = (step: number) => {
-    return Math.min((step / 15) * 100, 100); // 16 steps total (0-15)
-  };
+	const calculateProgress = (step: number) => {
+		return Math.min((step / 15) * 100, 100); // 16 steps total (0-15)
+	};
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando sessão...</p>
-        </div>
-      </div>
-    );
-  }
+	if (isLoading) {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+					<p className="text-muted-foreground">Carregando sessão...</p>
+				</div>
+			</div>
+		);
+	}
 
-  const renderCurrentStep = () => {
-    switch (currentStep) {
-      case 0:
-        return <Step1Landing />;
-      case 1:
-        return <Step2Modal />;
-      case 2:
-        return <Step2PersonalizationForm />;
-      case 3:
-        return <Step2ProfileConfirmation />;
-      case 4:
-        return <Step3Pain />;
-      case 5:
-        return <Step4Agitate />;
-      case 6:
-        return <Step5Solution />;
-      case 7:
-        return <Step6Loading />;
-      case 8:
-        return <Step7Form />;
-      case 9:
-        return <Step9PreChat />;
-      case 10:
-        return <Step10WhatsApp />;
-      case 11:
-        return <Step11Calendar />;
-      case 12:
-        return <Step12Result />;
-      case 13:
-        return <Step13Features />;
-      case 14:
-        return <Step14Emergency />;
-      case 15:
-        return <Step15SocialProof />;
-      case 16:
-        return <Step16CTA />;
-      default:
-        return (
-          <div className="min-h-screen gradient-bg flex items-center justify-center">
-            <div className="text-center">
-              <h1 className="text-lg font-bold mb-4">Demo concluída!</h1>
-              <p className="text-muted-foreground mb-6">Obrigado por testar a SecretáriaPlus!</p>
-              <button 
-                onClick={resetDemo}
-                className="btn-primary px-6 py-3 rounded-2xl"
-              >
-                Testar novamente
-              </button>
-            </div>
-          </div>
-        );
-    }
-  };
+	const renderCurrentStep = () => {
+		switch (currentStep) {
+			case 0:
+				return <Step1Landing />;
+			case 1:
+				return <Step2Modal />;
+			case 2:
+				return <Step2PersonalizationForm />;
+			case 3:
+				return <Step2ProfileConfirmation />;
+			case 4:
+				return <Step3Pain />;
+			case 5:
+				return <Step4Agitate />;
+			case 6:
+				return <Step5Solution />;
+			case 7:
+				return <Step6Loading />;
+			case 8:
+				return <Step7Form />;
+			case 9:
+				return <Step9PreChat />;
+			case 10:
+				return <Step10WhatsApp />;
+			case 11:
+				return <Step11Calendar />;
+			case 12:
+				return <Step12Result />;
+			case 13:
+				return <Step13Features />;
+			case 14:
+				return <Step14Emergency />;
+			case 15:
+				return <Step15SocialProof />;
+			default:
+				return <Step16CTA />;
+		}
+	};
 
-  return (
-    <div className="min-h-screen relative">
-      {/* Progress Bar */}
-      {currentStep > 0 && <ProgressBar progress={calculateProgress(currentStep)} />}
-      
-      {/* Current Step */}
-      {renderCurrentStep()}
-      
-      {/* Session Resume Modal */}
-      <SessionResumeModal
-        isOpen={showResumeModal}
-        instagramHandle={foundPreviousSession?.instagram_handle || ''}
-        onResume={resumePreviousSession}
-        onNewTest={startNewTest}
-      />
-      
-      {/* Global Controls: Back and Reset */}
-      <div className="global-controls flex items-center gap-2">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={prevStep}
-          className="bg-gray-800 text-white px-4 py-2 rounded-full shadow-card hover:bg-gray-700 transition-all flex items-center gap-2"
-          title="Voltar etapa"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Voltar</span>
-        </motion.button>
+	return (
+		<div className="min-h-screen relative">
+			{/* Progress Bar */}
+			{currentStep > 0 && <ProgressBar progress={calculateProgress(currentStep)} />}
+			
+			{/* Current Step */}
+			{renderCurrentStep()}
+			
+			{/* Session Resume Modal */}
+			<SessionResumeModal
+				isOpen={showResumeModal}
+				instagramHandle={foundPreviousSession?.instagram_handle || ''}
+				onResume={resumePreviousSession}
+				onNewTest={closeResumeModal} // CHANGED: apenas fecha o modal
+			/>
+			
+			{/* Global Controls: Back and Reset */}
+			<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={prevStep}
+					className="bg-gray-800 text-white px-4 py-2 rounded-full shadow-card hover:bg-gray-700 transition-all flex items-center gap-2"
+					title="Voltar etapa"
+				>
+					<ChevronLeft className="w-4 h-4" />
+					<span className="hidden sm:inline">Voltar</span>
+				</motion.button>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={resetDemo}
-          className="bg-gray-800 text-white px-4 py-2 rounded-full shadow-card hover:bg-gray-700 transition-all flex items-center gap-2"
-          title="Reiniciar demonstração"
-        >
-          <RotateCcw className="w-4 h-4" />
-          <span className="hidden sm:inline">Reiniciar</span>
-        </motion.button>
-      </div>
-    </div>
-  );
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={resetDemo}
+					className="bg-gray-800 text-white px-4 py-2 rounded-full shadow-card hover:bg-gray-700 transition-all flex items-center gap-2"
+					title="Reiniciar demonstração"
+				>
+					<RotateCcw className="w-4 h-4" />
+					<span className="hidden sm:inline">Reiniciar</span>
+				</motion.button>
+			</div>
+		</div>
+	);
 };
 
 const App = () => {
-  return (
-    <SupabaseDemoProvider>
-      <DemoContent />
-    </SupabaseDemoProvider>
-  );
+	return (
+		<SupabaseDemoProvider>
+			<DemoContent />
+		</SupabaseDemoProvider>
+	);
 };
 
 export default App;
