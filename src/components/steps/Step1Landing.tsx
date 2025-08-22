@@ -11,12 +11,18 @@ export const Step1Landing = () => {
     nextStep
   } = useSupabaseDemo();
   const [instagram, setInstagram] = useState(userData.instagram || '');
-  const [liveCount, setLiveCount] = useState(243);
+  const [liveCount, setLiveCount] = useState(() => 130 + Math.floor(Math.random() * 91)); // 130..220
 
   // Increment live count every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setLiveCount(prev => prev + Math.floor(Math.random() * 3) + 1);
+      setLiveCount(prev => {
+        const delta = (Math.random() < 0.5 ? -1 : 1) * (Math.floor(Math.random() * 3) + 1); // -3..+3
+        let next = prev + delta;
+        if (next < 130) next = 130;
+        if (next > 220) next = 220;
+        return next;
+      });
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -101,7 +107,7 @@ export const Step1Landing = () => {
                 [Grátis] Teste sua Nova Secretária de I.A. em 1 Min.
               </h1>
               
-              <p className="-bottom-1/3 text-muted-foreground leading-relaxed -bottom-0 ">Treinaremos ela com base no seu Instagram automagicamente ✨</p>
+              <p className="text-muted-foreground leading-relaxed mb-12">Treinaremos ela com base no seu Instagram automagicamente ✨</p>
             </motion.div>
 
             <motion.div initial={{
@@ -113,7 +119,7 @@ export const Step1Landing = () => {
           }} transition={{
             delay: 0.3,
             duration: 0.6
-          }} className="space-y-3">
+          }} className="space-y-4 mt-0">
               <div className="text-center">
                 <p className="text-muted-foreground mb-3 font-normal text-sm mx-0 my-0 py-0">Insira seu @ profissional abaixo:</p>
               </div>
@@ -137,7 +143,7 @@ export const Step1Landing = () => {
             duration: 0.6
           }} className="text-center">
               <p className="text-muted-foreground/80 leading-relaxed text-xs">
-                A análise do seu instagram é feita apenas com dados públicos e sua personalizacão na demonstracão.
+                A análise do seu perfil é feita apenas com suas informações públicas da rede social.
               </p>
             </motion.div>
 
