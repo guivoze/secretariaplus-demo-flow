@@ -56,7 +56,7 @@ export const Step10WhatsApp = () => {
 	}, [isKeyboardOpen]);
 
 	// Memoize message conversion to prevent unnecessary re-renders
-	const messages: Message[] = useMemo(() => 
+	const messages: Message[] = useMemo(() =>
 		chatMessages.map(msg => ({
 			id: msg.id,
 			text: msg.content,
@@ -65,14 +65,18 @@ export const Step10WhatsApp = () => {
 		})), [chatMessages]
 	);
 
-	// Initialize chat with welcome message - only once
 	useEffect(() => {
 		if (chatMessages.length === 0 && !hasInitialMessage) {
-			const initialMessage = "Olá! Seja bem-vinda à Clínica Exemplo! Como posso ajudar você hoje? 😊";
+			const initialMessage = 
+			`✨ Oie! Pra me testar, aja como um paciente típico, ex: "Qual valor do botox?"
+
+			Estou prontíssima, pode mandar! 🥰`;
+
 			sendAssistantMessage(initialMessage);
 			setHasInitialMessage(true);
 		}
 	}, [chatMessages.length, hasInitialMessage, sendAssistantMessage]);
+
 
 	useEffect(() => {
 		if (messages.length >= 8) {
@@ -94,6 +98,18 @@ export const Step10WhatsApp = () => {
 		}
 	}, []);
 
+	// Força o scroll a grudar no fundo mesmo com layout/teclado animando
+	const ensureBottom = useCallback(() => {
+		const el = messagesContainerRef.current;
+		if (!el) return;
+		el.scrollTop = el.scrollHeight;
+		requestAnimationFrame(() => {
+			el.scrollTop = el.scrollHeight;
+		});
+		setTimeout(() => { el.scrollTop = el.scrollHeight; }, 80);
+		setTimeout(() => { el.scrollTop = el.scrollHeight; }, 250);
+	}, []);
+
 	// Only scroll when messages actually change, not on every render
 	useEffect(() => {
 		scrollToBottom('smooth');
@@ -101,21 +117,21 @@ export const Step10WhatsApp = () => {
 
 	useEffect(() => {
 		if (isKeyboardOpen) {
-			setTimeout(() => scrollToBottom('auto'), 50);
+			setTimeout(() => ensureBottom(), 50);
 		}
-	}, [isKeyboardOpen, scrollToBottom]);
+	}, [isKeyboardOpen, ensureBottom]);
 
 	useEffect(() => {
 		if (isChunkTyping) {
 			// garante rolagem total quando bolha de "digitando" aparece
-			requestAnimationFrame(() => scrollToBottom('smooth'));
+			ensureBottom();
 		}
-	}, [isChunkTyping, scrollToBottom]);
+	}, [isChunkTyping, ensureBottom]);
 
 	useEffect(() => {
 		// a cada novo chunk visível, gruda no fundo
-		requestAnimationFrame(() => scrollToBottom('smooth'));
-	}, [visibleChunkCount, scrollToBottom]);
+		ensureBottom();
+	}, [visibleChunkCount, ensureBottom]);
 
 	// Evitar perder foco ao tocar no botão de enviar (iOS dispara blur antes do click)
 	const keepFocusPointerDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -148,10 +164,11 @@ export const Step10WhatsApp = () => {
 					(async () => {
 						for (let i = 1; i < chunks.length; i++) {
 							setIsChunkTyping(true);
+							ensureBottom();
 							await new Promise(r => setTimeout(r, 1500));
 							setIsChunkTyping(false);
 							setVisibleChunkCount(prev => prev + 1);
-							requestAnimationFrame(() => scrollToBottom('smooth'));
+							ensureBottom();
 						}
 						setLockInput(false);
 					})();
@@ -254,7 +271,7 @@ export const Step10WhatsApp = () => {
 			<div
 				ref={messagesContainerRef}
 				className={`chat-messages flex-1 p-4 space-y-3 transition-all duration-200 ${chatDarkened ? 'opacity-30' : ''}`}
-				style={{ 
+				style={{
 					paddingBottom: (effectiveKB > 0 ? effectiveKB : 0) + 80
 				}}
 			>
@@ -333,22 +350,22 @@ export const Step10WhatsApp = () => {
 			<div
 				ref={inputBarRef}
 				className={`chat-inputbar bg-[#f0f0f0] border-t transition-all duration-150 ${chatDarkened ? 'opacity-30' : ''}`}
-				style={{ 
+				style={{
 					bottom: effectiveKB > 0 ? effectiveKB : 0
 				}}
 			>
 				<div className="mx-4 flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
-					<input 
-						ref={inputRef} 
-						type="text" 
-						value={inputValue} 
-						onChange={handleInputChange} 
-						onKeyPress={handleKeyPress} 
+					<input
+						ref={inputRef}
+						type="text"
+						value={inputValue}
+						onChange={handleInputChange}
+						onKeyPress={handleKeyPress}
 						onFocus={handleInputFocus}
 						onBlur={handleInputBlur}
 						placeholder="Digite uma mensagem"
-						className="flex-1 outline-none bg-transparent" 
-						style={{ fontSize: '16px' }} 
+						className="flex-1 outline-none bg-transparent"
+						style={{ fontSize: '16px' }}
 						readOnly={isLoading}                    // bloqueia digitação sem perder foco
 						aria-disabled={chatDarkened || isLoading || lockInput}
 						autoComplete="off"
@@ -356,7 +373,7 @@ export const Step10WhatsApp = () => {
 						autoCapitalize="sentences"
 						spellCheck="false"
 					/>
-					<button 
+					<button
 						onMouseDown={keepFocusPointerDown}
 						onTouchStart={keepFocusPointerDown}
 						onClick={() => {
@@ -366,8 +383,8 @@ export const Step10WhatsApp = () => {
 									inputRef.current.focus();
 								}
 							}, 50);
-						}} 
-						disabled={!inputValue.trim() || chatDarkened || isLoading} 
+						}}
+						disabled={!inputValue.trim() || chatDarkened || isLoading}
 						className="text-[#075e54] disabled:text-gray-400 transition-colors p-1"
 					>
 						<Send className="w-5 h-5" />
@@ -382,15 +399,15 @@ export const Step10WhatsApp = () => {
 						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/60 z-40" />
 						<motion.div initial={{ opacity: 0, y: -100 }} animate={{ opacity: 1, y: 0 }} className="fixed top-4 inset-x-0 z-50 px-4">
 							<div className="mx-auto max-w-sm bg-white rounded-lg shadow-2xl p-4 text-center">
-							<div className="flex items-start gap-3">
-								<div className="text-green-500 text-2xl">✅</div>
-								<div className="flex-1">
-									<h3 className="font-semibold text-gray-900">Novo Agendamento!</h3>
-									<p className="text-sm text-gray-600 mt-1">Paciente Ana Cláudia • (11) 92912-1731</p>
-									<p className="text-xs text-gray-500 mt-1">acabou de marcar {userData.especialidade || 'botox'} para 20/08/25, às 15:35</p>
+								<div className="flex items-start gap-3">
+									<div className="text-green-500 text-2xl">✅</div>
+									<div className="flex-1">
+										<h3 className="font-semibold text-gray-900">Novo Agendamento!</h3>
+										<p className="text-sm text-gray-600 mt-1">Paciente Ana Cláudia • (11) 92912-1731</p>
+										<p className="text-xs text-gray-500 mt-1">acabou de marcar {userData.especialidade || 'botox'} para 20/08/25, às 15:35</p>
+									</div>
 								</div>
 							</div>
-						</div>
 						</motion.div>
 					</>
 				)}

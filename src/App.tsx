@@ -107,8 +107,8 @@ const DemoContent = () => {
 				onNewTest={closeResumeModal} // CHANGED: apenas fecha o modal
 			/>
 			
-			{/* Global Controls: Back and Reset */}
-			<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
+			{/* Global Controls: Back and Reset (debug) */}
+			<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 pb-5">
 				<motion.button
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}

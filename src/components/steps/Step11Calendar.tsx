@@ -2,11 +2,24 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 export const Step11Calendar = () => {
   const { nextStep, userData, appointment } = useSupabaseDemo();
   console.log('[calendar-ui] appointment from context:', appointment);
+
+  // Garantir que o scroll esteja destravado nesta tela
+  useEffect(() => {
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    document.body.style.overflow = 'auto';
+    document.documentElement.style.overflow = 'auto';
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
+  }, []);
 
   const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const monthDays = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -14,7 +27,9 @@ export const Step11Calendar = () => {
   const selectedTime = appointment?.displayTime || '15:35';
   const selectedPatient = appointment?.patientName || 'Paciente';
   const selectedProcedure = appointment?.procedure || (userData.especialidade || 'preenchimento');
-  const headerDate = appointment?.displayDate || '20 de Agosto, 2025';
+  const baseDate = appointment?.dateISO ? new Date(appointment.dateISO) : new Date();
+  const headerDate = appointment?.displayDate || new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(baseDate);
+  const weekday = new Intl.DateTimeFormat('pt-BR', { weekday: 'long' }).format(baseDate);
 
   const appointments = [
     { time: '09:00', patient: '', available: true },
@@ -45,6 +60,7 @@ export const Step11Calendar = () => {
               <Calendar className="w-6 h-6 text-gray-800" />
               {headerDate}
             </h2>
+            <p className="text-xs text-muted-foreground mt-1 capitalize">{weekday}</p>
           </motion.div>
 
           <motion.div
