@@ -56,7 +56,13 @@ export const Step2PersonalizationForm = () => {
               label="Qual seu nome completo?"
               placeholder="Seu Nome"
               value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+              onChange={(e) => {
+                const v = e.target.value.replace(/\s+/g, ' ');
+                const title = v.replace(/\b\p{L}/gu, (m) => m.toUpperCase());
+                setFormData({ ...formData, nome: title });
+              }}
+              autoCapitalize="words"
+              autoCorrect="on"
             />
 
             <div className="space-y-3">

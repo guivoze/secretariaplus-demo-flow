@@ -200,7 +200,10 @@ export const Step2ProfileConfirmation = () => {
             </CustomButton>
 
             <CustomButton
-              onClick={resetDemo}
+              onClick={() => {
+                // Apenas fecha o modal/segue o fluxo sem resetar para step 0
+                nextStep();
+              }}
               variant="outline"
               className="w-full bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200"
               size="lg"

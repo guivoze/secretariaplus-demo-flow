@@ -352,8 +352,8 @@ export const Step10WhatsApp = () => {
 						readOnly={isLoading}                    // bloqueia digitação sem perder foco
 						aria-disabled={chatDarkened || isLoading || lockInput}
 						autoComplete="off"
-						autoCorrect="off"
-						autoCapitalize="off"
+						autoCorrect="on"
+						autoCapitalize="sentences"
 						spellCheck="false"
 					/>
 					<button 
@@ -381,7 +381,7 @@ export const Step10WhatsApp = () => {
 					<>
 						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/60 z-40" />
 						<motion.div initial={{ opacity: 0, y: -100 }} animate={{ opacity: 1, y: 0 }} className="fixed top-4 inset-x-0 z-50 px-4">
-							<div className="mx-auto max-w-sm bg-white rounded-lg shadow-2xl p-4">
+							<div className="mx-auto max-w-sm bg-white rounded-lg shadow-2xl p-4 text-center">
 							<div className="flex items-start gap-3">
 								<div className="text-green-500 text-2xl">✅</div>
 								<div className="flex-1">
