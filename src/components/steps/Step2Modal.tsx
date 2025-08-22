@@ -192,7 +192,7 @@ export const Step2Modal = () => {
             }} transition={{
               delay: 0.4
             }}>
-                  <CustomButton onClick={nextStep} className="w-full" size="lg">Liberar Chat Teste</CustomButton>
+                  <CustomButton onClick={nextStep} className="w-full" size="lg">Liberar Chat de Teste →</CustomButton>
                 </motion.div>
               </CustomCard>
             </motion.div>
