@@ -123,7 +123,7 @@ export const Step6Loading = () => {
   }, [posts]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Instagram posts slideshow background */}
       <div className="absolute inset-0 opacity-32">
         <motion.div

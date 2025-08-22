@@ -46,7 +46,7 @@ export const Step7Form = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+    <div className="h-screen relative flex items-center justify-center p-4 overflow-hidden">
       {/* Background image com overlay escuro - AJUSTE O BRIGHTNESS AQUI */}
       {backgroundImage && (
         <div 
@@ -62,7 +62,7 @@ export const Step7Form = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-lg relative z-10"
+        className="w-full max-w-lg relative z-10 max-h-[calc(100vh-2rem)] overflow-y-auto"
       >
         <CustomCard variant="elevated" className="space-y-6">
           <motion.div

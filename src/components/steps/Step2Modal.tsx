@@ -117,7 +117,7 @@ export const Step2Modal = () => {
   );
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="h-screen relative overflow-hidden">
       {/* WhatsApp Background - always clean */}
       <WhatsAppBackground />
 

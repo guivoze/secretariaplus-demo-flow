@@ -106,15 +106,14 @@ export const Step11Calendar = () => {
   const appointments = generateSmartAppointments();
 
   return (
-    <div className="container-responsive gradient-subtle py-4">
+    <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="content-responsive max-w-lg"
-        style={{ overflowY: 'auto' }} // Fallback scroll apenas nesta tela
+        className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto"
       >
-        <CustomCard variant="elevated" className="space-y-4 p-5 mt-4 mb-6">
+        <CustomCard variant="elevated" className="space-y-4 p-4 sm:p-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

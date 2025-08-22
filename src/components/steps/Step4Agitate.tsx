@@ -7,7 +7,7 @@ export const Step4Agitate = () => {
   const { nextStep } = useSupabaseDemo();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-background via-background to-muted/30 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 opacity-20">
         <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -32,9 +32,6 @@ export const Step4Agitate = () => {
               <div className="w-32 h-32 bg-muted/30 rounded-2xl flex items-center justify-center">
                 <div className="text-muted-foreground text-4xl">⚡</div>
               </div>
-            </div>
-            <div className="absolute top-4 left-4 text-xs font-medium text-muted-foreground/80 bg-card/80 rounded-full px-3 py-1">
-              STEP 4
             </div>
           </div>
 

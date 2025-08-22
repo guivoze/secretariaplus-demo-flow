@@ -131,12 +131,12 @@ export const Step2ProfileConfirmation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+    <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-lg"
+        className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto"
       >
         <CustomCard variant="elevated" className="text-center space-y-6">
           <div className="space-y-2">
