@@ -189,7 +189,7 @@ export const Step10WhatsApp = () => {
 			await sendUserMessage(userMessage);
 			setIsLoading(true);
 			const { data, error } = await supabase.functions.invoke('chat-completion', {
-				body: { sessionId: sessionId, threadId: threadId, message: userMessage }
+				body: { sessionId: sessionId, threadId: threadId, message: userMessage, nowEpochMs: Date.now() }
 			});
 			if (error) throw error;
 			console.log('[chat-ui] function response:', data);

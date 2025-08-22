@@ -17,7 +17,7 @@ serve(async (req)=>{
     });
   }
   try {
-    const { sessionId, threadId, message } = await req.json();
+    const { sessionId, threadId, message, nowEpochMs } = await req.json();
     console.log('Chat completion request:', {
       sessionId,
       message
@@ -177,33 +177,38 @@ serve(async (req)=>{
             const args = fn.arguments ? JSON.parse(fn.arguments) : {};
             if (fn.name === 'get_date') {
               const tz = 'America/Sao_Paulo';
-              const nowUTC = new Date();
-              const parts = new Intl.DateTimeFormat('en-CA', {
+              // Use timestamp do cliente se vier (melhora consistência em dev/proxy)
+              const nowUTC = nowEpochMs ? new Date(nowEpochMs) : new Date();
+              const dateFmt = new Intl.DateTimeFormat('en-CA', {
                 timeZone: tz,
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
                 hour: '2-digit',
                 minute: '2-digit',
-                second: '2-digit'
-              }).formatToParts(nowUTC);
+                second: '2-digit',
+                hourCycle: 'h23'
+              });
+              const parts = dateFmt.formatToParts(nowUTC);
               const y = parts.find((p)=>p.type === 'year')?.value;
               const m = parts.find((p)=>p.type === 'month')?.value;
               const d = parts.find((p)=>p.type === 'day')?.value;
               const hh = parts.find((p)=>p.type === 'hour')?.value;
               const mm = parts.find((p)=>p.type === 'minute')?.value;
               const ss = parts.find((p)=>p.type === 'second')?.value;
+              // America/Sao_Paulo atualmente UTC-03 o ano todo
               const localISO = `${y}-${m}-${d}T${hh}:${mm}:${ss}-03:00`;
               const fmtDate = new Intl.DateTimeFormat('pt-BR', {
                 timeZone: tz,
                 day: '2-digit',
-                month: '2-digit',
+                month: 'long',
                 year: 'numeric'
               }).format(nowUTC);
               const fmtTime = new Intl.DateTimeFormat('pt-BR', {
                 timeZone: tz,
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                hour12: false
               }).format(nowUTC);
               result = {
                 iso: localISO,
@@ -214,10 +219,68 @@ serve(async (req)=>{
               console.log('[chat-fn] get_date ->', result);
             } else if (fn.name === 'appointment') {
               const { dateISO, displayDate, displayTime, patientName, procedure } = args;
+              const tz = 'America/Sao_Paulo';
+              const nowBase = nowEpochMs ? new Date(nowEpochMs) : new Date();
+
+              // Helper para formatar um Date (em tz) para ISO local -03:00
+              const toLocalISO = (d: Date) => {
+                const fmt = new Intl.DateTimeFormat('en-CA', {
+                  timeZone: tz,
+                  year: 'numeric', month: '2-digit', day: '2-digit',
+                  hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+                });
+                const p = fmt.formatToParts(d);
+                const y = p.find(x=>x.type==='year')?.value;
+                const m = p.find(x=>x.type==='month')?.value;
+                const dd = p.find(x=>x.type==='day')?.value;
+                const hh = p.find(x=>x.type==='hour')?.value;
+                const mm = p.find(x=>x.type==='minute')?.value;
+                const ss = p.find(x=>x.type==='second')?.value;
+                return `${y}-${m}-${dd}T${hh}:${mm}:${ss}-03:00`;
+              };
+
+              let base = dateISO ? new Date(dateISO) : new Date();
+
+              // Normalização de datas antigas: se estiver no passado, ajuste para ano atual, e se ainda ficar no passado, empurre 7 dias
+              const now = nowBase;
+              const nowYear = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric' }).format(now);
+              let bYear = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric' }).format(base);
+              if (parseInt(bYear) < parseInt(nowYear)) {
+                // Reescreve o ano do agendamento para o ano corrente, mantendo mês/dia/hora
+                const parts = new Intl.DateTimeFormat('en-CA', {
+                  timeZone: tz,
+                  year: 'numeric', month: '2-digit', day: '2-digit',
+                  hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+                }).formatToParts(base);
+                const m = parts.find(x=>x.type==='month')?.value;
+                const d = parts.find(x=>x.type==='day')?.value;
+                const hh = parts.find(x=>x.type==='hour')?.value;
+                const mm = parts.find(x=>x.type==='minute')?.value;
+                const ss = parts.find(x=>x.type==='second')?.value;
+                const rebuilt = `${nowYear}-${m}-${d}T${hh}:${mm}:${ss}-03:00`;
+                base = new Date(rebuilt);
+              }
+              // Se ainda estiver no passado, empurra em blocos de 7 dias até ficar no futuro próximo
+              let safety = 0;
+              while (base.getTime() < now.getTime() && safety < 8) {
+                base = new Date(base.getTime() + 7 * 24 * 60 * 60 * 1000);
+                safety++;
+              }
+
+              const localISO = toLocalISO(base);
+              const dateLabel = new Intl.DateTimeFormat('pt-BR', {
+                timeZone: tz,
+                day: '2-digit', month: 'long', year: 'numeric'
+              }).format(base);
+              const timeLabel = new Intl.DateTimeFormat('pt-BR', {
+                timeZone: tz,
+                hour: '2-digit', minute: '2-digit', hour12: false
+              }).format(base);
+
               appointmentPayload = {
-                dateISO,
-                displayDate,
-                displayTime,
+                dateISO: localISO,
+                displayDate: displayDate || dateLabel,
+                displayTime: displayTime || timeLabel,
                 patientName: patientName || null,
                 procedure: procedure || null
               };

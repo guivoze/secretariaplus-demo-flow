@@ -22,7 +22,6 @@ import { Step13Features } from "@/components/steps/Step13Features";
 import { Step14Emergency } from "@/components/steps/Step14Emergency";
 import { Step15SocialProof } from "@/components/steps/Step15SocialProof";
 import { Step16CTA } from "@/components/steps/Step16CTA";
-import { DebugNavigator } from "@/components/ui/debug-navigator";
 
 const DemoContent = () => {
 	const { 
@@ -38,7 +37,36 @@ const DemoContent = () => {
 	} = useSupabaseDemo();
 
 	const calculateProgress = (step: number) => {
-		return Math.min((step / 15) * 100, 100); // 16 steps total (0-15)
+		// Total lógico de steps do app (0..15)
+		const totalSteps = 16;
+		// A barra será exibida até o step 8 (inclusive)
+		const lastVisibleIndex = Math.min(8, totalSteps - 1);
+		const count = lastVisibleIndex + 1; // quantidade de posições (0..lastVisibleIndex)
+
+		// Se o total visível for pequeno, fazemos uma progressão linear até 75%.
+		// Caso contrário, aplicamos front‑loading (0..5) e distribuímos o restante até 100% no último visível.
+		let milestones: number[] = [];
+		if (count <= 2) {
+			milestones = [0];
+			if (count === 2) milestones.push(75);
+		} else if (count <= 6) {
+			// Linear até 75% para caber nos visíveis
+			for (let i = 0; i < count; i++) {
+				milestones.push((75 / (count - 1)) * i);
+			}
+		} else {
+			// Base front‑loading até 75% nos primeiros 6 índices (0..5)
+			const base = [0, 30, 50, 62, 70, 75];
+			milestones = base.slice();
+			const remaining = count - base.length; // posições 6..lastVisibleIndex
+			const inc = remaining > 0 ? (25 / remaining) : 25;
+			for (let k = 0; k < remaining; k++) {
+				milestones.push(Math.min(75 + inc * (k + 1), 100));
+			}
+		}
+
+		const clamped = Math.max(0, Math.min(step, lastVisibleIndex));
+		return Math.min(milestones[clamped] || 0, 100);
 	};
 
 	if (isLoading) {
@@ -93,11 +121,12 @@ const DemoContent = () => {
 
 	return (
 		<div className="min-h-screen h-screen relative overflow-hidden">
-			{/* Debug Navigator */}
-			<DebugNavigator />
+			{/* Debug Navigator removido */}
 			
-			{/* Progress Bar */}
-			{currentStep > 0 && <ProgressBar progress={calculateProgress(currentStep)} />}
+			{/* Progress Bar (visível apenas até o step 8) */}
+			{currentStep > 0 && currentStep <= 8 && (
+				<ProgressBar progress={calculateProgress(currentStep)} />
+			)}
 			
 			{/* Current Step - Com overflow responsivo */}
 			<div className="h-full overflow-auto">
