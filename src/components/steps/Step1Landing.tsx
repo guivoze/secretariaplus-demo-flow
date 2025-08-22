@@ -44,43 +44,77 @@ export const Step1Landing = () => {
   };
 
   return (
-    <div className="container-responsive gradient-bg">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 opacity-20">
+        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+          <g fill="none" fillRule="evenodd">
+            <g fill="#f5f5f5" fillOpacity="0.4">
+              <circle cx="20" cy="20" r="1"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+      
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="content-responsive max-w-md"
+        initial={{ opacity: 0, y: 40, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-lg relative z-10"
       >
-        <CustomCard variant="elevated" className="text-center space-y-6 p-6">
-          {/* Logo */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-          >
-            <h1 className="title-section text-foreground mb-2">
-              SecretáriaPlus
-            </h1>
-            <div className="w-16 h-1 bg-primary mx-auto rounded-full" />
-          </motion.div>
+        <div className="bg-card rounded-3xl shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm">
+          {/* Hero Image Area */}
+          <div className="relative h-48 bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
+            <div className="absolute inset-0 mix-blend-overlay">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-full h-full">
+                <path d="M0 0h100v100H0z" fill="#ffffff" fillOpacity="0.1"/>
+              </svg>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-20 h-20 bg-card rounded-2xl shadow-lg flex items-center justify-center">
+                <div className="text-2xl font-bold text-primary">SP</div>
+              </div>
+            </div>
+            <div className="absolute top-4 left-4 text-xs font-medium text-muted-foreground/80 bg-card/80 rounded-full px-3 py-1">
+              STEP 1
+            </div>
+          </div>
 
-          {/* Main content */}
-          <div className="space-y-6">
-            <h2 className="title-sub text-foreground leading-tight">
-              Teste gratuitamente e veja a I.A agendar consultas no piloto automático. Preparado?
-            </h2>
-            
-            <p className="text-content text-muted-foreground">
-              Insira o @ do instagram profissional para iniciar
-            </p>
+          {/* Content */}
+          <div className="p-8 space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="text-center space-y-4"
+            >
+              <h1 className="text-2xl font-bold text-foreground leading-tight">
+                [Grátis] Teste sua Nova Secretária de I.A. em 1 Min.
+              </h1>
+              
+              <p className="text-content text-muted-foreground leading-relaxed">
+                Treinamos ela com base no seu Insta automaticamente ✨
+              </p>
+            </motion.div>
 
-            <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="space-y-4"
+            >
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Insira seu @ profissional aqui embaixo:
+                </p>
+              </div>
+
               <CustomInput
                 prefix="@"
                 placeholder="drabelguerra"
                 value={instagram}
                 onChange={(e) => setInstagram(e.target.value.toLowerCase())}
-                className="text-center"
+                className="text-center text-lg"
                 style={{ textTransform: 'lowercase' }}
                 autoComplete="off"
                 autoCorrect="off"
@@ -92,27 +126,41 @@ export const Step1Landing = () => {
               <CustomButton
                 onClick={handleSubmit}
                 disabled={!instagram.trim()}
-                className="w-full"
+                className="w-full text-white bg-black hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                 size="lg"
               >
-                QUERO TESTAR AGORA 🚀
+                Testar Minha I.A Agora 🚀
               </CustomButton>
-            </div>
-          </div>
+            </motion.div>
 
-          {/* Live counter */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-small text-muted-foreground"
-          >
-            <span className="text-primary font-semibold animate-pulse-slow">
-              {liveCount}
-            </span>{" "}
-            clínicas testando agora
-          </motion.div>
-        </CustomCard>
+            {/* Disclaimer */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="text-center"
+            >
+              <p className="text-xs text-muted-foreground/80 leading-relaxed">
+                A análise do seu instagram é feita apenas com dados públicos e sua personalizacão na demonstracão.
+              </p>
+            </motion.div>
+
+            {/* Live counter */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6, duration: 0.4 }}
+              className="text-center pt-2"
+            >
+              <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-foreground">
+                  {liveCount} clínicas testando agora
+                </span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </motion.div>
     </div>
   );
