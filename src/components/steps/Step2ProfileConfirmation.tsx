@@ -84,8 +84,8 @@ export const Step2ProfileConfirmation = () => {
 
     const confirmedUsername = selectedProfile.replace('@', '');
     
-    // Update user data with confirmed profile
-    setUserData({ instagram: confirmedUsername });
+    // Update user data with confirmed profile (marca como confirmado)
+    setUserData({ instagram: confirmedUsername, instagramConfirmed: true });
 
     // This is the ONLY place where get_insta webhook should be called
     // Start Instagram scraping in background after profile confirmation
@@ -123,12 +123,9 @@ export const Step2ProfileConfirmation = () => {
       })
       .catch(error => console.error('Error during Instagram scrape:', error));
 
-    // Checa sessão anterior só após confirmação do perfil
+    // Após confirmação, segue o fluxo sem modal
     (async () => {
-      const hasPrevious = await findPreviousSession(confirmedUsername);
-      if (hasPrevious) {
-        openResumeModal();
-      }
+      await findPreviousSession(confirmedUsername);
       nextStep();
     })();
   };

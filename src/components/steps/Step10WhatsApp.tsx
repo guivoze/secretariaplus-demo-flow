@@ -15,7 +15,7 @@ interface Message {
 }
 
 export const Step10WhatsApp = () => {
-	const { nextStep, userData, sessionId, setAppointment } = useSupabaseDemo();
+	const { nextStep, userData, sessionId, setAppointment, appointment, resetChatInMemory, threadId, setThreadId } = useSupabaseDemo();
 	const { chatMessages, sendUserMessage, sendAssistantMessage } = useChatMessages();
 	const [inputValue, setInputValue] = useState('');
 	const [showNotification, setShowNotification] = useState(false);
@@ -24,6 +24,36 @@ export const Step10WhatsApp = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [hasInitialMessage, setHasInitialMessage] = useState(false);
 	const { height: keyboardHeight, open: isKeyboardOpen } = useKeyboardGlue();
+	// Top dinâmico para o toast respeitando o teclado e o visualViewport
+	const [toastTop, setToastTop] = useState<number>(16);
+
+	useEffect(() => {
+		function computeTop() {
+			// Usa visualViewport quando disponível para pegar o topo visível real
+			const vv: any = (typeof window !== 'undefined' && (window as any).visualViewport) || null;
+			if (vv) {
+				// Quando o teclado abre no iOS, vv.offsetTop sobe; ancoramos o toast no topo visível + 16px
+				const top = Math.max(16, Math.round((vv as any).offsetTop + 16));
+				setToastTop(top);
+				return;
+			}
+			// Fallback: se o teclado estiver aberto, desloca 16px; caso contrário 16px padrão
+			setToastTop(16);
+		}
+
+		computeTop();
+		const vv: any = (typeof window !== 'undefined' && (window as any).visualViewport) || null;
+		if (vv) {
+			const onVV = () => computeTop();
+			vv.addEventListener('resize', onVV);
+			vv.addEventListener('scroll', onVV);
+			return () => {
+				vv.removeEventListener('resize', onVV);
+				vv.removeEventListener('scroll', onVV);
+			};
+		}
+		return;
+	}, [isKeyboardOpen, keyboardHeight]);
 	const [isInputFocused, setIsInputFocused] = useState(false);
 	const [lockInput, setLockInput] = useState(false);
 	const [stagedChunks, setStagedChunks] = useState<string[]>([]);
@@ -159,7 +189,7 @@ export const Step10WhatsApp = () => {
 			await sendUserMessage(userMessage);
 			setIsLoading(true);
 			const { data, error } = await supabase.functions.invoke('chat-completion', {
-				body: { sessionId: sessionId, message: userMessage }
+				body: { sessionId: sessionId, threadId: threadId, message: userMessage }
 			});
 			if (error) throw error;
 			console.log('[chat-ui] function response:', data);
@@ -190,9 +220,9 @@ export const Step10WhatsApp = () => {
 				if (data.appointment && data.appointment.dateISO) {
 					console.log('[chat-ui] appointment received:', data.appointment);
 					setAppointment(data.appointment);
-					// Exibir toast com mais delay e manter por mais tempo
-					setTimeout(() => { setShowNotification(true); }, 900);
-					setTimeout(() => { setShowNotification(false); nextStep(); }, 3900);
+					// Exibir toast com mais delay (+2s) e manter por mais tempo (+2s)
+					setTimeout(() => { setShowNotification(true); }, 8900);
+					setTimeout(() => { setShowNotification(false); nextStep(); }, 11900);
 				}
 			} else {
 				throw new Error('No AI response received');
@@ -216,8 +246,15 @@ export const Step10WhatsApp = () => {
 		setTimeout(() => {
 			setShowNotification(true);
 			setTimeout(() => { nextStep(); }, 3000);
-		}, 500);
+		}, 2500); // +2s delay antes do toast aparecer
 	}, [nextStep]);
+
+	// Sempre que esta tela monta (novo teste), limpamos o chat em memória e criamos um novo threadId
+	useEffect(() => {
+		resetChatInMemory();
+		setThreadId(String(Date.now()));
+		// não limpamos o DB; apenas a lista em memória, e mudamos o threadId para isolar memória do assistant
+	}, [resetChatInMemory]);
 
 	const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
 		if (e.key === 'Enter') {
@@ -474,14 +511,18 @@ export const Step10WhatsApp = () => {
 				{showNotification && (
 					<>
 						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/60 z-40" />
-						<motion.div initial={{ opacity: 0, y: -100 }} animate={{ opacity: 1, y: 0 }} className="fixed top-4 inset-x-0 z-50 px-4">
+						<motion.div 
+							initial={{ opacity: 0, y: -100 }} 
+							animate={{ opacity: 1, y: 0 }} 
+							className="fixed inset-x-0 z-50 px-4"
+							style={{ top: `${toastTop}px` }}
+						>
 							<div className="mx-auto max-w-sm bg-white rounded-lg shadow-2xl p-4 text-center">
 								<div className="flex items-start gap-3">
 									<div className="text-green-500 text-2xl">✅</div>
 									<div className="flex-1">
 										<h3 className="font-semibold text-gray-900">Novo Agendamento!</h3>
-										<p className="text-sm text-gray-600 mt-1">Paciente Ana Cláudia • (11) 92912-1731</p>
-										<p className="text-xs text-gray-500 mt-1">acabou de marcar {userData.especialidade || 'botox'} para 20/08/25, às 15:35</p>
+										<p className="text-sm text-gray-600 mt-1">Paciente acabou de marcar {appointment?.procedure || userData.especialidade || 'procedimento'}</p>
 									</div>
 								</div>
 							</div>

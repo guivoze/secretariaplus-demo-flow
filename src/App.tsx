@@ -1,7 +1,6 @@
 import React from "react";
 import { SupabaseDemoProvider, useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { SessionResumeModal } from "@/components/ui/session-resume-modal";
 import { RotateCcw, ChevronLeft } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -23,6 +22,7 @@ import { Step13Features } from "@/components/steps/Step13Features";
 import { Step14Emergency } from "@/components/steps/Step14Emergency";
 import { Step15SocialProof } from "@/components/steps/Step15SocialProof";
 import { Step16CTA } from "@/components/steps/Step16CTA";
+import { DebugNavigator } from "@/components/ui/debug-navigator";
 
 const DemoContent = () => {
 	const { 
@@ -93,6 +93,9 @@ const DemoContent = () => {
 
 	return (
 		<div className="min-h-screen h-screen relative overflow-hidden">
+			{/* Debug Navigator */}
+			<DebugNavigator />
+			
 			{/* Progress Bar */}
 			{currentStep > 0 && <ProgressBar progress={calculateProgress(currentStep)} />}
 			
@@ -101,13 +104,7 @@ const DemoContent = () => {
 				{renderCurrentStep()}
 			</div>
 			
-			{/* Session Resume Modal */}
-			<SessionResumeModal
-				isOpen={showResumeModal}
-				instagramHandle={foundPreviousSession?.instagram_handle || ''}
-				onResume={resumePreviousSession}
-				onNewTest={closeResumeModal} // CHANGED: apenas fecha o modal
-			/>
+			{/* Session Resume Modal removido */}
 			
 			{/* Global Controls: Back and Reset (debug) - Responsivo */}
 			<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 pb-5">

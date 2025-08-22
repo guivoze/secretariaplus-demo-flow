@@ -9,12 +9,12 @@ export const Step11Calendar = () => {
   const { nextStep, userData, appointment } = useSupabaseDemo();
   console.log('[calendar-ui] appointment from context:', appointment);
 
-  // Garantir que o scroll esteja destravado nesta tela
+  // Garantir que o scroll esteja travado nesta tela (responsividade consistente)
   useEffect(() => {
     const prevBody = document.body.style.overflow;
     const prevHtml = document.documentElement.style.overflow;
-    document.body.style.overflow = 'auto';
-    document.documentElement.style.overflow = 'auto';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prevBody;
       document.documentElement.style.overflow = prevHtml;
@@ -31,56 +31,123 @@ export const Step11Calendar = () => {
   const headerDate = appointment?.displayDate || new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(baseDate);
   const weekday = new Intl.DateTimeFormat('pt-BR', { weekday: 'long' }).format(baseDate);
 
-  const appointments = [
-    { time: '09:00', patient: '', available: true },
-    { time: '10:00', patient: '', available: true },
-    { time: '11:00', patient: '', available: true },
-    { time: '14:00', patient: '', available: true },
-    { time: selectedTime, patient: `${selectedPatient} - ${selectedProcedure}`, available: false, isNew: true },
-    { time: '16:00', patient: '', available: true },
-    { time: '17:00', patient: '', available: true },
-  ].sort((a, b) => a.time.localeCompare(b.time));
+  // Função para gerar os 4 horários inteligentemente
+  const generateSmartAppointments = () => {
+    // Horários disponíveis de 8h às 19h (intervalos de 1h)
+    const allTimes = [];
+    for (let hour = 8; hour <= 19; hour++) {
+      allTimes.push(`${hour.toString().padStart(2, '0')}:00`);
+    }
+    
+    // Converter selectedTime para minutos para comparação
+    const [selectedHour, selectedMin] = selectedTime.split(':').map(Number);
+    const selectedMinutes = selectedHour * 60 + selectedMin;
+    
+    // Encontrar o índice mais próximo no array de horários
+    let selectedIndex = allTimes.findIndex(time => {
+      const [hour] = time.split(':').map(Number);
+      return hour * 60 >= selectedMinutes;
+    });
+    
+    // Se não achou, usar o último horário
+    if (selectedIndex === -1) selectedIndex = allTimes.length - 1;
+    
+    // Calcular posições para manter o horário agendado na 2ª ou 3ª posição
+    let startIndex;
+    let selectedPositionInFour; // Posição do agendado nos 4 horários (0,1,2,3)
+    
+    if (selectedIndex <= 1) {
+      // Se for muito cedo, colocar na 2ª posição (índice 1)
+      startIndex = 0;
+      selectedPositionInFour = selectedIndex;
+    } else if (selectedIndex >= allTimes.length - 2) {
+      // Se for muito tarde, colocar na 3ª posição (índice 2)
+      startIndex = allTimes.length - 4;
+      selectedPositionInFour = selectedIndex - startIndex;
+    } else {
+      // Caso normal, colocar na 2ª posição (índice 1)
+      startIndex = selectedIndex - 1;
+      selectedPositionInFour = 1;
+    }
+    
+    // Garantir que não saia dos limites
+    startIndex = Math.max(0, Math.min(allTimes.length - 4, startIndex));
+    
+    // Pegar 4 horários consecutivos da grade
+    const fourTimes = allTimes.slice(startIndex, startIndex + 4);
+    
+    // Criar os appointments - substituir apenas UMA posição pelo horário real
+    return fourTimes.map((time, index) => {
+      const isSelectedSlot = index === selectedPositionInFour;
+      const isEdge = index === 0 || index === 3; // Pontas (40% opacity)
+      
+      if (isSelectedSlot) {
+        // Este é o slot que será substituído pelo horário real agendado
+        return {
+          time: selectedTime,
+          patient: `${selectedPatient} - ${selectedProcedure}`,
+          available: false,
+          isNew: true,
+          isEdge: isEdge
+        };
+      } else {
+        // Horários normais da grade (disponíveis)
+        return {
+          time: time,
+          patient: '',
+          available: true,
+          isNew: false,
+          isEdge: isEdge
+        };
+      }
+    });
+  };
+
+  const appointments = generateSmartAppointments();
 
   return (
-    <div className="min-h-screen gradient-subtle p-4">
+    <div className="container-responsive gradient-subtle py-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-4xl mx-auto"
+        className="content-responsive max-w-lg"
+        style={{ overflowY: 'auto' }} // Fallback scroll apenas nesta tela
       >
-        <CustomCard variant="elevated" className="space-y-6">
+        <CustomCard variant="elevated" className="space-y-4 p-5 mt-4 mb-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="text-center"
           >
-            <h2 className="text-xl font-bold text-foreground flex items-center justify-center gap-2">
-              <Calendar className="w-6 h-6 text-gray-800" />
+            <h2 className="title-sub text-foreground flex items-center justify-center gap-2">
+              <Calendar className="w-5 h-5 text-gray-800" />
               {headerDate}
             </h2>
-            <p className="text-xs text-muted-foreground mt-1 capitalize">{weekday}</p>
+            <p className="text-small text-muted-foreground mt-1 capitalize">{weekday}</p>
           </motion.div>
 
           <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="space-y-4"
+              className="space-y-3"
             >
-              <h3 className="text-lg font-semibold text-foreground text-center">
+              <h3 className="text-content-medium text-foreground text-center">
                 Agendamentos do Dia
               </h3>
               
               <div className="space-y-2">
                 {appointments.map((appointment, index) => (
                   <motion.div
-                    key={appointment.time}
+                    key={`${appointment.time}-${index}`}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 + index * 0.1 }}
                     className={`p-3 rounded-lg border-2 transition-all ${
+                      appointment.isEdge ? 'opacity-60' : ''
+                    } ${
                       appointment.isNew
                         ? 'border-gray-800 bg-gray-100 animate-pulse'
                         : appointment.available
@@ -89,14 +156,14 @@ export const Step11Calendar = () => {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-foreground">{appointment.time}</span>
+                      <span className="text-content-medium text-foreground">{appointment.time}</span>
                       {appointment.isNew && (
-                        <span className="text-xs bg-gray-800 text-white px-2 py-1 rounded-full font-semibold">
+                        <span className="text-small bg-gray-800 text-white px-2 py-1 rounded-full font-semibold">
                           NOVO!
                         </span>
                       )}
                     </div>
-                    <p className={`text-sm ${
+                    <p className={`text-small ${
                       appointment.available 
                         ? 'text-muted-foreground italic' 
                         : 'text-foreground'
@@ -114,12 +181,12 @@ export const Step11Calendar = () => {
             transition={{ delay: 0.6 }}
             className="bg-gray-100 border border-gray-300 rounded-xl p-4"
           >
-            <h4 className="font-semibold text-foreground mb-2">
+            <h4 className="text-content-medium text-foreground mb-2">
               🎉 Agendamento realizado automaticamente!
             </h4>
-            <p className="text-sm text-muted-foreground">
-              A I.A acabou de agendar {selectedPatient} para {selectedProcedure} 
-              no dia {headerDate} às {selectedTime}. Tudo sem sua intervenção!
+            <p className="text-small text-muted-foreground">
+              A I.A acabou de agendar {selectedPatient} para {selectedProcedure}&nbsp; 
+              no dia {headerDate} às {selectedTime}. <strong>Tudo sem sua intervenção!</strong>
             </p>
           </motion.div>
 
@@ -127,7 +194,7 @@ export const Step11Calendar = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="text-center"
+            className="text-center pt-2"
           >
             <CustomButton
               onClick={nextStep}

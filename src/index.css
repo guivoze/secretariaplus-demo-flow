@@ -137,7 +137,7 @@ Gradients: suaves com tons de cinza/branco
     width: 100%;
     max-height: calc(100vh - 2rem);
     max-height: calc(100dvh - 2rem);
-    overflow-y: auto;
+    overflow-y: hidden;
   }
 
   /* Responsive Design System - Based on iPhone 16 Pro (19.5:9) */

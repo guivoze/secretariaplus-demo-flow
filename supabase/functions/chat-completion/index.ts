@@ -17,7 +17,7 @@ serve(async (req)=>{
     });
   }
   try {
-    const { sessionId, message } = await req.json();
+    const { sessionId, threadId, message } = await req.json();
     console.log('Chat completion request:', {
       sessionId,
       message
@@ -35,9 +35,21 @@ serve(async (req)=>{
     }
     console.log('[chat-fn] Session data found for session_id:', sessionId, 'db id:', sessionData.id);
     // Get conversation history
-    const { data: chatHistory, error: chatError } = await supabase.from('chat_messages').select('*').eq('session_id', sessionData.id).order('created_at', {
+    // Se threadId vier, limita o histórico a esta thread (metadata JSON tem threadId)
+    const chatQuery = supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('session_id', sessionData.id)
+      .order('created_at', { ascending: true });
+    const { data: chatHistory, error: chatError } = threadId
+      ? await chatQuery.contains('message_metadata', { threadId })
+      : await chatQuery
+    ;
+    
+    // Ordem já garantida acima
+    /* .order('created_at', {
       ascending: true
-    });
+    }); */
     if (chatError) {
       console.error('Error fetching chat history:', chatError);
       throw new Error('Error fetching chat history');

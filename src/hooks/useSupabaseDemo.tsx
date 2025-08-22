@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface UserData {
   instagram: string;
+  instagramConfirmed?: boolean;
   nome: string;
   email: string;
   whatsapp: string;
@@ -53,6 +54,9 @@ interface SupabaseDemoContextType {
   saveSession: () => Promise<void>;
   chatMessages: ChatMessage[];
   addChatMessage: (content: string, sender: 'user' | 'assistant', metadata?: any) => Promise<void>;
+  resetChatInMemory: () => void;
+  threadId: string | null;
+  setThreadId: (id: string | null) => void;
   generateCustomPrompt: () => string;
   getLeadScore: () => number;
   // Session resume features
@@ -77,6 +81,7 @@ interface SupabaseDemoContextType {
 
 const initialUserData: UserData = {
   instagram: '',
+  instagramConfirmed: false,
   nome: '',
   email: '',
   whatsapp: '',
@@ -137,6 +142,7 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
   const [foundPreviousSession, setFoundPreviousSession] = useState<any | null>(null);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
   const [appointment, setAppointment] = useState<SupabaseDemoContextType['appointment']>(null);
+  const [threadId, setThreadId] = useState<string | null>(null);
 
   // Generate session ID - always start at Step 0
   const initializeSession = useCallback(async () => {
@@ -216,12 +222,12 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
   // Save session to Supabase
   const saveSession = useCallback(async () => {
     if (!sessionId) return;
-    // Evita criar/atualizar linha enquanto o modal está aberto
+    // Evita criar/atualizar linha enquanto o modal está aberto (compat)
     if (showResumeModal) return;
-    // Evita criar linha antes do usuário informar o instagram
+    // Só persiste após Instagram CONFIRMADO no Step 3+
+    if (!userData.instagramConfirmed) return;
     if (!userData.instagram || !userData.instagram.trim()) return;
-    // SÓ CRIA ROW DEPOIS DE REALMENTE PROGREDIR (step 2+)
-    if (currentStep < 2) return;
+    if (currentStep < 3) return;
     
     try {
       const utmParams = getUTMParams();
@@ -254,15 +260,42 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
           .update(sessionData)
           .eq('id', dbSessionId);
       } else {
-        // Create new session
-        const { data, error } = await supabase
-          .from('demo_sessions')
-          .insert(sessionData)
-          .select()
-          .single();
-          
-        if (data && !error) {
-          setDbSessionId(data.id);
+        // Reaproveitar linha existente do MESMO navegador (fingerprint) + mesmo instagram
+        try {
+          const fingerprintPrefix = String(sessionId).split('_')[0];
+          const { data: existing, error: findErr } = await supabase
+            .from('demo_sessions')
+            .select('id, session_id, instagram_handle')
+            .eq('instagram_handle', userData.instagram)
+            .ilike('session_id', `${fingerprintPrefix}\_%`)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+          if (!findErr && existing && existing.id) {
+            setDbSessionId(existing.id);
+            await supabase
+              .from('demo_sessions')
+              .update(sessionData)
+              .eq('id', existing.id);
+          } else {
+            // Create new session
+            const { data, error } = await supabase
+              .from('demo_sessions')
+              .insert(sessionData)
+              .select()
+              .single();
+            if (data && !error) {
+              setDbSessionId(data.id);
+            }
+          }
+        } catch (e) {
+          // Fallback para insert se algo falhar
+          const { data } = await supabase
+            .from('demo_sessions')
+            .insert(sessionData)
+            .select()
+            .single();
+          if (data) setDbSessionId(data.id);
         }
       }
     } catch (error) {
@@ -270,9 +303,9 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [sessionId, userData, currentStep, dbSessionId]);
 
-  // Auto-save when important data changes
+  // Auto-save when important data changes (apenas após confirmação)
   useEffect(() => {
-    if (sessionId && !isLoading && !showResumeModal && userData.instagram && currentStep >= 2) {
+    if (sessionId && !isLoading && !showResumeModal && userData.instagramConfirmed && userData.instagram && currentStep >= 3) {
       const timer = setTimeout(() => {
         saveSession();
       }, 1000); // Debounce saves
@@ -321,7 +354,7 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
           message_order: messageOrder,
           sender_type: sender,
           content,
-          message_metadata: metadata || {}
+          message_metadata: { ...(metadata || {}), threadId: threadId || null }
         })
         .select()
         .single();
@@ -340,6 +373,11 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error adding chat message:', error);
     }
   }, [dbSessionId, chatMessages.length]);
+
+  // Reset chat only in memory (não apaga histórico do DB)
+  const resetChatInMemory = useCallback(() => {
+    setChatMessages([]);
+  }, []);
 
   // Generate custom prompt based on user data
   const generateCustomPrompt = useCallback(() => {
@@ -446,8 +484,11 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
     setUserDataState(prev => {
       const newData = { ...prev, ...data };
       
-      // If Instagram handle is being updated, search for previous sessions
-      if (data.instagram && data.instagram !== prev.instagram && data.instagram.trim()) {
+      // Só busca sessão anterior quando Instagram estiver CONFIRMADO
+      if (
+        newData.instagramConfirmed &&
+        data.instagram && data.instagram !== prev.instagram && data.instagram.trim()
+      ) {
         // Clear existing timeout
         if (searchTimeout) {
           clearTimeout(searchTimeout);
@@ -514,6 +555,9 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
       saveSession,
       chatMessages,
       addChatMessage,
+      resetChatInMemory,
+      threadId,
+      setThreadId,
       generateCustomPrompt,
       getLeadScore,
       showResumeModal,
