@@ -48,6 +48,7 @@ interface SupabaseDemoContextType {
   prevStep: () => void;
   // New Supabase features
   sessionId: string | null;
+  dbSessionId: string | null;
   isLoading: boolean;
   saveSession: () => Promise<void>;
   chatMessages: ChatMessage[];
@@ -508,6 +509,7 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
       nextStep,
       prevStep,
       sessionId,
+      dbSessionId,
       isLoading,
       saveSession,
       chatMessages,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useKeyboardGlue } from "@/hooks/useKeyboardGlue";
@@ -84,54 +84,66 @@ export const Step10WhatsApp = () => {
 		}
 	}, [messages.length]);
 
-	// Removido: detecção própria; agora usamos useKeyboardGlue()
+	// === SCROLL SYSTEM OTIMIZADO PARA iOS SAFARI ===
+	const scrollToEnd = useCallback((behavior: ScrollBehavior = 'auto') => {
+		const container = messagesContainerRef.current;
+		const anchor = messagesEndRef.current;
+		if (!container || !anchor) return;
 
-	const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
-		// Evitar scrollIntoView no iOS (pode causar body-scroll); use só scrollTop
-		const el = messagesContainerRef.current;
-		if (el) {
-			if (behavior === 'smooth') {
-				el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-			} else {
-				el.scrollTop = el.scrollHeight;
-			}
+		// Força o header a ficar fixo no topo
+		window.scrollTo(0, 0);
+		document.body.scrollTop = 0;
+		document.documentElement.scrollTop = 0;
+
+		// Calcula área visível real: viewport - header - teclado - input - margem
+		const headerHeight = 72; // altura fixa do header
+		const inputHeight = 80; // altura do input com padding (12px * 2 + 56px)
+		const keyboardOffset = isInputFocused ? keyboardHeight : 0;
+		const marginBuffer = 20; // margem de segurança
+		
+		// Área visível disponível para mensagens
+		const availableHeight = window.innerHeight - headerHeight - keyboardOffset - inputHeight - marginBuffer;
+		
+		// Calcula scroll para mostrar a âncora na área visível
+		const targetScroll = anchor.offsetTop - availableHeight;
+
+		if (behavior === 'smooth') {
+			container.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+		} else {
+			container.scrollTop = Math.max(0, targetScroll);
 		}
-	}, []);
+	}, [isInputFocused, keyboardHeight]);
 
-	// Força o scroll a grudar no fundo mesmo com layout/teclado animando
-	const ensureBottom = useCallback(() => {
+	const isAtBottom = useCallback(() => {
 		const el = messagesContainerRef.current;
-		if (!el) return;
-		el.scrollTop = el.scrollHeight;
-		requestAnimationFrame(() => {
-			el.scrollTop = el.scrollHeight;
-		});
-		setTimeout(() => { el.scrollTop = el.scrollHeight; }, 80);
-		setTimeout(() => { el.scrollTop = el.scrollHeight; }, 250);
+		if (!el) return true;
+		const threshold = 40; // px
+		const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+		return distance <= threshold;
 	}, []);
 
-	// Only scroll when messages actually change, not on every render
-	useEffect(() => {
-		scrollToBottom('smooth');
-	}, [messages.length, scrollToBottom]);
+	// Desce SEMPRE quando entrar nova mensagem / aparecer "digitando" / mostrar chunk
+	useLayoutEffect(() => {
+		// Pequeno delay para garantir que o DOM foi atualizado
+		const timer = setTimeout(() => {
+			const behavior: ScrollBehavior = isAtBottom() ? 'auto' : 'smooth';
+			scrollToEnd(behavior);
+		}, 10);
+		return () => clearTimeout(timer);
+	}, [messages.length, isLoading, isChunkTyping, visibleChunkCount, scrollToEnd, isAtBottom]);
 
+	// Quando o teclado abrir/fechar, SEMPRE faz snap para o final
 	useEffect(() => {
 		if (isKeyboardOpen) {
-			setTimeout(() => ensureBottom(), 50);
+			// Força header no topo e scroll para final
+			window.scrollTo(0, 0);
+			const t = setTimeout(() => {
+				window.scrollTo(0, 0);
+				scrollToEnd('auto');
+			}, 100);
+			return () => clearTimeout(t);
 		}
-	}, [isKeyboardOpen, ensureBottom]);
-
-	useEffect(() => {
-		if (isChunkTyping) {
-			// garante rolagem total quando bolha de "digitando" aparece
-			ensureBottom();
-		}
-	}, [isChunkTyping, ensureBottom]);
-
-	useEffect(() => {
-		// a cada novo chunk visível, gruda no fundo
-		ensureBottom();
-	}, [visibleChunkCount, ensureBottom]);
+	}, [isKeyboardOpen, scrollToEnd]);
 
 	// Evitar perder foco ao tocar no botão de enviar (iOS dispara blur antes do click)
 	const keepFocusPointerDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
@@ -145,7 +157,7 @@ export const Step10WhatsApp = () => {
 		try {
 			console.log('[chat-ui] sending user message:', userMessage);
 			await sendUserMessage(userMessage);
-			setTimeout(() => setIsLoading(true), 300);
+			setIsLoading(true);
 			const { data, error } = await supabase.functions.invoke('chat-completion', {
 				body: { sessionId: sessionId, message: userMessage }
 			});
@@ -164,11 +176,9 @@ export const Step10WhatsApp = () => {
 					(async () => {
 						for (let i = 1; i < chunks.length; i++) {
 							setIsChunkTyping(true);
-							ensureBottom();
 							await new Promise(r => setTimeout(r, 1500));
 							setIsChunkTyping(false);
 							setVisibleChunkCount(prev => prev + 1);
-							ensureBottom();
 						}
 						setLockInput(false);
 					})();
@@ -192,15 +202,14 @@ export const Step10WhatsApp = () => {
 			toast.error('Erro ao enviar mensagem. Tente novamente.');
 			setInputValue(userMessage);
 		} finally {
-			setIsLoading(false);
+			setTimeout(() => setIsLoading(false), 350);
 			requestAnimationFrame(() => {
 				if (inputRef.current) {
 					inputRef.current.focus();   // manter teclado aberto após enviar
 				}
-				scrollToBottom('smooth');
 			});
 		}
-	}, [inputValue, isLoading, sendUserMessage, sendAssistantMessage, sessionId, scrollToBottom]);
+	}, [inputValue, isLoading, sendUserMessage, sendAssistantMessage, sessionId]);
 
 	const finishConversation = useCallback(() => {
 		setChatDarkened(true);
@@ -225,9 +234,19 @@ export const Step10WhatsApp = () => {
 
 	const handleInputFocus = useCallback(() => {
 		setIsInputFocused(true);
-		scrollToBottom('auto');
-		setTimeout(() => scrollToBottom('auto'), 200);
-	}, [scrollToBottom]);
+		
+		// Força header no topo imediatamente
+		window.scrollTo(0, 0);
+		document.body.scrollTop = 0;
+		document.documentElement.scrollTop = 0;
+		
+		// Aguarda o teclado aparecer e então faz o scroll
+		setTimeout(() => {
+			// Força novamente para garantir
+			window.scrollTo(0, 0);
+			scrollToEnd('auto');
+		}, 300);
+	}, [scrollToEnd]);
 
 	const handleInputBlur = useCallback(() => {
 		// Só consideramos "fechar teclado" quando perder foco de verdade
@@ -242,10 +261,24 @@ export const Step10WhatsApp = () => {
 	const effectiveKB = isInputFocused ? keyboardHeight : 0;
 
 	return (
-		<div className="chat-root relative overflow-hidden">
-			{/* WhatsApp Header - fixed and stabilized */}
-			<div className="chat-header bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg shrink-0"
-				style={{ transform: 'translateZ(0)', willChange: 'transform' }}
+		<div className="chat-root fixed inset-0 flex flex-col overflow-hidden bg-white" style={{ margin: 0, padding: 0 }}>
+			{/* WhatsApp Header - SEMPRE fixo no topo */}
+			<div className="chat-header bg-[#075e54] text-white flex items-center gap-3 shadow-lg"
+				style={{ 
+					position: 'fixed',
+					top: 0,
+					left: 0,
+					right: 0,
+					height: '72px',
+					zIndex: 20,
+					transform: 'translateZ(0)', 
+					willChange: 'transform',
+					margin: 0,
+					paddingLeft: '16px',
+					paddingRight: '16px',
+					paddingTop: '4px',
+					paddingBottom: '4px'
+				}}
 			>
 				<div className="w-10 h-10 rounded-full bg-black/10 overflow-hidden flex items-center justify-center">
 					{userData.realProfilePic ? (
@@ -267,12 +300,21 @@ export const Step10WhatsApp = () => {
 				</div>
 			</div>
 
-			{/* Messages Area - dynamically padded for keyboard */}
+			{/* Messages Area - área entre header e input */}
 			<div
 				ref={messagesContainerRef}
-				className={`chat-messages flex-1 p-4 space-y-3 transition-all duration-200 ${chatDarkened ? 'opacity-30' : ''}`}
+				className={`chat-messages space-y-3 transition-all duration-200 overflow-y-auto ${chatDarkened ? 'opacity-30' : ''}`}
 				style={{
-					paddingBottom: (effectiveKB > 0 ? effectiveKB : 0) + 80
+					position: 'fixed',
+					top: '72px', // depois do header
+					left: 0,
+					right: 0,
+					bottom: effectiveKB + 80, // acima do input + teclado (input = ~80px com padding)
+					paddingTop: '16px',
+					paddingLeft: '16px',
+					paddingRight: '16px',
+					paddingBottom: '8px', // bem mais próximo do input
+					zIndex: 1
 				}}
 			>
 				<AnimatePresence mode="popLayout">
@@ -280,7 +322,15 @@ export const Step10WhatsApp = () => {
 						const isAssistant = message.sender !== 'user';
 						if (!isAssistant) {
 							return (
-								<motion.div key={message.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.2 }} className={`flex justify-end`}>
+								<motion.div 
+									key={message.id} 
+									initial={{ opacity: 0, y: 20 }} 
+									animate={{ opacity: 1, y: 0 }} 
+									exit={{ opacity: 0, y: -20 }} 
+									transition={{ duration: 0.2 }} 
+									onAnimationComplete={() => scrollToEnd('auto')}
+									className={`flex justify-end`}
+								>
 									<div className={`max-w-[80%] p-3 rounded-2xl shadow-sm bg-[#dcf8c6] text-black rounded-br-md`}>
 										<p className="text-sm whitespace-pre-wrap">{message.text}</p>
 										<div className={`flex items-center gap-1 mt-1 justify-end`}>
@@ -303,7 +353,14 @@ export const Step10WhatsApp = () => {
 						return (
 							<div key={message.id} className="space-y-2">
 								{chunks.slice(0, count).map((c, idc) => (
-									<motion.div key={`${message.id}-${idc}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className={`flex justify-start`}>
+									<motion.div 
+										key={`${message.id}-${idc}`} 
+										initial={{ opacity: 0, y: 20 }} 
+										animate={{ opacity: 1, y: 0 }} 
+										transition={{ duration: 0.2 }} 
+										onAnimationComplete={() => scrollToEnd('auto')}
+										className={`flex justify-start`}
+									>
 										<div className={`max-w-[80%] p-3 rounded-2xl shadow-sm bg-white text-black rounded-bl-md`}>
 											<p className="text-sm whitespace-pre-wrap">{c}</p>
 											<div className={`flex items-center gap-1 mt-1 justify-start`}>
@@ -313,7 +370,13 @@ export const Step10WhatsApp = () => {
 									</motion.div>
 								))}
 								{isLastAssistant && isChunkTyping && (
-									<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="flex justify-start">
+									<motion.div 
+										initial={{ opacity: 0, y: 20 }} 
+										animate={{ opacity: 1, y: 0 }} 
+										transition={{ duration: 0.2 }} 
+										onAnimationComplete={() => scrollToEnd('auto')}
+										className="flex justify-start"
+									>
 										<div className="bg-white text-black rounded-2xl rounded-bl-md p-3 shadow-sm">
 											<div className="flex space-x-1">
 												<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
@@ -323,13 +386,19 @@ export const Step10WhatsApp = () => {
 										</div>
 									</motion.div>
 								)}
-								<div ref={messagesEndRef} />
+
 							</div>
 						);
 					})}
 				</AnimatePresence>
 				{isLoading && (
-					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex justify-start">
+					<motion.div 
+						initial={{ opacity: 0, y: 20 }} 
+						animate={{ opacity: 1, y: 0 }} 
+						exit={{ opacity: 0, y: -20 }} 
+						onAnimationComplete={() => scrollToEnd('auto')}
+						className="flex justify-start"
+					>
 						<div className="bg-white text-black rounded-2xl rounded-bl-md p-3 shadow-sm">
 							<div className="flex space-x-1">
 								<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
@@ -339,6 +408,9 @@ export const Step10WhatsApp = () => {
 						</div>
 					</motion.div>
 				)}
+
+				{/* ANCORAAAAAAAA (deve ficar por último dentro de .chat-messages) */}
+				<div ref={messagesEndRef} />
 			</div>
 
 			{/* Finish Button */}
@@ -346,12 +418,17 @@ export const Step10WhatsApp = () => {
 				{/* hidden debug button removed */}
 			</AnimatePresence>
 
-			{/* Input Area - perfectly glued to keyboard */}
+			{/* Input Area - sempre fixo no fundo, acima do teclado */}
 			<div
 				ref={inputBarRef}
 				className={`chat-inputbar bg-[#f0f0f0] border-t transition-all duration-150 ${chatDarkened ? 'opacity-30' : ''}`}
 				style={{
-					bottom: effectiveKB > 0 ? effectiveKB : 0
+					position: 'fixed',
+					bottom: effectiveKB,
+					left: 0,
+					right: 0,
+					zIndex: 15,
+					padding: '12px 0'
 				}}
 			>
 				<div className="mx-4 flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
@@ -363,7 +440,7 @@ export const Step10WhatsApp = () => {
 						onKeyPress={handleKeyPress}
 						onFocus={handleInputFocus}
 						onBlur={handleInputBlur}
-						placeholder="Digite uma mensagem"
+						placeholder="Digite uma mensagem..."
 						className="flex-1 outline-none bg-transparent"
 						style={{ fontSize: '16px' }}
 						readOnly={isLoading}                    // bloqueia digitação sem perder foco
