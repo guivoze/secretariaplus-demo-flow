@@ -68,6 +68,10 @@ interface SupabaseDemoContextType {
     procedure?: string | null;
   } | null;
   setAppointment: (a: SupabaseDemoContextType['appointment']) => void;
+  // New: explicit controls
+  openResumeModal: () => void;
+  closeResumeModal: () => void;
+  findPreviousSession: (instagramHandle: string) => Promise<boolean>;
 }
 
 const initialUserData: UserData = {
@@ -176,7 +180,7 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
 
       const { data: existingSession, error } = await query.single();
 
-      // Only show modal AFTER profile is confirmed (mover lógica: o chamador controla o momento)
+      // Only update state; caller decides whether to open the modal
       if (
         existingSession &&
         !error &&
@@ -185,7 +189,6 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
         existingSession.id !== dbSessionId
       ) {
         setFoundPreviousSession(existingSession);
-        setShowResumeModal(true);
       }
     } catch (error) {
       // No previous session found or error - continue normally
@@ -468,6 +471,17 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 
+  const findPreviousSession = useCallback(async (instagramHandle: string) => {
+    setFoundPreviousSession(null);
+    await searchPreviousSession(instagramHandle);
+    // wait a tick for state
+    await new Promise(r => setTimeout(r, 0));
+    return !!foundPreviousSession;
+  }, [searchPreviousSession, foundPreviousSession]);
+
+  const openResumeModal = useCallback(() => setShowResumeModal(true), []);
+  const closeResumeModal = useCallback(() => setShowResumeModal(false), []);
+
   return (
     <SupabaseDemoContext.Provider value={{
       currentStep,
@@ -487,9 +501,12 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
       showResumeModal,
       foundPreviousSession,
       resumePreviousSession,
-      startNewTest
-      , appointment
-      , setAppointment
+      startNewTest,
+      appointment,
+      setAppointment,
+      openResumeModal,
+      closeResumeModal,
+      findPreviousSession
     }}>
       {children}
     </SupabaseDemoContext.Provider>

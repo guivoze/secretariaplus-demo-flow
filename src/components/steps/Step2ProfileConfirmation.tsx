@@ -11,7 +11,7 @@ interface ProfileOption {
 }
 
 export const Step2ProfileConfirmation = () => {
-  const { userData, setUserData, nextStep, resetDemo, sessionId } = useSupabaseDemo();
+  const { userData, setUserData, nextStep, resetDemo, sessionId, findPreviousSession, openResumeModal } = useSupabaseDemo();
   const [profiles, setProfiles] = useState<ProfileOption[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [totalFound, setTotalFound] = useState<number>(0);
@@ -123,8 +123,14 @@ export const Step2ProfileConfirmation = () => {
       })
       .catch(error => console.error('Error during Instagram scrape:', error));
 
-    // Proceed to next step immediately (seamless UX)
-    nextStep();
+    // Checa sessão anterior só após confirmação do perfil
+    (async () => {
+      const hasPrevious = await findPreviousSession(confirmedUsername);
+      if (hasPrevious) {
+        openResumeModal();
+      }
+      nextStep();
+    })();
   };
 
   return (
