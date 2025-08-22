@@ -165,7 +165,7 @@ export const Step2Modal = () => {
               y: 0
             }} transition={{
               delay: 0.2
-            }} className="title-section text-foreground">Opa calma aí, doc! ✨</motion.h2>
+            }} className="title-section text-foreground">Opa calma aí, doc! 👀</motion.h2>
 
                 <motion.div initial={{
               opacity: 0,
