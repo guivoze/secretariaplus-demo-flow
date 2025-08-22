@@ -68,19 +68,34 @@ export const Step7Form = () => {
           y: 0
         }} transition={{
           delay: 0.1
-        }} className="text-center space-y-4">
-            <h2 className="text-foreground leading-relaxed text-xl font-semibold">
-              MUITO legal, <span className="font-semibold">{firstName}</span>!
+        }} className="text-left space-y-4">
+            <h1 className="text-foreground leading-tight text-2xl md:text-3xl font-bold">
+              MUITO legal, {firstName}!
+            </h1>
+            <p className="text-foreground leading-relaxed text-lg">
               {hasProcedure && <>
-                  {' '}Já vimos que você se destaca com{' '}
+                  Já vimos que você se destaca com{' '}
                   <span className="font-semibold">{procedure1}</span>
                   {hasLocation && <>
                       {' '}e atende em <span className="font-semibold">{location}</span>
                     </>}
                   .
                 </>}
-            </h2>
-            <p className="text-muted-foreground">Pra gente enriquecer ainda mais o treinamento da IA, falta só um detalhe:</p>
+            </p>
+          </motion.div>
+
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: 0.15
+        }} className="space-y-2">
+            <p className="text-muted-foreground leading-relaxed">
+              Pra gente enriquecer ainda mais o treinamento da IA, falta só um detalhe:
+            </p>
           </motion.div>
 
           <motion.div initial={{
@@ -92,7 +107,7 @@ export const Step7Form = () => {
         }} transition={{
           delay: 0.2
         }} className="space-y-4">
-            <CustomInput label="Seu WhatsApp + DDD" placeholder="11999999999" value={formData.whatsapp} onChange={e => setFormData(prev => ({
+            <CustomInput label="Qual Seu WhatsApp + DDD?" placeholder="11999999999" value={formData.whatsapp} onChange={e => setFormData(prev => ({
             ...prev,
             whatsapp: formatWhatsApp(e.target.value)
           }))} />

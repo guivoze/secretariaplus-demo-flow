@@ -2,31 +2,29 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
-import { Calendar, Clock, Users, TrendingUp } from "lucide-react";
+import { PartyPopper, Star, Quote } from "lucide-react";
 
 export const Step12Result = () => {
   const { nextStep } = useSupabaseDemo();
 
-  const benefits = [
+  const cases = [
     {
-      icon: Clock,
-      title: "Tempo livre",
-      description: "Suas tardes livres para focar no que importa"
+      name: "Dra. Alana Ferri",
+      specialty: "Harmonização Facial",
+      text: "A gente perdia muito paciente pela demora no atendimento. Agora é tudo automático e nossa conversão triplicou!",
+      rating: 5
     },
     {
-      icon: Users,
-      title: "Mais pacientes",
-      description: "100% dos leads atendidos instantaneamente"
+      name: "Dra. Adriana Martins",
+      specialty: "Estética Avançada",
+      text: "Ela responde igualzinho um humano... Meus pacientes nem percebem que é uma IA. Incrível!",
+      rating: 5
     },
     {
-      icon: TrendingUp,
-      title: "Mais faturamento",
-      description: "Conversão de leads até 300% maior"
-    },
-    {
-      icon: Calendar,
-      title: "Agenda cheia",
-      description: "Agendamentos automáticos 24/7"
+      name: "Dra. Tânia Kelly",
+      specialty: "Dermatologia Estética",
+      text: "Dispensei um time comercial que custava R$ 8mil/mês. A IA faz tudo melhor e 24h por dia.",
+      rating: 5
     }
   ];
 
@@ -36,89 +34,76 @@ export const Step12Result = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto"
+        className="w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto"
       >
-        <CustomCard variant="elevated" className="text-center space-y-8">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-            className="relative"
-          >
-            {/* Background calendar effect */}
-            <div className="absolute inset-0 opacity-10">
-              <Calendar className="w-full h-48 text-primary" />
-            </div>
-            
-            <div className="relative z-10 space-y-6">
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                Agora: imagina <span className="text-primary">TODOS</span> seus leads sendo 
-                atendidos com esta qualidade e sendo marcados sozinhos?
-              </h1>
-
-              <p className="text-xl text-muted-foreground leading-relaxed">
-                Isso é tempo de sobra pra você cuidar dos seus pacientes e não se preocupar com atendimento.
-              </p>
-            </div>
-          </motion.div>
-
+        <CustomCard variant="elevated" className="space-y-6">
+          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            transition={{ duration: 0.6 }}
+            className="text-left space-y-3"
           >
-            {benefits.map((benefit, index) => (
-              <motion.div
-                key={benefit.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-                className="p-4 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
-              >
-                <benefit.icon className="w-8 h-8 text-primary mx-auto mb-3" />
-                <h3 className="font-semibold text-foreground mb-2">{benefit.title}</h3>
-                <p className="text-sm text-muted-foreground">{benefit.description}</p>
-              </motion.div>
-            ))}
+            <PartyPopper className="w-6 h-6 text-gray-900" />
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
+              Agora: imagina TODOS seus leads atendidos com esta qualidade e agendados sozinhos?
+            </h1>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Isso é tempo de sobra pra você cuidar dos seus pacientes e não se preocupar com atendimento.
+            </p>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl p-6 border border-primary/30"
-          >
-            <h3 className="text-2xl font-bold text-foreground mb-4">
-              📈 Resultados reais dos nossos clientes
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-3xl font-bold text-primary">+300%</div>
-                <div className="text-sm text-muted-foreground">Taxa de conversão</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-primary">24/7</div>
-                <div className="text-sm text-muted-foreground">Atendimento ativo</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-primary">100%</div>
-                <div className="text-sm text-muted-foreground">Leads atendidos</div>
-              </div>
-            </div>
-          </motion.div>
+          {/* Cases */}
+          {cases.map((caseItem, index) => (
+            <motion.div
+              key={caseItem.name}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 + index * 0.1 }}
+              className="space-y-4"
+            >
+              <CustomCard variant="bordered" className="p-4 hover:shadow-lg transition-all duration-300">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-gray-600 text-sm font-bold">
+                        {caseItem.name.split(' ')[1].charAt(0)}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 text-sm">{caseItem.name}</h4>
+                      <p className="text-xs text-gray-600">{caseItem.specialty}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      {Array.from({ length: caseItem.rating }).map((_, i) => (
+                        <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                  </div>
 
+                  <div className="relative">
+                    <Quote className="w-4 h-4 text-gray-400 absolute -top-1 -left-1" />
+                    <p className="text-xs text-gray-700 leading-relaxed pl-3">
+                      "{caseItem.text}"
+                    </p>
+                  </div>
+                </div>
+              </CustomCard>
+            </motion.div>
+          ))}
+
+          {/* Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
+            transition={{ delay: 0.5 }}
+            className="pt-4"
           >
             <CustomButton
               onClick={nextStep}
-              size="lg"
-              className="px-12"
+              className="w-full bg-gray-900 hover:bg-gray-800 text-white py-4 rounded-lg font-medium text-lg"
             >
-              Ver mais benefícios
+              Continuar
             </CustomButton>
           </motion.div>
         </CustomCard>

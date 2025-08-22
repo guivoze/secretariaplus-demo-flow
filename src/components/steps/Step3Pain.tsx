@@ -56,7 +56,7 @@ export const Step3Pain = () => {
                 É frustrante, né?
               </h1>
               
-              <p className="text-content text-muted-foreground leading-relaxed">Se profissionalizar cada vez mais e perder pacientes por demora, ou falta de qualidade no atendimento por mensagem...</p>
+              <p className="text-content text-muted-foreground leading-relaxed">Se profissionalizar cada vez mais e <span className="font-medium">perder pacientes por demora, ou falta de qualidade</span> no atendimento por mensagem...</p>
             </motion.div>
 
             <motion.div initial={{

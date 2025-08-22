@@ -2,7 +2,7 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
-import { AlertTriangle, Phone, MessageSquare, Shield } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 export const Step14Emergency = () => {
   const { nextStep } = useSupabaseDemo();
@@ -13,20 +13,20 @@ export const Step14Emergency = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto"
+        className="w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto"
       >
-        <CustomCard variant="elevated" className="space-y-8">
+        <CustomCard variant="elevated" className="space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-center space-y-4"
+            className="text-left space-y-3"
           >
-            <Shield className="w-16 h-16 text-primary mx-auto" />
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
-              Ahh.. mas e se o paciente reclamar de dor? E se tiver uma intercorrência?
+            <AlertTriangle className="w-6 h-6 text-gray-900" />
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
+              Ahh... mas e se algum paciente relatar complicação ou intercorrência?
             </h1>
-            <p className="text-xl text-primary font-semibold">
+            <p className="text-sm text-gray-500 font-normal">
               Tranquilo!
             </p>
           </motion.div>
@@ -35,81 +35,38 @@ export const Step14Emergency = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.4 }}
-            className="relative"
+            className="space-y-4"
           >
-            {/* Mobile notification mockup */}
-            <div className="max-w-sm mx-auto">
-              <motion.div
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
-                className="bg-red-500 text-white rounded-t-xl p-4 shadow-2xl"
-              >
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-6 h-6 animate-pulse" />
-                  <div className="flex-1">
-                    <h3 className="font-bold text-sm">🚨 Emergência Médica</h3>
-                    <p className="text-xs opacity-90">from SecretáriaPlus</p>
-                  </div>
-                </div>
-              </motion.div>
-              
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.7 }}
-                className="bg-white rounded-b-xl p-4 shadow-2xl border-l-4 border-red-500"
-              >
-                <h4 className="font-semibold text-foreground mb-2">
-                  URGENTE: Mariana Neves • (11) 91283-2382
-                </h4>
-                <p className="text-sm text-muted-foreground mb-3">
-                  relatou uma complicação/emergência. Clique para abrir a conversa.
-                </p>
-                <div className="flex gap-2">
-                  <button className="bg-red-500 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1">
-                    <Phone className="w-3 h-3" />
-                    Ligar
-                  </button>
-                  <button className="bg-blue-500 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1">
-                    <MessageSquare className="w-3 h-3" />
-                    Chat
-                  </button>
-                </div>
-              </motion.div>
+            {/* Toast notification placeholder */}
+            <div className="bg-gray-100 rounded-lg p-8 border border-gray-200 flex items-center justify-center min-h-[120px]">
+              <div className="text-center space-y-2">
+                <AlertTriangle className="w-8 h-8 text-red-600 mx-auto" />
+                <div className="text-xs text-gray-500 font-mono">TOAST_NOTIFICATION_PLACEHOLDER</div>
+              </div>
             </div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-            className="text-center space-y-4"
+            transition={{ delay: 0.5 }}
+            className="space-y-4"
           >
-            <p className="text-lg text-foreground leading-relaxed">
+            <p className="text-gray-700 leading-relaxed">
               Você recebe uma <span className="font-bold text-red-500">notificação automática</span> no app, 
               e já cai direto na conversa para lidar na íntegra!
             </p>
-
-            <CustomCard variant="bordered" className="bg-primary/10 border-primary p-4">
-              <p className="text-sm text-muted-foreground">
-                💡 <strong>A I.A é inteligente:</strong> Quando detecta palavras como "dor", "problema", 
-                "complicação" ou "urgente", ela automaticamente te notifica e pausa o atendimento 
-                até você assumir o controle.
-              </p>
-            </CustomCard>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1 }}
-            className="text-center"
+            transition={{ delay: 0.7 }}
+            className="pt-4"
           >
             <CustomButton
               onClick={nextStep}
-              size="lg"
-              className="px-12"
+              className="w-full bg-gray-900 hover:bg-gray-800 text-white py-4 rounded-lg font-medium text-lg"
             >
               Continuar
             </CustomButton>

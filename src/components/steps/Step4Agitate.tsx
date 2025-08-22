@@ -52,12 +52,12 @@ export const Step4Agitate = () => {
             delay: 0.2,
             duration: 0.6
           }} className="text-center space-y-4">
-              <h1 className="text-2xl font-bold text-foreground leading-tight">
+              <h1 className="text-2xl font-semibold text-foreground leading-tight">
                 Rápida & Persuasiva
               </h1>
               
               <p className="text-content text-muted-foreground leading-relaxed">
-                É possível atender <span className="font-semibold text-primary">múltiplos pacientes de tráfego pago simultaneamente</span> com rapidez, quebra de objeções..
+                É possível atender <span className="font-medium">múltiplos pacientes de tráfego pago simultaneamente</span> com rapidez, quebra de objeções..
               </p>
             </motion.div>
 

@@ -2,18 +2,18 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
-import { Rocket, AlertTriangle, CheckCircle, Phone, MessageCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle, Phone, MessageCircle } from "lucide-react";
 
 export const Step16CTA = () => {
   const { userData } = useSupabaseDemo();
 
   const benefits = [
-    "✅ I.A treinada especificamente para estética",
-    "✅ Atendimento 24/7 sem pausas",
-    "✅ CRM integrado que se alimenta sozinho",
-    "✅ Follow-up automático de leads perdidos",
-    "✅ Notificações de emergência médica",
-    "✅ Configuração em menos de 24h"
+    "Sua I.A treinada e configurada em 1 dia",
+    "Atendimento 24h sem pausas",
+    "Agenda Automática",
+    "CRM integrado que se alimenta sozinho",
+    "Follow-up automático",
+    "Notificações de emergência médica"
   ];
 
   const handleContact = () => {
@@ -76,10 +76,12 @@ Quero implementar na minha clínica!`;
             transition={{ delay: 0.1 }}
             className="space-y-4"
           >
-            <h1 className="text-2xl font-bold text-gray-800">
-              SecretáriaPlus
-            </h1>
-            <div className="w-24 h-1 bg-gray-800 mx-auto rounded-full" />
+            {/* Placeholder para logo SVG */}
+            <div className="bg-gray-100 rounded-lg p-6 border border-gray-200 flex items-center justify-center min-h-[80px]">
+              <div className="text-center space-y-2">
+                <div className="text-xs text-gray-500 font-mono">SECRETARIAPLUS_LOGO_SVG_PLACEHOLDER</div>
+              </div>
+            </div>
           </motion.div>
 
           <motion.div
@@ -88,8 +90,7 @@ Quero implementar na minha clínica!`;
             transition={{ delay: 0.2 }}
             className="space-y-6"
           >
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <Rocket className="w-8 h-8 text-gray-800" />
+            <div className="text-center mb-6">
               <h2 className="text-lg md:text-xl font-bold text-foreground">
                 Agora é hora de colocar a I.A pra funcionar na sua clínica a todo vapor!
               </h2>
@@ -135,22 +136,12 @@ Quero implementar na minha clínica!`;
               Falar com consultor
             </CustomButton>
 
-            <div className="flex items-center justify-center gap-2 text-orange-600 font-semibold">
+            <div className="flex items-center justify-center gap-2 text-gray-600 font-semibold">
               <AlertTriangle className="w-5 h-5" />
               <span className="text-sm">
-                Atenção: Só conseguimos atender 3 novas clínicas por semana.
+                Atenção: Só conseguimos atender 4 novas clínicas por semana.
               </span>
             </div>
-          </motion.div>
-
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2 }}
-            className="text-xs text-muted-foreground"
-          >
-            Ao clicar você será direcionado para nosso WhatsApp comercial com seus dados já preenchidos.
           </motion.div>
         </CustomCard>
       </motion.div>

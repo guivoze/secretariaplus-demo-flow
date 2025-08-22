@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { SupabaseDemoProvider, useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { RotateCcw, ChevronLeft } from "lucide-react";
@@ -20,14 +20,16 @@ import { Step11Calendar } from "@/components/steps/Step11Calendar";
 import { Step12Result } from "@/components/steps/Step12Result";
 import { Step13Features } from "@/components/steps/Step13Features";
 import { Step14Emergency } from "@/components/steps/Step14Emergency";
-import { Step15SocialProof } from "@/components/steps/Step15SocialProof";
+
 import { Step16CTA } from "@/components/steps/Step16CTA";
 
 const DemoContent = () => {
 	const { 
 		currentStep, 
+		setCurrentStep,
 		resetDemo, 
 		prevStep,
+		nextStep,
 		isLoading, 
 		showResumeModal, 
 		foundPreviousSession, 
@@ -35,6 +37,67 @@ const DemoContent = () => {
 		startNewTest,
 		closeResumeModal // ADDED
 	} = useSupabaseDemo();
+
+	// Add global navigation functions for console debugging
+	useEffect(() => {
+		(window as any).nav = {
+			goto: (step: number) => {
+				if (step >= 0 && step <= 15) {
+					setCurrentStep(step);
+					console.log(`✅ Navegando para o step ${step}`);
+				} else {
+					console.log(`❌ Step inválido. Use um número entre 0 e 15`);
+				}
+			},
+			next: () => {
+				nextStep();
+				console.log(`➡️ Próximo step: ${currentStep + 1}`);
+			},
+			prev: () => {
+				prevStep();
+				console.log(`⬅️ Step anterior: ${currentStep - 1}`);
+			},
+			current: () => {
+				console.log(`📍 Step atual: ${currentStep}`);
+				return currentStep;
+			},
+			reset: () => {
+				resetDemo();
+				console.log(`🔄 Demo resetado para o step 0`);
+			},
+			help: () => {
+				console.log(`
+🚀 COMANDOS DE NAVEGAÇÃO:
+nav.goto(N)  - Vai para o step N (0-15)
+nav.next()   - Próximo step
+nav.prev()   - Step anterior  
+nav.current()- Mostra step atual
+nav.reset()  - Reseta para o step 0
+nav.help()   - Mostra esta ajuda
+
+📝 MAPA DOS STEPS:
+0  - Landing (Instagram)
+1  - Modal
+2  - Personalização
+3  - Confirmação de Perfil
+4  - Pain
+5  - Agitate
+6  - Solution
+7  - Loading
+8  - Form
+9  - PreChat
+10 - WhatsApp
+11 - Calendar
+12 - Result
+13 - Features
+14 - Emergency
+15 - CTA
+				`);
+			}
+		};
+		
+		console.log(`🎯 Comandos de navegação carregados! Digite "nav.help()" para ver todos os comandos`);
+	}, [currentStep, setCurrentStep, nextStep, prevStep, resetDemo]);
 
 	const calculateProgress = (step: number) => {
 		// Total lógico de steps do app (0..15)
@@ -113,7 +176,7 @@ const DemoContent = () => {
 			case 14:
 				return <Step14Emergency />;
 			case 15:
-				return <Step15SocialProof />;
+				return <Step16CTA />;
 			default:
 				return <Step16CTA />;
 		}

@@ -71,7 +71,7 @@ export const Step5Solution = () => {
             duration: 0.6
           }} className="space-y-4 text-center">
               <p className="text-content text-muted-foreground leading-relaxed">
-                Treinamos nossa IA com <span className="font-semibold text-primary">+de 100 mil conversas</span> entre recepções e pacientes, analisando o que MAIS converte avaliações.
+                Treinamos nossa IA com <span className="font-medium">+de 100 mil conversas</span> entre recepções e pacientes, analisando o que MAIS converte avaliações.
               </p>
               
               <p className="text-sm text-muted-foreground italic">

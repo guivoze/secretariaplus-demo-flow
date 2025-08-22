@@ -15,15 +15,21 @@ export const Step9PreChat = () => {
     });
     return <div className="absolute inset-0 min-h-screen bg-[#e5ddd5] pointer-events-none">
         {/* Header */}
-        <div className="bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg">
+        <div className="bg-[#075e54] text-white flex items-center gap-3 shadow-lg" style={{
+          height: '72px',
+          paddingLeft: '16px',
+          paddingRight: '16px',
+          paddingTop: '4px',
+          paddingBottom: '4px'
+        }}>
           <div className="w-10 h-10 rounded-full bg-black/10 overflow-hidden flex items-center justify-center">
             {userData.realProfilePic ? <img src={userData.realProfilePic} alt="profile" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center font-bold text-black bg-primary">
                 {(userData.instagram || 'SP').charAt(0).toUpperCase()}
               </div>}
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold">{userData.aiInsights?.name || userData.instagram || 'SecretáriaPlus'}</h3>
-            <p className="text-sm text-green-200">online</p>
+            <h3 className="text-sm font-medium">{userData.aiInsights?.name || userData.instagram || 'SecretáriaPlus'}</h3>
+            <p className="text-xs text-[#ffffff]/[0.61]">online</p>
           </div>
           <div className="flex gap-4">
             <Video className="w-5 h-5" />
