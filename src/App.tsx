@@ -92,12 +92,14 @@ const DemoContent = () => {
 	};
 
 	return (
-		<div className="min-h-screen relative">
+		<div className="min-h-screen h-screen relative overflow-hidden">
 			{/* Progress Bar */}
 			{currentStep > 0 && <ProgressBar progress={calculateProgress(currentStep)} />}
 			
-			{/* Current Step */}
-			{renderCurrentStep()}
+			{/* Current Step - Com overflow responsivo */}
+			<div className="h-full overflow-auto">
+				{renderCurrentStep()}
+			</div>
 			
 			{/* Session Resume Modal */}
 			<SessionResumeModal
@@ -107,13 +109,13 @@ const DemoContent = () => {
 				onNewTest={closeResumeModal} // CHANGED: apenas fecha o modal
 			/>
 			
-			{/* Global Controls: Back and Reset (debug) */}
+			{/* Global Controls: Back and Reset (debug) - Responsivo */}
 			<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 pb-5">
 				<motion.button
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
 					onClick={prevStep}
-					className="bg-gray-800 text-white px-4 py-2 rounded-full shadow-card hover:bg-gray-700 transition-all flex items-center gap-2"
+					className="bg-gray-800 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-full shadow-card hover:bg-gray-700 transition-all flex items-center gap-2 text-small"
 					title="Voltar etapa"
 				>
 					<ChevronLeft className="w-4 h-4" />
@@ -124,7 +126,7 @@ const DemoContent = () => {
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
 					onClick={resetDemo}
-					className="bg-gray-800 text-white px-4 py-2 rounded-full shadow-card hover:bg-gray-700 transition-all flex items-center gap-2"
+					className="bg-gray-800 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-full shadow-card hover:bg-gray-700 transition-all flex items-center gap-2 text-small"
 					title="Reiniciar demonstração"
 				>
 					<RotateCcw className="w-4 h-4" />

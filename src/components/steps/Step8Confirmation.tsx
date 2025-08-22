@@ -49,17 +49,17 @@ export const Step8Confirmation = () => {
             transition={{ delay: 0.2 }}
             className="text-center space-y-4"
           >
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="title-section text-foreground">
               Certo... então você é <span className="text-primary">{userData.nome}</span>, 
               atende em sua clínica, e parece que faz bastante{" "}
               <span className="text-primary">{userData.especialidade}</span>? 👀
             </h2>
 
-            <p className="text-lg text-foreground">
+            <p className="text-content-medium text-foreground">
               Alias, seu perfil é incrível! Vi que você tem ótimos resultados.
             </p>
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-small text-muted-foreground">
               Quer ajustar algo? Clique nos campos e edite.
             </p>
           </motion.div>
@@ -72,20 +72,20 @@ export const Step8Confirmation = () => {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="p-3 rounded-xl bg-muted/50 border border-border">
-                <span className="text-sm text-muted-foreground">Nome:</span>
-                <p className="font-medium text-foreground">{userData.nome}</p>
+                <span className="text-small text-muted-foreground">Nome:</span>
+                <p className="text-content-medium text-foreground">{userData.nome}</p>
               </div>
               <div className="p-3 rounded-xl bg-muted/50 border border-border">
-                <span className="text-sm text-muted-foreground">Especialidade:</span>
-                <p className="font-medium text-foreground">{userData.especialidade}</p>
+                <span className="text-small text-muted-foreground">Especialidade:</span>
+                <p className="text-content-medium text-foreground">{userData.especialidade}</p>
               </div>
               <div className="p-3 rounded-xl bg-muted/50 border border-border">
-                <span className="text-sm text-muted-foreground">Email:</span>
-                <p className="font-medium text-foreground">{userData.email}</p>
+                <span className="text-small text-muted-foreground">Email:</span>
+                <p className="text-content-medium text-foreground">{userData.email}</p>
               </div>
               <div className="p-3 rounded-xl bg-muted/50 border border-border">
-                <span className="text-sm text-muted-foreground">WhatsApp:</span>
-                <p className="font-medium text-foreground">{userData.whatsapp}</p>
+                <span className="text-small text-muted-foreground">WhatsApp:</span>
+                <p className="text-content-medium text-foreground">{userData.whatsapp}</p>
               </div>
             </div>
           </motion.div>

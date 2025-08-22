@@ -58,7 +58,8 @@ export const Step2Modal = () => {
 
   // WhatsApp Background Component (non-interactive) - identical to Step10
   const WhatsAppBackground = () => (
-    <div className="chat-root pointer-events-none">
+    <div className="chat-preview-container">
+      <div className="chat-root pointer-events-none">
       {/* Header com mesmo comportamento do Step10 */}
       <div className="chat-header bg-[#075e54] text-white p-4 flex items-center gap-3 shadow-lg">
         <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-black">
@@ -112,6 +113,7 @@ export const Step2Modal = () => {
         </div>
       </div>
     </div>
+    </div>
   );
 
   return (
@@ -159,7 +161,7 @@ export const Step2Modal = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-2xl font-bold text-foreground"
+                  className="title-section text-foreground"
                 >
                   Bora ver na prática?
                 </motion.h2>
@@ -170,11 +172,11 @@ export const Step2Modal = () => {
                   transition={{ delay: 0.3 }}
                   className="space-y-4 text-foreground"
                 >
-                  <p className="text-lg leading-relaxed">
+                  <p className="text-content-medium leading-relaxed">
                     Em instantes, você poderá simular uma conversa no WhatsApp: você faz o papel do paciente e a I.A responde como se fosse sua clínica.
                   </p>
 
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-small text-muted-foreground">
                     Veja a qualidade das respostas, condução de vendas e o agendamento automático.
                   </p>
                 </motion.div>

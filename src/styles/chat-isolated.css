@@ -1,0 +1,299 @@
+/* 
+=======================
+ISOLATED CHAT STYLES
+=======================
+Estes estilos são específicos para o chat (Step9PreChat.tsx, Step10WhatsApp.tsx e preview no Step2Modal.tsx)
+NÃO ALTERE NADA AQUI - O CHAT FUNCIONA PERFEITAMENTE
+Isolamos estes estilos para garantir que mudanças globais na UI não afetem o chat
+*/
+
+/* === ESTILOS DO STEP2MODAL WHATSAPP PREVIEW === */
+
+/* WhatsApp preview no Step2Modal - mantém fontes originais */
+.chat-preview-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.chat-preview-container * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.chat-preview-container .chat-root {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #e5ddd5;
+  overscroll-behavior: contain;
+}
+
+.chat-preview-container .chat-header {
+  background: #075e54;
+  color: white;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 30;
+}
+
+.chat-preview-container .chat-messages {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 1rem;
+  padding-bottom: 5rem;
+}
+
+.chat-preview-container .chat-inputbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #f0f0f0;
+  border-top: 1px solid #e0e0e0;
+  padding: 1rem;
+  z-index: 50;
+}
+
+/* === ESTILOS DO STEP9PRECHAT === */
+
+/* Step9PreChat mantém suas fontes originais */
+.prechat-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.prechat-container * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* === ESTILOS DO STEP10WHATSAPP === */
+
+/* Step10WhatsApp (chat real) mantém suas fontes e comportamento */
+.chat-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+.chat-container * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* Travar scroll global e evitar "duplo scroll" no documento - APENAS NO CHAT */
+.chat-active-body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* Raiz do chat ocupa a viewport e fica ancorada (evita scroll do body no iOS) */
+.chat-root {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #e5ddd5;
+  overscroll-behavior: contain;
+}
+
+/* ÚNICO scroll da tela */
+.chat-messages {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+}
+
+/* Header sticky estável dentro do container com scroll */
+.chat-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  will-change: transform;
+}
+
+/* Barra de input fixa e "colada" ao teclado (via bottom dinam.) */
+.chat-inputbar {
+  position: fixed;
+  left: 0; 
+  right: 0;
+  z-index: 50;
+  transform: translateZ(0);
+  will-change: transform;
+  padding: 16px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+/* Controles globais: não atrapalhar o teclado; sobem junto via var --kb */
+.global-controls {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + var(--kb, 0px));
+  z-index: 60;
+}
+
+/* Opcional: em telas pequenas, esconder os controles globais */
+@media (max-width: 640px) {
+  .global-controls { 
+    display: none; 
+  }
+}
+
+/* === CHATSCOPE OVERRIDES === */
+
+/* WhatsApp-like customizations for ChatScope */
+
+/* Main container adjustments for mobile */
+.cs-main-container {
+  height: 100vh !important;
+  height: 100dvh !important;
+  width: 100% !important;
+  position: relative !important;
+}
+
+/* Message list container */
+.cs-message-list {
+  background-color: #e5ddd5 !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d0d0d0' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") !important;
+}
+
+/* Conversation header - WhatsApp green */
+.cs-conversation-header {
+  background-color: #075e54 !important;
+  color: white !important;
+  padding: 1rem !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+}
+
+.cs-conversation-header__content {
+  color: white !important;
+}
+
+.cs-conversation-header__user-name {
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.cs-conversation-header__info {
+  color: #90EE90 !important;
+  font-size: 0.875rem !important;
+}
+
+/* Messages styling */
+.cs-message--incoming .cs-message__content {
+  background-color: white !important;
+  color: black !important;
+  border-radius: 18px !important;
+  border-bottom-left-radius: 4px !important;
+  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13) !important;
+}
+
+.cs-message--outgoing .cs-message__content {
+  background-color: #dcf8c6 !important;
+  color: black !important;
+  border-radius: 18px !important;
+  border-bottom-right-radius: 4px !important;
+  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13) !important;
+}
+
+/* Message time */
+.cs-message__sent-time {
+  color: #667781 !important;
+  font-size: 0.75rem !important;
+}
+
+/* Message input container */
+.cs-message-input__content-editor-wrapper {
+  background-color: white !important;
+  border-radius: 24px !important;
+  margin: 0.5rem !important;
+}
+
+.cs-message-input {
+  background-color: #f0f0f0 !important;
+  border-top: 1px solid #e0e0e0 !important;
+  padding: 0.5rem !important;
+}
+
+.cs-message-input__content-editor {
+  min-height: 40px !important;
+  max-height: 120px !important;
+  padding: 10px 12px !important;
+  font-size: 16px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* Send button */
+.cs-button--send {
+  color: #075e54 !important;
+  background: none !important;
+  border: none !important;
+}
+
+.cs-button--send:disabled {
+  color: #999 !important;
+}
+
+/* Typing indicator */
+.cs-typing-indicator {
+  background-color: white !important;
+  border-radius: 18px !important;
+  border-bottom-left-radius: 4px !important;
+  padding: 0.75rem 1rem !important;
+  margin: 0.5rem !important;
+}
+
+/* Mobile viewport fixes */
+@supports (height: 100dvh) {
+  .cs-main-container,
+  .cs-chat-container {
+    height: 100dvh !important;
+  }
+}
+
+/* Fix for iOS Safari keyboard */
+@supports (-webkit-touch-callout: none) {
+  .cs-message-input {
+    position: sticky !important;
+    bottom: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+  
+  .cs-main-container {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
+
+/* Ensure proper scrolling on mobile */
+.cs-message-list__scroll-wrapper {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+
+/* Avatar styling */
+.cs-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+}
+
+/* Remove default focus outlines for better mobile UX */
+.cs-message-input__content-editor:focus {
+  outline: none !important;
+}
+
+/* Ensure messages don't get too wide on tablets */
+.cs-message__content {
+  max-width: 80% !important;
+}
+
+@media (min-width: 768px) {
+  .cs-message__content {
+    max-width: 60% !important;
+  }
+}

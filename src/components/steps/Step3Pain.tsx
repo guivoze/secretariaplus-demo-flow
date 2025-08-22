@@ -25,7 +25,7 @@ export const Step3Pain = () => {
           y: 0
         }} transition={{
           delay: 0.1
-        }} className="text-3xl font-bold text-foreground">
+        }} className="title-section text-foreground">
             A gente sabe como é frustrante...
           </motion.h1>
 
@@ -37,7 +37,7 @@ export const Step3Pain = () => {
           y: 0
         }} transition={{
           delay: 0.2
-        }} className="text-lg text-foreground leading-relaxed">
+        }} className="text-content-medium text-foreground leading-relaxed">
             Investir na técnica, posicionamento, entregar o melhor resultado clínico... mas deixar de crescer por incompetência de uma secretária no WhatsApp
           </motion.p>
 
@@ -47,7 +47,7 @@ export const Step3Pain = () => {
             transition={{ delay: 0.3, duration: 0.4 }}
           >
             <CustomCard variant="bordered" className="bg-primary/10 border-primary">
-              <p className="text-xl font-semibold text-foreground">
+              <p className="title-sub text-foreground">
                 72% dos seus pacientes ou leads VÃO embora só por que você demora mais de 3 minutos para responder
               </p>
             </CustomCard>
@@ -61,7 +61,7 @@ export const Step3Pain = () => {
           y: 0
         }} transition={{
           delay: 0.4
-        }} className="font-semibold text-slate-950 text-lg">
+        }} className="text-content-medium font-semibold text-slate-950">
             isso é praticamente rasgar $$$
           </motion.p>
 

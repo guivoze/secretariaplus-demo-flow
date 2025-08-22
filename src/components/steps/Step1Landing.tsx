@@ -44,33 +44,33 @@ export const Step1Landing = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
+    <div className="container-responsive gradient-bg">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-md"
+        className="content-responsive max-w-md"
       >
-        <CustomCard variant="elevated" className="text-center space-y-4 p-6">
+        <CustomCard variant="elevated" className="text-center space-y-6 p-6">
           {/* Logo */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.4 }}
           >
-            <h1 className="text-2xl font-bold text-foreground mb-2">
+            <h1 className="title-section text-foreground mb-2">
               SecretáriaPlus
             </h1>
             <div className="w-16 h-1 bg-primary mx-auto rounded-full" />
           </motion.div>
 
           {/* Main content */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-foreground leading-tight">
+          <div className="space-y-6">
+            <h2 className="title-sub text-foreground leading-tight">
               Teste gratuitamente e veja a I.A agendar consultas no piloto automático. Preparado?
             </h2>
             
-            <p className="text-muted-foreground">
+            <p className="text-content text-muted-foreground">
               Insira o @ do instagram profissional para iniciar
             </p>
 
@@ -105,7 +105,7 @@ export const Step1Landing = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-sm text-muted-foreground"
+            className="text-small text-muted-foreground"
           >
             <span className="text-primary font-semibold animate-pulse-slow">
               {liveCount}

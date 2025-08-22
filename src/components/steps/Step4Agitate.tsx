@@ -19,7 +19,7 @@ export const Step4Agitate = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-xl text-foreground leading-relaxed"
+            className="text-content-medium text-foreground leading-relaxed"
           >
             Mas... se o problema maior fosse só o tempo de resposta, você colocaria um bot pra atender os leads e resolveria o problema.
           </motion.p>
@@ -37,7 +37,7 @@ export const Step4Agitate = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="text-xl text-foreground leading-relaxed font-medium"
+            className="text-content-medium text-foreground leading-relaxed font-medium"
           >
             Só que.. você <span className="font-bold text-primary">SABE</span> o quanto um paciente de alto valor <span className="font-bold text-primary">PRECISA</span> de um atendimento vip e humano - respeitando um script persuasivo para maximizar seus agendamentos.
           </motion.p>

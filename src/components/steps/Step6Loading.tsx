@@ -174,7 +174,7 @@ export const Step6Loading = () => {
               transition={{ delay: 0.4, duration: 0.6 }}
               className="flex items-center justify-center gap-1"
             >
-              <span className="text-sm text-gray-500">
+              <span className="text-small text-gray-500">
                 {userData.aiInsights.name}
               </span>
               <i className="fa-solid fa-sparkles text-sm text-gray-500"></i>
@@ -188,7 +188,7 @@ export const Step6Loading = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="text-foreground font-medium"
+              className="text-content-medium text-foreground"
             >
               {currentStepIndex < loadingSteps.length ? loadingSteps[currentStepIndex] : "Concluído!"}
             </motion.div>

@@ -46,7 +46,7 @@ export const Step2PersonalizationForm = () => {
       >
         <CustomCard variant="elevated" className="space-y-6">
           <div className="text-center space-y-2">
-            <h2 className="text-xl font-bold text-foreground">
+            <h2 className="title-sub text-foreground">
               Pra gente personalizar seu teste 🤩
             </h2>
           </div>
@@ -66,7 +66,7 @@ export const Step2PersonalizationForm = () => {
             />
 
             <div className="space-y-3">
-              <label className="text-sm font-medium text-foreground">
+              <label className="text-content-medium text-foreground">
                 Qual sua área de atuação principal?
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -77,7 +77,7 @@ export const Step2PersonalizationForm = () => {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setFormData({ ...formData, especialidade: specialty })}
                     className={`
-                      p-3 rounded-xl border-2 text-sm font-medium transition-all duration-200
+                      p-3 rounded-xl border-2 text-content font-medium transition-all duration-200
                       ${formData.especialidade === specialty
                         ? 'border-gray-800 bg-gray-50 text-foreground'
                         : 'border-gray-200 hover:border-gray-400 text-muted-foreground hover:text-foreground'
