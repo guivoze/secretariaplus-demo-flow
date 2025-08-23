@@ -3,9 +3,14 @@ import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 import { CreditCard, Headphones, UserCheck, CheckCircle, Sparkles } from "lucide-react";
+import { useEffect } from "react";
 
 export const Step13Features = () => {
   const { nextStep } = useSupabaseDemo();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-start justify-center p-4 pt-8">
