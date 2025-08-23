@@ -123,88 +123,206 @@ export const Step6Loading = () => {
   }, [posts]);
 
   return (
-    <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Instagram posts slideshow background */}
-      <div className="absolute inset-0 opacity-32">
+    <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated particles background */}
+      <div className="absolute inset-0">
+        <motion.div
+          className="absolute inset-0 opacity-20"
+          animate={{
+            background: [
+              "radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%)",
+              "radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%)",
+              "radial-gradient(circle at 40% 80%, rgba(168, 85, 247, 0.4) 0%, transparent 50%)"
+            ]
+          }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      {/* Instagram posts slideshow background with enhanced effects */}
+      <div className="absolute inset-0 opacity-10">
         <motion.div
           key={currentPostIndex}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
+          initial={{ opacity: 0, scale: 1.2, rotate: -2 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          exit={{ opacity: 0, scale: 0.8, rotate: 2 }}
+          transition={{ duration: 2, ease: "easeOut" }}
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${posts[currentPostIndex].image})`,
-            filter: 'blur(3px)'
+            filter: 'blur(8px) brightness(0.7) contrast(1.2)'
           }}
         />
       </div>
 
+      {/* Floating elements */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full max-w-md relative z-10"
+        animate={{ y: [-10, 10, -10] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-1/4 left-1/4 w-2 h-2 bg-white/30 rounded-full"
+      />
+      <motion.div
+        animate={{ y: [10, -10, 10] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute top-1/3 right-1/4 w-1 h-1 bg-purple-300/40 rounded-full"
+      />
+      <motion.div
+        animate={{ y: [-5, 15, -5] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        className="absolute bottom-1/3 left-1/3 w-1.5 h-1.5 bg-white/20 rounded-full"
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="w-full max-w-sm relative z-10"
       >
-        <CustomCard variant="elevated" className="text-center space-y-6">
+        <motion.div
+          className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 text-center space-y-8 shadow-2xl"
+          animate={{ boxShadow: [
+            "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            "0 25px 50px -12px rgba(168, 85, 247, 0.25)",
+            "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+          ]}}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {/* Enhanced profile section */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="w-16 h-16 bg-gray-800 rounded-full mx-auto flex items-center justify-center overflow-hidden"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.8, ease: "backOut" }}
+            className="relative"
           >
-            {profileImage ? (
-              <img 
-                src={profileImage} 
-                alt="Profile" 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-lg font-medium text-white">
-                {userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
-              </span>
-            )}
+            <motion.div
+              className="w-20 h-20 mx-auto relative"
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            >
+              {/* Glowing ring */}
+              <motion.div
+                className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 p-1"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              >
+                <div className="w-full h-full rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden">
+                  {profileImage ? (
+                    <img 
+                      src={profileImage} 
+                      alt="Profile" 
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xl font-bold text-white">
+                      {userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
+                    </span>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Sparkle effects around profile */}
+            <motion.div
+              animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-2 -right-2 text-yellow-300"
+            >
+              ✨
+            </motion.div>
+            <motion.div
+              animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              className="absolute -bottom-1 -left-1 text-purple-300"
+            >
+              ⭐
+            </motion.div>
           </motion.div>
 
-          {/* Nome da pessoa com sparkles */}
+          {/* Enhanced name section */}
           {userData.aiInsights?.name && (
             <motion.div
-              initial={{ opacity: 0, y: 5 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="flex items-center justify-center gap-1"
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="flex items-center justify-center gap-2"
             >
-              <span className="text-small text-gray-500">
+              <motion.span 
+                className="text-lg font-semibold text-white"
+                animate={{ textShadow: [
+                  "0 0 10px rgba(168, 85, 247, 0.5)",
+                  "0 0 20px rgba(168, 85, 247, 0.8)",
+                  "0 0 10px rgba(168, 85, 247, 0.5)"
+                ]}}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
                 {userData.aiInsights.name}
-              </span>
-              <i className="fa-solid fa-sparkles text-sm text-gray-500"></i>
+              </motion.span>
+              <motion.i 
+                className="fa-solid fa-sparkles text-yellow-300"
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              />
             </motion.div>
           )}
 
-          <div className="h-6 flex items-center justify-center">
+          {/* Enhanced loading text */}
+          <div className="h-8 flex items-center justify-center">
             <motion.div
               key={currentStepIndex}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="text-content-medium text-foreground"
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 1.1 }}
+              transition={{ duration: 0.6, ease: "backOut" }}
+              className="text-base font-medium text-white/90"
             >
               {currentStepIndex < loadingSteps.length ? loadingSteps[currentStepIndex] : "Concluído!"}
             </motion.div>
           </div>
 
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          {/* Enhanced progress bar */}
+          <div className="space-y-3">
+            <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400"
+                initial={{ width: 0 }}
+                animate={{ width: `${(currentStepIndex / loadingSteps.length) * 100}%` }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              />
+            </div>
+            
+            {/* Progress percentage */}
             <motion.div
-              className="bg-gray-800 h-2 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${(currentStepIndex / loadingSteps.length) * 100}%` }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            />
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="text-xs text-white/70 font-medium"
+            >
+              {Math.round((currentStepIndex / loadingSteps.length) * 100)}% completo
+            </motion.div>
           </div>
 
-
-        </CustomCard>
+          {/* Loading dots animation */}
+          <motion.div
+            className="flex justify-center gap-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+          >
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="w-2 h-2 bg-white/60 rounded-full"
+                animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  delay: i * 0.2,
+                  ease: "easeInOut"
+                }}
+              />
+            ))}
+          </motion.div>
+        </motion.div>
       </motion.div>
     </div>
   );
