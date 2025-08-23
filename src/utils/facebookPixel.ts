@@ -45,6 +45,10 @@ export const trackLeadConversionApi = async (userData: {
   email: string;
   whatsapp: string;
   especialidade: string;
+  eventID?: string;
+  fbp?: string | null;
+  fbc?: string | null;
+  external_id?: string | null;
   faturamento?: string;
   followers?: string;
   posts?: string;
@@ -113,12 +117,19 @@ export const trackLeadConversionApi = async (userData: {
     lead_quality: assessLeadQuality(userData),
     
     // Dados adicionais para riqueza
-    external_id: `${userData.instagram}_${Date.now()}`,
+    external_id: userData.external_id || `${userData.instagram}_${Date.now()}`,
     content_language: 'pt_BR',
     delivery_category: 'home_delivery',
   };
 
-  const parameters = { ...baseParameters, ...userParameters };
+  const identificationParameters = {
+    eventID: userData.eventID,
+    fbp: userData.fbp,
+    fbc: userData.fbc,
+    external_id: userData.external_id,
+  };
+
+  const parameters = { ...baseParameters, ...userParameters, ...identificationParameters };
 
   return await trackConversionApi('Lead', parameters);
 };
