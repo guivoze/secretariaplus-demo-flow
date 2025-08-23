@@ -100,7 +100,7 @@ export const Step11Calendar = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-lg my-8"
+        className="w-full max-w-lg my-12 pb-8"
       >
         <CustomCard variant="elevated" className="space-y-4 p-4 sm:p-6">
           <motion.div

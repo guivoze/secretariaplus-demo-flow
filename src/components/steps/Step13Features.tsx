@@ -13,7 +13,7 @@ export const Step13Features = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-md my-8"
+        className="w-full max-w-md my-12 pb-8"
       >
         <CustomCard variant="elevated" className="space-y-6">
           {/* Header */}

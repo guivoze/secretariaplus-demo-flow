@@ -38,7 +38,7 @@ Quero implementar na minha clínica!`;
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-3xl my-8"
+        className="w-full max-w-3xl my-12 pb-12"
       >
         <CustomCard variant="elevated" className="text-center space-y-8">
           {/* Confetti effect */}
