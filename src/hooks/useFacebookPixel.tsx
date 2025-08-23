@@ -30,6 +30,12 @@ export const useFacebookPixel = () => {
     procedures?: string[];
     aiInsights?: any;
   }) => {
+    // Filtrar leads de "Estética Geral" - não são considerados leads válidos
+    if (userData.especialidade === 'Estética Geral (salão, micro, make)') {
+      console.log('[Facebook Pixel] Lead filtrado - especialidade "Estética Geral" não é considerada lead válido');
+      return;
+    }
+
     // Dados básicos do evento
     const baseParameters = {
       content_name: 'Demo SecretáriaPlus - Free Test',
@@ -128,9 +134,9 @@ export const useFacebookPixel = () => {
     const mediumValue = ['Dermato', 'Odonto'];
     const lowValue = ['Estética Geral (salão, micro, make)'];
     
+    if (lowValue.includes(especialidade)) return 'Filtered Out';
     if (highValue.includes(especialidade)) return 'High Value';
     if (mediumValue.includes(especialidade)) return 'Medium Value';
-    if (lowValue.includes(especialidade)) return 'Standard Value';
     return 'Unknown';
   };
 
