@@ -31,8 +31,186 @@
     
     <link rel="canonical" href="https://flow.secretariaplus.com.br" />
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+
+    <!-- Facebook Pixel Code - Versão Enriquecida -->
+    <script>
+      // Função auxiliar para gerar IDs únicos (para deduplicação)
+      window.generateEventId = function () {
+        return 'evt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      };
+
+      // Função para obter/criar external_id persistente
+      window.getExternalId = function () {
+        let externalId = localStorage.getItem('sp_external_id');
+        if (!externalId) {
+          externalId =
+            'sp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+          localStorage.setItem('sp_external_id', externalId);
+        }
+        return externalId;
+      };
+
+      // Função para obter fbp cookie
+      window.getFbp = function () {
+        const match = document.cookie.match(/_fbp=([^;]+)/);
+        return match ? match[1] : null;
+      };
+
+      // Função para obter fbc cookie (Facebook Click ID)
+      window.getFbc = function () {
+        const match = document.cookie.match(/_fbc=([^;]+)/);
+        if (match) return match[1];
+
+        // Se não existe cookie, tenta pegar do URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const fbclid = urlParams.get('fbclid');
+        if (fbclid) {
+          const fbc = 'fb.1.' + Date.now() + '.' + fbclid;
+          // Salva o fbc em cookie para uso futuro
+          document.cookie =
+            '_fbc=' + fbc + '; max-age=' + 90 * 24 * 60 * 60 + '; path=/';
+          return fbc;
+        }
+        return null;
+      };
+
+      // Função para normalizar telefone no formato E.164
+      function normalizePhone(phone) {
+        const digits = phone.replace(/\D/g, '');
+        return digits.startsWith('55') ? '+' + digits : '+55' + digits;
+      }
+
+      // Facebook Pixel - Código Base com Advanced Matching
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+      // Inicializa com Advanced Matching vazio (será preenchido dinamicamente)
+      fbq('init', '1245486659923087', {
+        external_id: window.getExternalId(),
+      });
+
+      // Função global para atualizar Advanced Matching quando tivermos dados do usuário
+      window.updateFacebookAdvancedMatching = function (userData) {
+        if (userData) {
+          fbq('init', '1245486659923087', {
+            em: userData.email
+              ? userData.email.toLowerCase().trim()
+              : undefined,
+            ph: userData.whatsapp
+              ? normalizePhone(userData.whatsapp)
+              : undefined,
+            fn: userData.nome
+              ? userData.nome.split(' ')[0].toLowerCase().trim()
+              : undefined,
+            ln: userData.nome
+              ? userData.nome
+                  .split(' ')
+                  .slice(1)
+                  .join(' ')
+                  .toLowerCase()
+                  .trim()
+              : undefined,
+            external_id: window.getExternalId(),
+          });
+        }
+      };
+
+      const now = new Date();
+      const days = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
+      const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+
+      function getTimeInterval(hour) {
+        if (hour >= 0 && hour < 6) return '0-6';
+        if (hour >= 6 && hour < 12) return '6-12';
+        if (hour >= 12 && hour < 18) return '12-18';
+        return '18-24';
+      }
+
+      function getTrafficSource() {
+        const referrer = document.referrer.toLowerCase();
+        if (!referrer) return 'Direct';
+        if (referrer.includes('google')) return 'Google';
+        if (referrer.includes('facebook')) return 'Facebook';
+        if (referrer.includes('instagram')) return 'Instagram';
+        if (referrer.includes('vercel')) return 'Vercel';
+        return 'Referral';
+      }
+
+      // Dispara PageView enriquecido
+      fbq('track', 'PageView', {
+        eventID: window.generateEventId(),
+        external_id: window.getExternalId(),
+        fbp: window.getFbp(),
+        fbc: window.getFbc(),
+        content_name: 'SecretáriaPlus - Free Test',
+        content_category: 'Demo Flow',
+        content_type: 'product',
+        content_ids: ['demo_secretariaplus'],
+        value: 0.0,
+        currency: 'BRL',
+        event_day: days[now.getDay()],
+        event_day_in_month: now.getDate().toString(),
+        event_month: months[now.getMonth()],
+        event_time: now.getTime(),
+        event_time_interval: getTimeInterval(now.getHours()),
+        traffic_source: getTrafficSource(),
+        plugin: 'SecretáriaPlus Demo',
+        plugin_info: 'https://flow.secretariaplus.com.br',
+        page_title: document.title,
+        page_id: 'landing',
+        content_language: 'pt_BR',
+        country: 'BR',
+        ct: 'São Paulo',
+        st: 'SP',
+        zp: '00000-000',
+      });
+    </script>
+    <!-- End Facebook Pixel Code -->
   </head>
   <body>
+    <noscript>
+      <img
+        height="1"
+        width="1"
+        style="display:none"
+        src="https://www.facebook.com/tr?id=1245486659923087&ev=PageView&noscript=1"
+      />
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

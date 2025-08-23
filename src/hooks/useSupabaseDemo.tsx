@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { AIInsights } from '@/utils/facebookPixel';
 
 interface UserData {
   instagram: string;
@@ -36,7 +37,7 @@ interface ChatMessage {
   content: string;
   sender: 'user' | 'assistant';
   timestamp: Date;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface SupabaseDemoContextType {
@@ -53,7 +54,7 @@ interface SupabaseDemoContextType {
   isLoading: boolean;
   saveSession: () => Promise<void>;
   chatMessages: ChatMessage[];
-  addChatMessage: (content: string, sender: 'user' | 'assistant', metadata?: any) => Promise<void>;
+  addChatMessage: (content: string, sender: 'user' | 'assistant', metadata?: Record<string, unknown>) => Promise<void>;
   resetChatInMemory: () => void;
   threadId: string | null;
   setThreadId: (id: string | null) => void;
@@ -61,7 +62,7 @@ interface SupabaseDemoContextType {
   getLeadScore: () => number;
   // Session resume features
   showResumeModal: boolean;
-  foundPreviousSession: any | null;
+  foundPreviousSession: Record<string, unknown> | null;
   resumePreviousSession: () => void;
   startNewTest: () => void;
   // Appointment handed off by LLM tool
@@ -139,7 +140,7 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [dbSessionId, setDbSessionId] = useState<string | null>(null);
   const [showResumeModal, setShowResumeModal] = useState(false);
-  const [foundPreviousSession, setFoundPreviousSession] = useState<any | null>(null);
+const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, unknown> | null>(null);
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
   const [appointment, setAppointment] = useState<SupabaseDemoContextType['appointment']>(null);
   const [threadId, setThreadId] = useState<string | null>(null);
@@ -267,7 +268,7 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
             .from('demo_sessions')
             .select('id, session_id, instagram_handle')
             .eq('instagram_handle', userData.instagram)
-            .ilike('session_id', `${fingerprintPrefix}\_%`)
+            .ilike('session_id', `${fingerprintPrefix}_%`)
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
@@ -301,7 +302,7 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error('Error saving session:', error);
     }
-  }, [sessionId, userData, currentStep, dbSessionId]);
+  }, [sessionId, userData, currentStep, dbSessionId, showResumeModal]);
 
   // Auto-save when important data changes (apenas após confirmação)
   useEffect(() => {
@@ -341,8 +342,13 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
   }, [dbSessionId]);
 
   // Add chat message
-  const addChatMessage = useCallback(async (content: string, sender: 'user' | 'assistant', metadata?: any) => {
-    if (!dbSessionId) return;
+  const addChatMessage = useCallback(
+    async (
+      content: string,
+      sender: 'user' | 'assistant',
+      metadata?: Record<string, unknown>
+    ) => {
+      if (!dbSessionId) return;
     
     try {
       const messageOrder = chatMessages.length;
@@ -457,8 +463,8 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
       procedures: ['Botox', 'Preenchimento', 'Limpeza de Pele'],
       hasInstagramData: foundPreviousSession.has_instagram_data,
       realProfilePic: foundPreviousSession.real_profile_pic_url,
-      realPosts: foundPreviousSession.real_posts ? foundPreviousSession.real_posts as string[] : [],
-      aiInsights: foundPreviousSession.ai_insights as any,
+      realPosts: foundPreviousSession.real_posts ? (foundPreviousSession.real_posts as string[]) : [],
+      aiInsights: (foundPreviousSession as { ai_insights?: AIInsights }).ai_insights || null,
       instagramRequestTime: foundPreviousSession.created_at ? new Date(foundPreviousSession.created_at).getTime() : null
     };
     

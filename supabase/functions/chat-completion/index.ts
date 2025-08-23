@@ -121,7 +121,7 @@ serve(async (req)=>{
         }
       }
     ];
-    let messages = [
+    const messages = [
       {
         role: 'system',
         content: filledPrompt
@@ -244,7 +244,7 @@ serve(async (req)=>{
               // Normalização de datas antigas: se estiver no passado, ajuste para ano atual, e se ainda ficar no passado, empurre 7 dias
               const now = nowBase;
               const nowYear = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric' }).format(now);
-              let bYear = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric' }).format(base);
+              const bYear = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric' }).format(base);
               if (parseInt(bYear) < parseInt(nowYear)) {
                 // Reescreve o ano do agendamento para o ano corrente, mantendo mês/dia/hora
                 const parts = new Intl.DateTimeFormat('en-CA', {

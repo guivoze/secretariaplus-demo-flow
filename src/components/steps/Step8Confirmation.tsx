@@ -1,43 +1,10 @@
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
-import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
 
 export const Step8Confirmation = () => {
   const { userData, nextStep } = useSupabaseDemo();
-  const { trackLead } = useFacebookPixel();
-
-  // Disparar evento "Lead" quando todos os dados estiverem completos
-  useEffect(() => {
-    const fireLeadEvent = async () => {
-      if (
-        userData.instagram &&
-        userData.nome &&
-        userData.email &&
-        userData.whatsapp &&
-        userData.especialidade
-      ) {
-        console.log('[Facebook Pixel] Todos os dados completos, disparando evento Lead');
-        await trackLead({
-          instagram: userData.instagram,
-          nome: userData.nome,
-          email: userData.email,
-          whatsapp: userData.whatsapp,
-          especialidade: userData.especialidade,
-          faturamento: userData.faturamento,
-          followers: userData.followers,
-          posts: userData.posts,
-          clinicName: userData.clinicName,
-          procedures: userData.procedures,
-          aiInsights: userData.aiInsights
-        });
-      }
-    };
-
-    fireLeadEvent();
-  }, [userData, trackLead]);
 
   const procedureImages = [
     "/imgs/crm.webp",

@@ -3,15 +3,12 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { CustomInput } from "@/components/ui/custom-input";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
+import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { motion } from "framer-motion";
 
 export const Step7Form = () => {
-  const {
-    userData,
-    setUserData,
-    nextStep
-  } = useSupabaseDemo();
-  // Removido useFacebookPixel para evitar duplicação
+  const { userData, setUserData, nextStep } = useSupabaseDemo();
+  const { trackLead } = useFacebookPixel();
   
   const [formData, setFormData] = useState({
     email: userData.email || '',
@@ -35,13 +32,24 @@ export const Step7Form = () => {
   
   const handleSubmit = async () => {
     if (isFormValid) {
-      setUserData({
+      const mergedData = {
+        ...userData,
         email: formData.email,
-        whatsapp: formData.whatsapp
+        whatsapp: formData.whatsapp,
+      };
+
+      setUserData({
+        email: mergedData.email,
+        whatsapp: mergedData.whatsapp,
       });
 
-      // Removido disparo do evento Lead - será feito apenas no Step8Confirmation
-      // para evitar duplicação
+      await trackLead({
+        instagram: mergedData.instagram,
+        nome: mergedData.nome,
+        email: mergedData.email,
+        whatsapp: mergedData.whatsapp,
+        especialidade: mergedData.especialidade,
+      });
 
       nextStep();
     }

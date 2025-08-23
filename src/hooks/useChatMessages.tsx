@@ -8,9 +8,12 @@ export const useChatMessages = () => {
     await addChatMessage(message, 'user');
   }, [addChatMessage]);
 
-  const sendAssistantMessage = useCallback(async (message: string, metadata?: any) => {
-    await addChatMessage(message, 'assistant', metadata);
-  }, [addChatMessage]);
+  const sendAssistantMessage = useCallback(
+    async (message: string, metadata?: Record<string, unknown>) => {
+      await addChatMessage(message, 'assistant', metadata);
+    },
+    [addChatMessage]
+  );
 
   const getPromptForAPI = useCallback(() => {
     const customPrompt = generateCustomPrompt();

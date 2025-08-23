@@ -1,7 +1,8 @@
 // Configuração do Facebook Pixel
 export const FACEBOOK_PIXEL_CONFIG = {
   pixelId: '1245486659923087',
-  conversionApiToken: 'EAARpggKMPi0BPdxUqL28mTFJlUIlkFmZBcWH5NTm0pZAYg15EMB3LX6rlgK1ZBDXpvZBAPB1MQoJMKrGTgodAXh74quZCGXAnZA33VPaHu3SwZAlQzPB8CdWBe0C0ZCKJqXdr3gU5trgUUcsihEReeDE0dZClZCWuQNCnMeYqrx8Nn5gQC9srjD6Iy0oFARLnTfks5RQZDZD',
+  conversionApiToken:
+    'EAARpggKMPi0BPdxUqL28mTFJlUIlkFmZBcWH5NTm0pZAYg15EMB3LX6rlgK1ZBDXpvZBAPB1MQoJMKrGTgodAXh74quZCGXAnZA33VPaHu3SwZAlQzPB8CdWBe0C0ZCKJqXdr3gU5trgUUcsihEReeDE0dZClZCWuQNCnMeYqrx8Nn5gQC9srjD6Iy0oFARLnTfks5RQZDZD',
   testEventCode: null, // Adicione aqui se tiver um código de teste
   // Configurações adicionais
   enableEnhancedEcommerce: true,
@@ -9,8 +10,45 @@ export const FACEBOOK_PIXEL_CONFIG = {
   enableAutomaticAdvancedMatching: true,
 };
 
+// Tipagem de dados do usuário utilizados nos eventos de Lead
+export interface AIInsights {
+  name?: string;
+  where?: string;
+  procedure1?: string;
+  procedure2?: string;
+  procedure3?: string;
+}
+
+export interface LeadUserData {
+  instagram: string;
+  nome: string;
+  email: string;
+  whatsapp: string;
+  especialidade: string;
+  eventID?: string;
+  fbp?: string | null;
+  fbc?: string | null;
+  external_id?: string | null;
+  faturamento?: string;
+  followers?: string;
+  posts?: string;
+  clinicName?: string;
+  procedures?: string[];
+  aiInsights?: AIInsights;
+}
+
+interface TrackResult {
+  success: boolean;
+  response?: unknown;
+  error?: unknown;
+  reason?: string;
+}
+
 // Função para disparar evento via Conversion API (server-side)
-export const trackConversionApi = async (eventName: string, parameters: Record<string, any>) => {
+export const trackConversionApi = async (
+  eventName: string,
+  parameters: Record<string, unknown>
+): Promise<TrackResult> => {
   try {
     const response = await fetch('/api/facebook-conversion', {
       method: 'POST',
@@ -28,10 +66,10 @@ export const trackConversionApi = async (eventName: string, parameters: Record<s
     if (response.ok) {
       console.log(`[Facebook Conversion API] Evento "${eventName}" enviado com sucesso`);
       return { success: true, response: await response.json() };
-    } else {
-      console.error(`[Facebook Conversion API] Erro ao enviar evento "${eventName}"`);
-      return { success: false, error: await response.json() };
     }
+
+    console.error(`[Facebook Conversion API] Erro ao enviar evento "${eventName}"`);
+    return { success: false, error: await response.json() };
   } catch (error) {
     console.error('[Facebook Conversion API] Erro na requisição:', error);
     return { success: false, error };
@@ -39,19 +77,9 @@ export const trackConversionApi = async (eventName: string, parameters: Record<s
 };
 
 // Função para disparar evento "Lead" via Conversion API com dados enriquecidos
-export const trackLeadConversionApi = async (userData: {
-  instagram: string;
-  nome: string;
-  email: string;
-  whatsapp: string;
-  especialidade: string;
-  faturamento?: string;
-  followers?: string;
-  posts?: string;
-  clinicName?: string;
-  procedures?: string[];
-  aiInsights?: any;
-}) => {
+export const trackLeadConversionApi = async (
+  userData: LeadUserData
+): Promise<TrackResult> => {
   // Filtrar leads de "Estética Geral" - não são considerados leads válidos
   if (userData.especialidade === 'Estética Geral (salão, micro, make)') {
     console.log('[Facebook Conversion API] Lead filtrado - especialidade "Estética Geral" não é considerada lead válido');
@@ -89,11 +117,11 @@ export const trackLeadConversionApi = async (userData: {
     procedures: userData.procedures?.join(', ') || 'N/A',
     
     // Insights de IA para segmentação avançada
-    ai_insights_name: userData.aiInsights?.name || 'N/A',
-    ai_insights_location: userData.aiInsights?.where || 'N/A',
-    ai_insights_procedure1: userData.aiInsights?.procedure1 || 'N/A',
-    ai_insights_procedure2: userData.aiInsights?.procedure2 || 'N/A',
-    ai_insights_procedure3: userData.aiInsights?.procedure3 || 'N/A',
+  ai_insights_name: userData.aiInsights?.name || 'N/A',
+  ai_insights_location: userData.aiInsights?.where || 'N/A',
+  ai_insights_procedure1: userData.aiInsights?.procedure1 || 'N/A',
+  ai_insights_procedure2: userData.aiInsights?.procedure2 || 'N/A',
+  ai_insights_procedure3: userData.aiInsights?.procedure3 || 'N/A',
     
     // Dados de contexto para atribuição
     lead_source: 'Instagram Demo',
@@ -113,12 +141,19 @@ export const trackLeadConversionApi = async (userData: {
     lead_quality: assessLeadQuality(userData),
     
     // Dados adicionais para riqueza
-    external_id: `${userData.instagram}_${Date.now()}`,
+    external_id: userData.external_id || `${userData.instagram}_${Date.now()}`,
     content_language: 'pt_BR',
     delivery_category: 'home_delivery',
   };
 
-  const parameters = { ...baseParameters, ...userParameters };
+  const identificationParameters = {
+    eventID: userData.eventID,
+    fbp: userData.fbp,
+    fbc: userData.fbc,
+    external_id: userData.external_id,
+  };
+
+  const parameters = { ...baseParameters, ...userParameters, ...identificationParameters };
 
   return await trackConversionApi('Lead', parameters);
 };
@@ -149,7 +184,7 @@ function getSpecialtyTier(especialidade: string, faturamento?: string): string {
 }
 
 // Função para calcular score do lead
-function calculateLeadScore(userData: any): number {
+function calculateLeadScore(userData: LeadUserData): number {
   let score = 0;
   
   // Base score
@@ -181,7 +216,7 @@ function calculateLeadScore(userData: any): number {
 }
 
 // Função para avaliar qualidade do lead
-function assessLeadQuality(userData: any): string {
+function assessLeadQuality(userData: LeadUserData): string {
   const score = calculateLeadScore(userData);
   
   if (score >= 80) return 'Premium';
@@ -192,7 +227,8 @@ function assessLeadQuality(userData: any): string {
 
 // Função para verificar se o pixel está carregado
 export const isPixelLoaded = (): boolean => {
-  return typeof window !== 'undefined' && typeof (window as any).fbq === 'function';
+  return typeof window !== 'undefined' &&
+    typeof (window as { fbq?: unknown }).fbq === 'function';
 };
 
 // Função para aguardar o pixel carregar
