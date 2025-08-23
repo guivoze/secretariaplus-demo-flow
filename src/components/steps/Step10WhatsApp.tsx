@@ -71,6 +71,11 @@ export const Step10WhatsApp = () => {
   const [stagedChunks, setStagedChunks] = useState<string[]>([]);
   const [visibleChunkCount, setVisibleChunkCount] = useState(0);
   const [isChunkTyping, setIsChunkTyping] = useState(false);
+  
+  // Nudge states
+  const [showFirstNudge, setShowFirstNudge] = useState(false);
+  const [showSecondNudge, setShowSecondNudge] = useState(false);
+  const [chatStartTime, setChatStartTime] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -272,8 +277,38 @@ export const Step10WhatsApp = () => {
   useEffect(() => {
     resetChatInMemory();
     setThreadId(String(Date.now()));
+    setChatStartTime(Date.now());
     // não limpamos o DB; apenas a lista em memória, e mudamos o threadId para isolar memória do assistant
   }, [resetChatInMemory]);
+
+  // Nudge timers
+  useEffect(() => {
+    if (!chatStartTime) return;
+
+    // First nudge at 15 seconds
+    const firstTimer = setTimeout(() => {
+      if (!appointment) { // Only show if no appointment yet
+        setShowFirstNudge(true);
+        setTimeout(() => setShowFirstNudge(false), 8000); // Hide after 8 seconds
+      }
+    }, 15000);
+
+    // Second nudge at 30 seconds
+    const secondTimer = setTimeout(() => {
+      if (!appointment) { // Only show if no appointment yet
+        setShowSecondNudge(true);
+        setTimeout(() => {
+          setShowSecondNudge(false);
+          nextStep(); // Auto advance after showing the nudge
+        }, 8000); // Hide after 8 seconds and advance
+      }
+    }, 30000);
+
+    return () => {
+      clearTimeout(firstTimer);
+      clearTimeout(secondTimer);
+    };
+  }, [chatStartTime, appointment, nextStep]);
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -465,6 +500,42 @@ export const Step10WhatsApp = () => {
 				{/* ANCORAAAAAAAA (deve ficar por último dentro de .chat-messages) */}
 				<div ref={messagesEndRef} />
 			</div>
+
+			{/* Nudges */}
+			<AnimatePresence>
+				{showFirstNudge && (
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -20 }}
+						className="fixed left-4 right-4 z-40 bg-primary/90 backdrop-blur-sm text-primary-foreground px-4 py-3 rounded-lg shadow-lg"
+						style={{
+							top: `calc(72px + 16px)`, // header height + margin
+							bottom: `calc(${effectiveKB}px + 80px + 16px)` // keyboard + input + margin
+						}}
+					>
+						<p className="text-sm text-center">
+							Dica: tente agendar e confirmar uma consulta para ver uma surpresa 🤯
+						</p>
+					</motion.div>
+				)}
+				{showSecondNudge && (
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -20 }}
+						className="fixed left-4 right-4 z-40 bg-destructive/90 backdrop-blur-sm text-destructive-foreground px-4 py-3 rounded-lg shadow-lg"
+						style={{
+							top: `calc(72px + 16px)`, // header height + margin
+							bottom: `calc(${effectiveKB}px + 80px + 16px)` // keyboard + input + margin
+						}}
+					>
+						<p className="text-sm text-center">
+							Aviso: Caso você não agende um horário em 30 segundos, iremos avançar para a próxima etapa automaticamente.
+						</p>
+					</motion.div>
+				)}
+			</AnimatePresence>
 
 			{/* Finish Button */}
 			<AnimatePresence>
