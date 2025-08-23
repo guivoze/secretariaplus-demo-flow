@@ -1,8 +1,7 @@
-// Configuração do Facebook Pixel
+// Configuração do Facebook Pixel (VERSÃO SEGURA)
+// Token removido do frontend por segurança - agora gerenciado pelo backend
 export const FACEBOOK_PIXEL_CONFIG = {
-  pixelId: '1245486659923087',
-  conversionApiToken:
-    'EAARpggKMPi0BPdxUqL28mTFJlUIlkFmZBcWH5NTm0pZAYg15EMB3LX6rlgK1ZBDXpvZBAPB1MQoJMKrGTgodAXh74quZCGXAnZA33VPaHu3SwZAlQzPB8CdWBe0C0ZCKJqXdr3gU5trgUUcsihEReeDE0dZClZCWuQNCnMeYqrx8Nn5gQC9srjD6Iy0oFARLnTfks5RQZDZD',
+  pixelId: '1245486659923087', // Public pixel ID - seguro manter no frontend
   testEventCode: null, // Adicione aqui se tiver um código de teste
   // Configurações adicionais
   enableEnhancedEcommerce: true,
@@ -59,7 +58,7 @@ export const trackConversionApi = async (
         eventName,
         parameters,
         pixelId: FACEBOOK_PIXEL_CONFIG.pixelId,
-        accessToken: FACEBOOK_PIXEL_CONFIG.conversionApiToken,
+        // Token removido - será obtido pelo backend via variável de ambiente
       }),
     });
 

@@ -6,9 +6,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { eventName, parameters, pixelId, accessToken } = req.body;
-    if (!eventName || !parameters || !pixelId || !accessToken) {
-      return res.status(400).json({ error: 'Missing required parameters' });
+    const { eventName, parameters, pixelId } = req.body;
+    
+    // Obtém o token da variável de ambiente (configurada na Vercel)
+    const accessToken = process.env.FACEBOOK_CONVERSION_API_TOKEN;
+    
+    if (!eventName || !parameters || !pixelId) {
+      return res.status(400).json({ error: 'Missing required parameters: eventName, parameters, pixelId' });
+    }
+    
+    if (!accessToken) {
+      return res.status(500).json({ error: 'Facebook Conversion API token not configured. Please set FACEBOOK_CONVERSION_API_TOKEN environment variable.' });
     }
 
     // Usar o mesmo eventID do pixel ou gerar um novo
