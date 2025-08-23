@@ -8,10 +8,34 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Browser fingerprinting utility (same as useSupabaseDemo.tsx)
+const generateBrowserFingerprint = (): string => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx?.fillText('Demo fingerprint', 10, 10);
+  
+  const fingerprint = {
+    userAgent: navigator.userAgent,
+    language: navigator.language,
+    platform: navigator.platform,
+    screenResolution: `${screen.width}x${screen.height}`,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    canvas: canvas.toDataURL(),
+    timestamp: Date.now()
+  };
+  
+  return btoa(JSON.stringify(fingerprint)).slice(0, 32);
+};
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-  }
+  },
+  global: {
+    headers: {
+      'x-session-fingerprint': generateBrowserFingerprint(),
+    },
+  },
 });
