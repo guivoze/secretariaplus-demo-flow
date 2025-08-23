@@ -4,7 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.55.0';
 import { BASE_PROMPT_TEMPLATE } from './prompt.ts';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-session-fingerprint'
 };
 const supabaseUrl = 'https://yuorlidtcnhcpuxpqwec.supabase.co';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
