@@ -510,10 +510,10 @@ export const Step10WhatsApp = () => {
 						exit={{ opacity: 0, y: 10 }}
 						className="fixed left-4 right-4 z-40"
 						style={{
-							bottom: `calc(${effectiveKB}px + 88px)` // just above input
+							top: `calc(72px + 16px)` // below header + margin
 						}}
 					>
-						<div className="bg-white text-black px-3 py-2 rounded-full shadow-md mx-auto max-w-fit">
+						<div className="bg-white/80 text-black px-4 py-3 rounded-full shadow-md mx-auto max-w-fit">
 							<p className="text-xs text-center">
 								Dica: tente agendar e confirmar uma consulta para ver uma surpresa 🤯
 							</p>
@@ -527,10 +527,10 @@ export const Step10WhatsApp = () => {
 						exit={{ opacity: 0, y: 10 }}
 						className="fixed left-4 right-4 z-40"
 						style={{
-							bottom: `calc(${effectiveKB}px + 88px)` // just above input
+							top: `calc(72px + 16px)` // below header + margin
 						}}
 					>
-						<div className="bg-white text-black px-3 py-2 rounded-full shadow-md mx-auto max-w-fit">
+						<div className="bg-white/80 text-black px-4 py-3 rounded-full shadow-md mx-auto max-w-fit">
 							<p className="text-xs text-center">
 								Aviso: Caso você não agende um horário em 30 segundos, iremos avançar para a próxima etapa automaticamente.
 							</p>
