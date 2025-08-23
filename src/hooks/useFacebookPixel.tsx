@@ -7,11 +7,75 @@ declare global {
   }
 }
 
+// Função para obter dados geográficos e temporais
+const getEnrichedData = () => {
+  const now = new Date();
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  
+  return {
+    // Dados temporais
+    event_day: now.toLocaleDateString('en-US', { weekday: 'long' }),
+    event_day_in_month: now.getDate().toString(),
+    event_month: now.toLocaleDateString('en-US', { month: 'long' }),
+    event_time: now.getTime(),
+    event_time_interval: getTimeInterval(now),
+    
+    // Dados geográficos (simulados - em produção usar serviço real)
+    country: 'BR', // Brasil
+    ct: 'São Paulo', // Cidade
+    st: 'SP', // Estado
+    zp: '00000-000', // CEP
+    
+    // Dados de contexto
+    traffic_source: getTrafficSource(),
+    plugin: 'SecretáriaPlus Demo',
+    plugin_info: 'https://flow.secretariaplus.com.br',
+    
+    // Dados de dispositivo
+    user_agent: navigator.userAgent,
+    timezone: timezone,
+    
+    // Dados de página
+    page_title: document.title,
+    event_source_url: window.location.href,
+    event_url: window.location.href,
+  };
+};
+
+// Função para determinar intervalo de tempo
+const getTimeInterval = (date: Date): string => {
+  const hour = date.getHours();
+  if (hour >= 6 && hour < 12) return '6-12';
+  if (hour >= 12 && hour < 18) return '12-18';
+  if (hour >= 18 && hour < 24) return '18-24';
+  return '0-6';
+};
+
+// Função para determinar fonte de tráfego
+const getTrafficSource = (): string => {
+  const referrer = document.referrer;
+  if (!referrer) return 'Direct';
+  if (referrer.includes('google')) return 'Google';
+  if (referrer.includes('facebook')) return 'Facebook';
+  if (referrer.includes('instagram')) return 'Instagram';
+  if (referrer.includes('vercel')) return 'Vercel';
+  return 'Referral';
+};
+
 export const useFacebookPixel = () => {
   const trackEvent = useCallback((eventName: string, parameters?: Record<string, any>) => {
     if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', eventName, parameters);
-      console.log(`[Facebook Pixel] Evento "${eventName}" disparado:`, parameters);
+      // Enriquecer parâmetros com dados contextuais
+      const enrichedParams = {
+        ...parameters,
+        ...getEnrichedData(),
+        // Dados de sessão
+        session_id: sessionStorage.getItem('session_id') || 'unknown',
+        page_id: window.location.pathname,
+      };
+      
+      window.fbq('track', eventName, enrichedParams);
+      console.log(`[Facebook Pixel] Evento "${eventName}" disparado:`, enrichedParams);
     } else {
       console.warn('[Facebook Pixel] fbq não está disponível');
     }
@@ -89,6 +153,11 @@ export const useFacebookPixel = () => {
       // Dados de valor do lead
       lead_value_score: calculateLeadScore(userData),
       lead_quality: assessLeadQuality(userData),
+      
+      // Dados adicionais para riqueza
+      external_id: `${userData.instagram}_${Date.now()}`,
+      content_language: 'pt_BR',
+      delivery_category: 'home_delivery',
     };
 
     const parameters = { ...baseParameters, ...userParameters };
@@ -106,8 +175,9 @@ export const useFacebookPixel = () => {
 
   const trackPageView = useCallback(() => {
     if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'PageView');
-      console.log('[Facebook Pixel] PageView disparado');
+      const enrichedParams = getEnrichedData();
+      window.fbq('track', 'PageView', enrichedParams);
+      console.log('[Facebook Pixel] PageView disparado com dados enriquecidos:', enrichedParams);
     }
   }, []);
 

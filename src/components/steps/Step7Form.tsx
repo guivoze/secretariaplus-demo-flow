@@ -3,7 +3,6 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { CustomInput } from "@/components/ui/custom-input";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
-import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { motion } from "framer-motion";
 
 export const Step7Form = () => {
@@ -12,7 +11,7 @@ export const Step7Form = () => {
     setUserData,
     nextStep
   } = useSupabaseDemo();
-  const { trackLead } = useFacebookPixel();
+  // Removido useFacebookPixel para evitar duplicação
   
   const [formData, setFormData] = useState({
     email: userData.email || '',
@@ -41,29 +40,8 @@ export const Step7Form = () => {
         whatsapp: formData.whatsapp
       });
 
-      // Disparar evento "Lead" quando todos os dados estiverem completos
-      if (
-        userData.instagram &&
-        userData.nome &&
-        formData.email &&
-        formData.whatsapp &&
-        userData.especialidade
-      ) {
-        console.log('[Facebook Pixel] Todos os dados completos, disparando evento Lead');
-        await trackLead({
-          instagram: userData.instagram,
-          nome: userData.nome,
-          email: formData.email,
-          whatsapp: formData.whatsapp,
-          especialidade: userData.especialidade,
-          faturamento: userData.faturamento,
-          followers: userData.followers,
-          posts: userData.posts,
-          clinicName: userData.clinicName,
-          procedures: userData.procedures,
-          aiInsights: userData.aiInsights
-        });
-      }
+      // Removido disparo do evento Lead - será feito apenas no Step8Confirmation
+      // para evitar duplicação
 
       nextStep();
     }

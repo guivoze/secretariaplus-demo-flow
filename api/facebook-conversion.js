@@ -11,6 +11,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
+    // Obter dados enriquecidos do servidor
+    const enrichedData = getServerEnrichedData(req);
+
     // Preparar dados para o Facebook Conversion API com atribuição avançada
     const conversionData = {
       data: [
@@ -24,6 +27,14 @@ export default async function handler(req, res) {
             ph: parameters.whatsapp ? hashPhone(parameters.whatsapp) : undefined,
             // Adicionar mais dados de usuário se disponível
             external_id: parameters.instagram ? hashString(parameters.instagram) : undefined,
+            // Dados geográficos
+            country: enrichedData.country,
+            ct: enrichedData.city,
+            st: enrichedData.state,
+            zp: enrichedData.zip,
+            // Dados de contexto
+            client_user_agent: req.headers['user-agent'] || 'unknown',
+            client_ip_address: enrichedData.ip_address,
           },
           custom_data: {
             // Dados básicos do evento
@@ -57,7 +68,7 @@ export default async function handler(req, res) {
             ai_insights_procedure2: parameters.ai_insights_procedure2,
             ai_insights_procedure3: parameters.ai_insights_procedure3,
             
-            // Dados de contexto
+            // Dados de contexto para atribuição
             lead_source: parameters.lead_source,
             lead_medium: parameters.lead_medium,
             lead_campaign: parameters.lead_campaign,
@@ -74,14 +85,42 @@ export default async function handler(req, res) {
             lead_value_score: parameters.lead_value_score,
             lead_quality: parameters.lead_quality,
             
-            // Dados de UTM se disponível
-            utm_source: req.headers['x-utm-source'] || 'direct',
-            utm_medium: req.headers['x-utm-medium'] || 'none',
-            utm_campaign: req.headers['x-utm-campaign'] || 'none',
+            // Dados enriquecidos do servidor
+            event_day: enrichedData.event_day,
+            event_day_in_month: enrichedData.event_day_in_month,
+            event_month: enrichedData.event_month,
+            event_time: enrichedData.event_time,
+            event_time_interval: enrichedData.event_time_interval,
+            
+            // Dados geográficos
+            country: enrichedData.country,
+            ct: enrichedData.city,
+            st: enrichedData.state,
+            zp: enrichedData.zip,
+            
+            // Dados de contexto
+            traffic_source: enrichedData.traffic_source,
+            plugin: enrichedData.plugin,
+            plugin_info: enrichedData.plugin_info,
             
             // Dados de dispositivo
             user_agent: req.headers['user-agent'] || 'unknown',
-            ip_address: req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown',
+            ip_address: enrichedData.ip_address,
+            timezone: enrichedData.timezone,
+            
+            // Dados de página
+            page_title: enrichedData.page_title,
+            page_id: enrichedData.page_id,
+            
+            // Dados adicionais para riqueza
+            external_id: parameters.external_id || `${parameters.instagram}_${Date.now()}`,
+            content_language: 'pt_BR',
+            delivery_category: 'home_delivery',
+            
+            // Dados de UTM se disponível
+            utm_source: req.headers['x-utm-source'] || enrichedData.utm_source || 'direct',
+            utm_medium: req.headers['x-utm-medium'] || enrichedData.utm_medium || 'none',
+            utm_campaign: req.headers['x-utm-campaign'] || enrichedData.utm_campaign || 'none',
           },
         },
       ],
@@ -115,6 +154,65 @@ export default async function handler(req, res) {
     console.error('[Facebook Conversion API] Erro interno:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
+}
+
+// Função para obter dados enriquecidos do servidor
+function getServerEnrichedData(req) {
+  const now = new Date();
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+  
+  return {
+    // Dados temporais
+    event_day: now.toLocaleDateString('en-US', { weekday: 'long' }),
+    event_day_in_month: now.getDate().toString(),
+    event_month: now.toLocaleDateString('en-US', { month: 'long' }),
+    event_time: now.getTime(),
+    event_time_interval: getTimeInterval(now),
+    
+    // Dados geográficos (simulados - em produção usar serviço real)
+    country: 'BR',
+    city: 'São Paulo',
+    state: 'SP',
+    zip: '00000-000',
+    
+    // Dados de contexto
+    traffic_source: getTrafficSource(req),
+    plugin: 'SecretáriaPlus Demo',
+    plugin_info: 'https://flow.secretariaplus.com.br',
+    
+    // Dados de dispositivo
+    ip_address: ip,
+    timezone: 'America/Sao_Paulo',
+    
+    // Dados de página
+    page_title: 'SecretáriaPlus - Free Test',
+    page_id: 'demo_flow',
+    
+    // Dados de UTM
+    utm_source: 'direct',
+    utm_medium: 'none',
+    utm_campaign: 'none',
+  };
+}
+
+// Função para determinar intervalo de tempo
+function getTimeInterval(date) {
+  const hour = date.getHours();
+  if (hour >= 6 && hour < 12) return '6-12';
+  if (hour >= 12 && hour < 18) return '12-18';
+  if (hour >= 18 && hour < 24) return '18-24';
+  return '0-6';
+}
+
+// Função para determinar fonte de tráfego
+function getTrafficSource(req) {
+  const referrer = req.headers.referer;
+  if (!referrer) return 'Direct';
+  if (referrer.includes('google')) return 'Google';
+  if (referrer.includes('facebook')) return 'Facebook';
+  if (referrer.includes('instagram')) return 'Instagram';
+  if (referrer.includes('vercel')) return 'Vercel';
+  return 'Referral';
 }
 
 // Função para hash do email (SHA256)

@@ -3,6 +3,10 @@ export const FACEBOOK_PIXEL_CONFIG = {
   pixelId: '1245486659923087',
   conversionApiToken: 'EAARpggKMPi0BPdxUqL28mTFJlUIlkFmZBcWH5NTm0pZAYg15EMB3LX6rlgK1ZBDXpvZBAPB1MQoJMKrGTgodAXh74quZCGXAnZA33VPaHu3SwZAlQzPB8CdWBe0C0ZCKJqXdr3gU5trgUUcsihEReeDE0dZClZCWuQNCnMeYqrx8Nn5gQC9srjD6Iy0oFARLnTfks5RQZDZD',
   testEventCode: null, // Adicione aqui se tiver um código de teste
+  // Configurações adicionais
+  enableEnhancedEcommerce: true,
+  enableAdvancedMatching: true,
+  enableAutomaticAdvancedMatching: true,
 };
 
 // Função para disparar evento via Conversion API (server-side)
@@ -23,11 +27,14 @@ export const trackConversionApi = async (eventName: string, parameters: Record<s
 
     if (response.ok) {
       console.log(`[Facebook Conversion API] Evento "${eventName}" enviado com sucesso`);
+      return { success: true, response: await response.json() };
     } else {
       console.error(`[Facebook Conversion API] Erro ao enviar evento "${eventName}"`);
+      return { success: false, error: await response.json() };
     }
   } catch (error) {
     console.error('[Facebook Conversion API] Erro na requisição:', error);
+    return { success: false, error };
   }
 };
 
@@ -48,7 +55,7 @@ export const trackLeadConversionApi = async (userData: {
   // Filtrar leads de "Estética Geral" - não são considerados leads válidos
   if (userData.especialidade === 'Estética Geral (salão, micro, make)') {
     console.log('[Facebook Conversion API] Lead filtrado - especialidade "Estética Geral" não é considerada lead válido');
-    return;
+    return { success: false, reason: 'filtered_specialty' };
   }
 
   // Dados básicos do evento
@@ -104,11 +111,16 @@ export const trackLeadConversionApi = async (userData: {
     // Dados de valor do lead
     lead_value_score: calculateLeadScore(userData),
     lead_quality: assessLeadQuality(userData),
+    
+    // Dados adicionais para riqueza
+    external_id: `${userData.instagram}_${Date.now()}`,
+    content_language: 'pt_BR',
+    delivery_category: 'home_delivery',
   };
 
   const parameters = { ...baseParameters, ...userParameters };
 
-  await trackConversionApi('Lead', parameters);
+  return await trackConversionApi('Lead', parameters);
 };
 
 // Função para categorizar especialidades
@@ -177,3 +189,28 @@ function assessLeadQuality(userData: any): string {
   if (score >= 40) return 'Medium';
   return 'Standard';
 }
+
+// Função para verificar se o pixel está carregado
+export const isPixelLoaded = (): boolean => {
+  return typeof window !== 'undefined' && typeof (window as any).fbq === 'function';
+};
+
+// Função para aguardar o pixel carregar
+export const waitForPixel = (): Promise<void> => {
+  return new Promise((resolve) => {
+    if (isPixelLoaded()) {
+      resolve();
+      return;
+    }
+    
+    const checkPixel = () => {
+      if (isPixelLoaded()) {
+        resolve();
+      } else {
+        setTimeout(checkPixel, 100);
+      }
+    };
+    
+    checkPixel();
+  });
+};
