@@ -1,4 +1,12 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
+// Função para limpar tags HTML
+function sanitizeMessage(text: string) {
+  return text.replace(/<[^>]*>?/gm, '');
+}
+
+const MAX_MESSAGE_LENGTH = 300;
+const SUSPICIOUS_CHARS = /[<>]/;
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useKeyboardGlue } from "@/hooks/useKeyboardGlue";
@@ -116,7 +124,7 @@ export const Step10WhatsApp = () => {
     if (chatMessages.length === 0 && !hasInitialMessage) {
       const initialMessage = `✨ Oie! Pra me testar, aja como um paciente típico, ex: "Qual valor do botox?"
 
-			Estou prontíssima, pode mandar! 🥰`;
+      Estou prontíssima, pode mandar! 🥰`;
       sendAssistantMessage(initialMessage);
       setHasInitialMessage(true);
     }
@@ -195,10 +203,17 @@ export const Step10WhatsApp = () => {
   }, []);
   const sendMessage = useCallback(async () => {
     if (!inputValue.trim() || isLoading) return;
+    if (inputValue.length > MAX_MESSAGE_LENGTH) {
+      toast.error('Mensagem muito longa.');
+      return;
+    }
+    if (SUSPICIOUS_CHARS.test(inputValue)) {
+      toast.error('Caracteres inválidos na mensagem.');
+      return;
+    }
     const userMessage = inputValue.trim();
     setInputValue('');
     try {
-      console.log('[chat-ui] sending user message:', userMessage);
       await sendUserMessage(userMessage);
       setIsLoading(true);
       const {
@@ -213,7 +228,6 @@ export const Step10WhatsApp = () => {
         }
       });
       if (error) throw error;
-      console.log('[chat-ui] function response:', data);
       if (data?.success && data?.message) {
         await sendAssistantMessage(data.message);
         const chunks = data.message.split(/\n\s*\n+/).map((c: string) => c.trim()).filter((c: string) => c.length > 0);
@@ -236,9 +250,7 @@ export const Step10WhatsApp = () => {
           setIsChunkTyping(false);
         }
         if (data.appointment && data.appointment.dateISO) {
-          console.log('[chat-ui] appointment received:', data.appointment);
           setAppointment(data.appointment);
-          // Exibir toast com mais delay (+2s) e manter por mais tempo (+2s)
           setTimeout(() => {
             setShowNotification(true);
           }, 8900);
@@ -251,7 +263,6 @@ export const Step10WhatsApp = () => {
         throw new Error('No AI response received');
       }
     } catch (error) {
-      console.error('[chat-ui] Error in chat:', error);
       toast.error('Erro ao enviar mensagem. Tente novamente.');
       setInputValue(userMessage);
     } finally {
@@ -262,7 +273,7 @@ export const Step10WhatsApp = () => {
         }
       });
     }
-  }, [inputValue, isLoading, sendUserMessage, sendAssistantMessage, sessionId]);
+  }, [inputValue, isLoading, sendUserMessage, sendAssistantMessage, sessionId, threadId]);
   const finishConversation = useCallback(() => {
     setChatDarkened(true);
     setTimeout(() => {
@@ -276,7 +287,7 @@ export const Step10WhatsApp = () => {
   // Sempre que esta tela monta (novo teste), limpamos o chat em memória e criamos um novo threadId
   useEffect(() => {
     resetChatInMemory();
-    setThreadId(String(Date.now()));
+    setThreadId(uuidv4()); // Use UUID para threadId
     setChatStartTime(Date.now());
     // não limpamos o DB; apenas a lista em memória, e mudamos o threadId para isolar memória do assistant
   }, [resetChatInMemory]);
@@ -285,24 +296,24 @@ export const Step10WhatsApp = () => {
   useEffect(() => {
     if (!chatStartTime) return;
 
-    // First nudge at 15 seconds
+    // First nudge at 60 seconds
     const firstTimer = setTimeout(() => {
       if (!appointment) { // Only show if no appointment yet
         setShowFirstNudge(true);
-        setTimeout(() => setShowFirstNudge(false), 8000); // Hide after 8 seconds
+        setTimeout(() => setShowFirstNudge(false), 9000); // Hide after 9 seconds
       }
-    }, 15000);
+    }, 600000);
 
-    // Second nudge at 30 seconds
+    // Second nudge at 90 seconds
     const secondTimer = setTimeout(() => {
       if (!appointment) { // Only show if no appointment yet
         setShowSecondNudge(true);
         setTimeout(() => {
           setShowSecondNudge(false);
           nextStep(); // Auto advance after showing the nudge
-        }, 8000); // Hide after 8 seconds and advance
+        }, 30000); // Hide after 30 seconds and advance
       }
-    }, 30000);
+    }, 90000);
 
     return () => {
       clearTimeout(firstTimer);
@@ -350,8 +361,8 @@ export const Step10WhatsApp = () => {
     margin: 0,
     padding: 0
   }}>
-			{/* WhatsApp Header - SEMPRE fixo no topo */}
-			<div className="chat-header bg-[#075e54] text-white flex items-center gap-3 shadow-lg" style={{
+      {/* WhatsApp Header - SEMPRE fixo no topo */}
+      <div className="chat-header bg-[#075e54] text-white flex items-center gap-3 shadow-lg" style={{
       position: 'fixed',
       top: 0,
       left: 0,
@@ -366,24 +377,24 @@ export const Step10WhatsApp = () => {
       paddingTop: '4px',
       paddingBottom: '4px'
     }}>
-				<div className="w-10 h-10 rounded-full bg-black/10 overflow-hidden flex items-center justify-center">
-					{userData.realProfilePic ? <img src={userData.realProfilePic} alt="profile" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center font-bold text-black bg-primary">
-							{(userData.instagram || 'SP').charAt(0).toUpperCase()}
-						</div>}
-				</div>
-				<div className="flex-1">
-					<h3 className="text-sm font-medium">{userData.aiInsights?.name || userData.instagram || 'SecretáriaPlus'}</h3>
-					<p className="text-xs text-[#ffffff]/[0.61]">online</p>
-				</div>
-				<div className="flex gap-4">
-					<Video className="w-5 h-5" />
-					<Phone className="w-5 h-5" />
-					<MoreVertical className="w-5 h-5" />
-				</div>
-			</div>
+        <div className="w-10 h-10 rounded-full bg-black/10 overflow-hidden flex items-center justify-center">
+          {userData.realProfilePic ? <img src={userData.realProfilePic} alt="profile" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center font-bold text-black bg-primary">
+              {(userData.instagram || 'SP').charAt(0).toUpperCase()}
+            </div>}
+        </div>
+        <div className="flex-1">
+          <h3 className="text-sm font-medium">{userData.aiInsights?.name || userData.instagram || 'SecretáriaPlus'}</h3>
+          <p className="text-xs text-[#ffffff]/[0.61]">online</p>
+        </div>
+        <div className="flex gap-4">
+          <Video className="w-5 h-5" />
+          <Phone className="w-5 h-5" />
+          <MoreVertical className="w-5 h-5" />
+        </div>
+      </div>
 
-			{/* Messages Area - área entre header e input */}
-			<div ref={messagesContainerRef} className={`chat-messages space-y-3 transition-all duration-200 overflow-y-auto ${chatDarkened ? 'opacity-30' : ''}`} style={{
+      {/* Messages Area - área entre header e input */}
+      <div ref={messagesContainerRef} className={`chat-messages space-y-3 transition-all duration-200 overflow-y-auto ${chatDarkened ? 'opacity-30' : ''}`} style={{
       position: 'fixed',
       top: '72px',
       // depois do header
@@ -398,8 +409,8 @@ export const Step10WhatsApp = () => {
       // bem mais próximo do input
       zIndex: 1
     }}>
-				<AnimatePresence mode="popLayout">
-					{messages.map(message => {
+        <AnimatePresence mode="popLayout">
+          {messages.map(message => {
           const isAssistant = message.sender !== 'user';
           if (!isAssistant) {
             return <motion.div key={message.id} initial={{
@@ -414,16 +425,16 @@ export const Step10WhatsApp = () => {
             }} transition={{
               duration: 0.2
             }} onAnimationComplete={() => scrollToEnd('auto')} className={`flex justify-end`}>
-									<div className={`max-w-[80%] p-3 rounded-2xl shadow-sm bg-[#dcf8c6] text-black rounded-br-md`}>
-										<p className="text-sm whitespace-pre-wrap">{message.text}</p>
-										<div className={`flex items-center gap-1 mt-1 justify-end`}>
-											<span className="text-xs text-gray-500">{message.timestamp}</span>
-											<CheckCheck className="w-3 h-3 text-blue-500" />
-										</div>
-									</div>
-								</motion.div>;
+                  <div className={`max-w-[80%] p-3 rounded-2xl shadow-sm bg-[#dcf8c6] text-black rounded-br-md`}>
+                    <p className="text-sm whitespace-pre-wrap">{sanitizeMessage(message.text)}</p>
+                    <div className={`flex items-center gap-1 mt-1 justify-end`}>
+                      <span className="text-xs text-gray-500">{message.timestamp}</span>
+                      <CheckCheck className="w-3 h-3 text-blue-500" />
+                    </div>
+                  </div>
+                </motion.div>;
           }
-          const chunks = message.text.split(/\n\s*\n+/).map(c => c.trim()).filter(Boolean);
+          const chunks = message.text.split(/\n\s*\n+/).map(c => sanitizeMessage(c.trim())).filter(Boolean);
           const lastAssistantId = (() => {
             for (let j = messages.length - 1; j >= 0; j--) {
               if (messages[j].sender !== 'user') return messages[j].id;
@@ -433,7 +444,7 @@ export const Step10WhatsApp = () => {
           const isLastAssistant = lastAssistantId === message.id;
           const count = isLastAssistant && stagedChunks.length > 1 ? Math.max(visibleChunkCount, 1) : chunks.length;
           return <div key={message.id} className="space-y-2">
-								{chunks.slice(0, count).map((c, idc) => <motion.div key={`${message.id}-${idc}`} initial={{
+                {chunks.slice(0, count).map((c, idc) => <motion.div key={`${message.id}-${idc}`} initial={{
               opacity: 0,
               y: 20
             }} animate={{
@@ -442,14 +453,14 @@ export const Step10WhatsApp = () => {
             }} transition={{
               duration: 0.2
             }} onAnimationComplete={() => scrollToEnd('auto')} className={`flex justify-start`}>
-										<div className={`max-w-[80%] p-3 rounded-2xl shadow-sm bg-white text-black rounded-bl-md`}>
-											<p className="text-sm whitespace-pre-wrap">{c}</p>
-											<div className={`flex items-center gap-1 mt-1 justify-start`}>
-												<span className="text-xs text-gray-500">{message.timestamp}</span>
-											</div>
-										</div>
-									</motion.div>)}
-								{isLastAssistant && isChunkTyping && <motion.div initial={{
+                    <div className={`max-w-[80%] p-3 rounded-2xl shadow-sm bg-white text-black rounded-bl-md`}>
+                    <p className="text-sm whitespace-pre-wrap">{c}</p>
+                      <div className={`flex items-center gap-1 mt-1 justify-start`}>
+                        <span className="text-xs text-gray-500">{message.timestamp}</span>
+                      </div>
+                    </div>
+                  </motion.div>)}
+                {isLastAssistant && isChunkTyping && <motion.div initial={{
               opacity: 0,
               y: 20
             }} animate={{
@@ -458,23 +469,23 @@ export const Step10WhatsApp = () => {
             }} transition={{
               duration: 0.2
             }} onAnimationComplete={() => scrollToEnd('auto')} className="flex justify-start">
-										<div className="bg-white text-black rounded-2xl rounded-bl-md p-3 shadow-sm">
-											<div className="flex space-x-1">
-												<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-												<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{
+                    <div className="bg-white text-black rounded-2xl rounded-bl-md p-3 shadow-sm">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{
                     animationDelay: '0.1s'
                   }}></div>
-												<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{
                     animationDelay: '0.2s'
                   }}></div>
-											</div>
-										</div>
-									</motion.div>}
+                      </div>
+                    </div>
+                  </motion.div>}
 
-							</div>;
+              </div>;
         })}
-				</AnimatePresence>
-				{isLoading && <motion.div initial={{
+        </AnimatePresence>
+        {isLoading && <motion.div initial={{
         opacity: 0,
         y: 20
       }} animate={{
@@ -484,68 +495,68 @@ export const Step10WhatsApp = () => {
         opacity: 0,
         y: -20
       }} onAnimationComplete={() => scrollToEnd('auto')} className="flex justify-start">
-						<div className="bg-white text-black rounded-2xl rounded-bl-md p-3 shadow-sm">
-							<div className="flex space-x-1">
-								<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-								<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{
+            <div className="bg-white text-black rounded-2xl rounded-bl-md p-3 shadow-sm">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{
               animationDelay: '0.1s'
             }}></div>
-								<div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{
               animationDelay: '0.2s'
             }}></div>
-							</div>
-						</div>
-					</motion.div>}
+              </div>
+            </div>
+          </motion.div>}
 
-				{/* ANCORAAAAAAAA (deve ficar por último dentro de .chat-messages) */}
-				<div ref={messagesEndRef} />
-			</div>
+        {/* ANCORAAAAAAAA (deve ficar por último dentro de .chat-messages) */}
+        <div ref={messagesEndRef} />
+      </div>
 
-			{/* Nudges */}
-			<AnimatePresence>
-				{showFirstNudge && (
-					<motion.div
-						initial={{ opacity: 0, y: 10 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: 10 }}
-						className="fixed left-4 right-4 z-40"
-						style={{
-							top: `calc(72px + 16px)` // below header + margin
-						}}
-					>
-						<div className="bg-white/80 text-black px-4 py-3 rounded-full shadow-md mx-auto max-w-fit">
-							<p className="text-xs text-center">
-								Dica: tente agendar e confirmar uma consulta para ver uma surpresa 🤯
-							</p>
-						</div>
-					</motion.div>
-				)}
-				{showSecondNudge && (
-					<motion.div
-						initial={{ opacity: 0, y: 10 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: 10 }}
-						className="fixed left-4 right-4 z-40"
-						style={{
-							top: `calc(72px + 16px)` // below header + margin
-						}}
-					>
-						<div className="bg-white/80 text-black px-4 py-3 rounded-full shadow-md mx-auto max-w-fit">
-							<p className="text-xs text-center">
-								Aviso: Caso você não agende um horário em 30 segundos, iremos avançar para a próxima etapa automaticamente.
-							</p>
-						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
+      {/* Nudges */}
+      <AnimatePresence>
+        {showFirstNudge && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed left-4 right-4 z-40"
+            style={{
+              top: `calc(72px + 16px)` // below header + margin
+            }}
+          >
+            <div className="bg-white/80 text-black px-4 py-3 rounded-full shadow-md mx-auto max-w-fit">
+              <p className="text-xs text-center">
+                Dica: tente agendar e confirmar uma consulta na conversa para ter uma surpresa 🤯
+              </p>
+            </div>
+          </motion.div>
+        )}
+        {showSecondNudge && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed left-4 right-4 z-40"
+            style={{
+              top: `calc(72px + 16px)` // below header + margin
+            }}
+          >
+            <div className="bg-white/80 text-black px-4 py-3 rounded-full shadow-md mx-auto max-w-fit">
+              <p className="text-xs text-center">
+                👀 Aviso: Caso você não agende um horário em 30 segundos, iremos avançar para a próxima etapa automaticamente.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-			{/* Finish Button */}
-			<AnimatePresence>
-				{/* hidden debug button removed */}
-			</AnimatePresence>
+      {/* Finish Button */}
+      <AnimatePresence>
+        {/* hidden debug button removed */}
+      </AnimatePresence>
 
-			{/* Input Area - sempre fixo no fundo, acima do teclado */}
-			<div ref={inputBarRef} className={`chat-inputbar bg-[#f0f0f0] border-t transition-all duration-150 ${chatDarkened ? 'opacity-30' : ''}`} style={{
+      {/* Input Area - sempre fixo no fundo, acima do teclado */}
+      <div ref={inputBarRef} className={`chat-inputbar bg-[#f0f0f0] border-t transition-all duration-150 ${chatDarkened ? 'opacity-30' : ''}`} style={{
       position: 'fixed',
       bottom: effectiveKB,
       left: 0,
@@ -553,12 +564,12 @@ export const Step10WhatsApp = () => {
       zIndex: 15,
       padding: '12px 0'
     }}>
-				<div className="mx-4 flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
-					<input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyPress={handleKeyPress} onFocus={handleInputFocus} onBlur={handleInputBlur} placeholder="Digite uma mensagem..." className="flex-1 outline-none bg-transparent" style={{
+        <div className="mx-4 flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
+          <input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyPress={handleKeyPress} onFocus={handleInputFocus} onBlur={handleInputBlur} placeholder="Digite uma mensagem..." className="flex-1 outline-none bg-transparent" style={{
           fontSize: '16px'
         }} readOnly={isLoading} // bloqueia digitação sem perder foco
         aria-disabled={chatDarkened || isLoading || lockInput} autoComplete="off" autoCorrect="on" autoCapitalize="sentences" spellCheck="false" />
-					<button onMouseDown={keepFocusPointerDown} onTouchStart={keepFocusPointerDown} onClick={() => {
+          <button onMouseDown={keepFocusPointerDown} onTouchStart={keepFocusPointerDown} onClick={() => {
           sendMessage();
           setTimeout(() => {
             if (inputRef.current) {
@@ -566,20 +577,20 @@ export const Step10WhatsApp = () => {
             }
           }, 50);
         }} disabled={!inputValue.trim() || chatDarkened || isLoading} className="text-[#075e54] disabled:text-gray-400 transition-colors p-1">
-						<Send className="w-5 h-5" />
-					</button>
-				</div>
-			</div>
+            <Send className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
-			{/* Notification Toast */}
-			<AnimatePresence>
-				{showNotification && <>
-						<motion.div initial={{
+      {/* Notification Toast */}
+      <AnimatePresence>
+        {showNotification && <>
+            <motion.div initial={{
           opacity: 0
         }} animate={{
           opacity: 1
         }} className="fixed inset-0 bg-black/60 z-40" />
-						<motion.div initial={{
+            <motion.div initial={{
           opacity: 0,
           y: -100
         }} animate={{
@@ -588,17 +599,17 @@ export const Step10WhatsApp = () => {
         }} className="fixed inset-x-0 z-50 px-4" style={{
           top: `${toastTop}px`
         }}>
-							<div className="mx-auto max-w-sm bg-white rounded-lg shadow-2xl p-4 text-center">
-								<div className="flex items-start gap-3">
-									<div className="text-green-500 text-2xl">✅</div>
-									<div className="flex-1 text-left">
-										<h3 className="font-semibold text-gray-900">Novo Agendamento!</h3>
-										<p className="text-sm text-gray-600 mt-1">Paciente acabou de marcar {appointment?.procedure || userData.especialidade || 'procedimento'}</p>
-									</div>
-								</div>
-							</div>
-						</motion.div>
-					</>}
-			</AnimatePresence>
-		</div>;
+              <div className="mx-auto max-w-sm bg-white rounded-lg shadow-2xl p-4 text-center">
+                <div className="flex items-start gap-3">
+                  <div className="text-green-500 text-2xl">✅</div>
+                  <div className="flex-1 text-left">
+                    <h3 className="font-semibold text-gray-900">Novo Agendamento!</h3>
+                    <p className="text-sm text-gray-600 mt-1">Paciente acabou de marcar {appointment?.procedure || userData.especialidade || 'procedimento'}</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>}
+      </AnimatePresence>
+    </div>;
 };

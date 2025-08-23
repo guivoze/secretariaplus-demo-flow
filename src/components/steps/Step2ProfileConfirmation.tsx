@@ -90,8 +90,8 @@ export const Step2ProfileConfirmation = () => {
     });
 
     // This is the ONLY place where get_insta webhook should be called
-    // Start Instagram scraping in background after profile confirmation
-    console.log('Starting Instagram scrape for confirmed profile:', confirmedUsername);
+    // Start in background after profile confirmation
+    console.log('Starting getting data for confirmed profile:', confirmedUsername);
     fetch('https://n8nsplus.up.railway.app/webhook/get_insta', {
       method: 'POST',
       headers: {
@@ -102,7 +102,7 @@ export const Step2ProfileConfirmation = () => {
         session_id: sessionId
       })
     }).then(response => response.json()).then(data => {
-      console.log('Instagram scrape completed:', data);
+      console.log('Analysis completed:', data);
       if (data.perfil) {
         // Save real Instagram data to localStorage for loading step
         const candidatePosts = [data.post1, data.post2, data.post3].filter((p: any) => typeof p === 'string' && p.trim().length > 0);
@@ -123,7 +123,7 @@ export const Step2ProfileConfirmation = () => {
         localStorage.setItem('instagram-data', JSON.stringify(instagramData));
         console.log('Instagram data cached for loading step:', instagramData);
       }
-    }).catch(error => console.error('Error during Instagram scrape:', error));
+    }).catch(error => console.error('Error during getting data:', error));
 
     // Após confirmação, segue o fluxo sem modal
     (async () => {
