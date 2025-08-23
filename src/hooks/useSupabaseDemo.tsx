@@ -332,7 +332,9 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
           content: msg.content,
           sender: msg.sender_type as 'user' | 'assistant',
           timestamp: new Date(msg.timestamp_sent),
-          metadata: msg.message_metadata
+          metadata: typeof msg.message_metadata === 'object' && msg.message_metadata !== null 
+            ? msg.message_metadata as Record<string, unknown>
+            : {}
         }));
         setChatMessages(messages);
       }
@@ -371,7 +373,9 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
           content: data.content,
           sender: data.sender_type as 'user' | 'assistant',
           timestamp: new Date(data.timestamp_sent),
-          metadata: data.message_metadata
+          metadata: typeof data.message_metadata === 'object' && data.message_metadata !== null 
+            ? data.message_metadata as Record<string, unknown>
+            : {}
         };
         setChatMessages(prev => [...prev, newMessage]);
       }
@@ -444,28 +448,43 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
     if (!foundPreviousSession) return;
     
     // Update current session to use existing DB session (reutilizar a mesma row)
-    setSessionId(foundPreviousSession.session_id);
-    setDbSessionId(foundPreviousSession.id);
-    setCurrentStep(foundPreviousSession.current_step);
+    setSessionId(String(foundPreviousSession.session_id || ''));
+    setDbSessionId(String(foundPreviousSession.id || ''));
+    setCurrentStep(Number(foundPreviousSession.current_step || 0));
     
     // Restore user data
     const restoredData: UserData = {
-      instagram: foundPreviousSession.instagram_handle,
-      nome: foundPreviousSession.nome || '',
-      email: foundPreviousSession.email || '',
-      whatsapp: foundPreviousSession.whatsapp || '',
-      especialidade: foundPreviousSession.especialidade || '',
-      faturamento: foundPreviousSession.faturamento || '',
-      followers: foundPreviousSession.followers_count || '1.2K',
-      posts: foundPreviousSession.posts_count || '324',
-      profilePic: foundPreviousSession.profile_pic_url,
+      instagram: String(foundPreviousSession.instagram_handle || ''),
+      nome: String(foundPreviousSession.nome || ''),
+      email: String(foundPreviousSession.email || ''),
+      whatsapp: String(foundPreviousSession.whatsapp || ''),
+      especialidade: String(foundPreviousSession.especialidade || ''),
+      faturamento: String(foundPreviousSession.faturamento || ''),
+      followers: String(foundPreviousSession.followers_count || '1.2K'),
+      posts: String(foundPreviousSession.posts_count || '324'),
+      profilePic: String(foundPreviousSession.profile_pic_url || ''),
       clinicName: 'Clínica Exemplo',
       procedures: ['Botox', 'Preenchimento', 'Limpeza de Pele'],
-      hasInstagramData: foundPreviousSession.has_instagram_data,
-      realProfilePic: foundPreviousSession.real_profile_pic_url,
-      realPosts: foundPreviousSession.real_posts ? (foundPreviousSession.real_posts as string[]) : [],
-      aiInsights: (foundPreviousSession as { ai_insights?: AIInsights }).ai_insights || null,
-      instagramRequestTime: foundPreviousSession.created_at ? new Date(foundPreviousSession.created_at).getTime() : null
+      hasInstagramData: Boolean(foundPreviousSession.has_instagram_data),
+      realProfilePic: String(foundPreviousSession.real_profile_pic_url || ''),
+      realPosts: Array.isArray(foundPreviousSession.real_posts) 
+        ? foundPreviousSession.real_posts as string[] 
+        : [],
+      aiInsights: foundPreviousSession.ai_insights && typeof foundPreviousSession.ai_insights === 'object'
+        ? {
+            name: String((foundPreviousSession.ai_insights as any)?.name || ''),
+            where: String((foundPreviousSession.ai_insights as any)?.where || ''),
+            procedure1: String((foundPreviousSession.ai_insights as any)?.procedure1 || ''),
+            procedure2: String((foundPreviousSession.ai_insights as any)?.procedure2 || ''),
+            procedure3: String((foundPreviousSession.ai_insights as any)?.procedure3 || ''),
+            rapport1: String((foundPreviousSession.ai_insights as any)?.rapport1 || ''),
+            rapport2: String((foundPreviousSession.ai_insights as any)?.rapport2 || ''),
+          }
+        : null,
+      instagramRequestTime: foundPreviousSession.created_at 
+        ? new Date(String(foundPreviousSession.created_at)).getTime() 
+        : null,
+      instagramConfirmed: true
     };
     
     setUserDataState(restoredData);
