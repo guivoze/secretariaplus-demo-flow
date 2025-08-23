@@ -173,6 +173,56 @@ export type Database = {
         }
         Returns: string
       }
+      get_admin_chat_messages: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          message_metadata: Json | null
+          message_order: number
+          sender_type: string
+          session_id: string
+          timestamp_sent: string
+        }[]
+      }
+      get_admin_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          ai_insights: Json | null
+          completed_at: string | null
+          completion_percentage: number
+          created_at: string
+          current_step: number
+          custom_prompt: string | null
+          email: string | null
+          especialidade: string | null
+          faturamento: string | null
+          first_visit_at: string
+          followers_count: string | null
+          has_instagram_data: boolean
+          id: string
+          instagram_handle: string
+          last_visit_at: string
+          lead_score: number
+          nome: string | null
+          posts_count: string | null
+          profile_pic_url: string | null
+          real_posts: Json | null
+          real_profile_pic_url: string | null
+          referrer: string | null
+          session_id: string
+          time_spent_seconds: number
+          total_steps: number
+          total_visits: number
+          updated_at: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          whatsapp: string | null
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
