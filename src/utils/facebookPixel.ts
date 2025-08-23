@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 // Configuração do Facebook Pixel
 export const FACEBOOK_PIXEL_CONFIG = {
   pixelId: '1245486659923087',
@@ -124,12 +125,36 @@ export const trackLeadConversionApi = async (
     delivery_category: 'home_delivery',
   };
 
+  // Utilitário para normalizar e hashear (SHA-256)
+  // Importar crypto corretamente para ambiente Node/Vercel
+  function normalizeAndHash(value?: string): string {
+    if (!value) return '';
+    return crypto.createHash('sha256').update(value.trim().toLowerCase()).digest('hex');
+  }
+
+  // Dados sensíveis para user_data (CAPI)
+  const user_data = {
+    em: normalizeAndHash(userData.email),
+    ph: normalizeAndHash(userData.whatsapp),
+    fn: userData.nome ? normalizeAndHash(userData.nome.split(' ')[0]) : '',
+    ln: userData.nome ? normalizeAndHash(userData.nome.split(' ').slice(1).join(' ')) : '',
+    ct: normalizeAndHash('sao paulo'), // ajuste se cidade dinâmica
+    st: normalizeAndHash('sp'), // ajuste se estado dinâmico
+    zp: normalizeAndHash('00000000'), // ajuste se CEP dinâmico
+    country: normalizeAndHash('br'), // ajuste se país dinâmico
+    external_id: userData.external_id ? normalizeAndHash(userData.external_id) : '',
+    fbp: userData.fbp || undefined,
+    fbc: userData.fbc || undefined,
+    client_user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+  };
+
   // Identificação para deduplicação e atribuição
   const identificationParameters = {
     eventID: userData.eventID,
     fbp: userData.fbp,
     fbc: userData.fbc,
     external_id: userData.external_id,
+    user_data,
   };
 
   // Nunca envie email, nome, telefone, cidade, UF, CEP, país como custom param
