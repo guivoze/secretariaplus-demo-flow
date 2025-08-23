@@ -123,192 +123,88 @@ export const Step6Loading = () => {
   }, [posts]);
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background particles */}
-      <div className="absolute inset-0">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white/20 rounded-full"
-            initial={{ 
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-              opacity: 0
-            }}
-            animate={{ 
-              y: [null, -100],
-              opacity: [0, 1, 0]
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 3
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Instagram posts slideshow background with enhanced blur */}
-      <div className="absolute inset-0 opacity-20">
+    <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Instagram posts slideshow background */}
+      <div className="absolute inset-0 opacity-32">
         <motion.div
           key={currentPostIndex}
-          initial={{ opacity: 0, scale: 1.2 }}
+          initial={{ opacity: 0, scale: 1.1 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ duration: 2, ease: "easeInOut" }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${posts[currentPostIndex].image})`,
-            filter: 'blur(8px) saturate(1.2)'
+            filter: 'blur(3px)'
           }}
         />
       </div>
 
-      {/* Main content */}
       <motion.div
-        initial={{ opacity: 0, y: 50, scale: 0.9 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="bg-background/90 backdrop-blur-xl rounded-3xl p-8 text-center space-y-8 shadow-2xl border border-white/10">
-          {/* Enhanced profile image with glow effect */}
+        <CustomCard variant="elevated" className="text-center space-y-6">
           <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-            className="relative mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="w-16 h-16 bg-gray-800 rounded-full mx-auto flex items-center justify-center overflow-hidden"
           >
-            <div className="w-24 h-24 relative">
-              {/* Glow ring */}
-              <motion.div
-                className="absolute inset-0 rounded-full bg-gradient-to-r from-primary via-accent to-primary"
-                animate={{ 
-                  rotate: 360,
-                  scale: [1, 1.1, 1]
-                }}
-                transition={{ 
-                  rotate: { duration: 8, repeat: Infinity, ease: "linear" },
-                  scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-                }}
-                style={{ padding: '3px' }}
-              >
-                <div className="w-full h-full bg-background rounded-full flex items-center justify-center overflow-hidden">
-                  {profileImage ? (
-                    <img 
-                      src={profileImage} 
-                      alt="Profile" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-xl font-bold text-foreground">
-                      {userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
-                    </span>
-                  )}
-                </div>
-              </motion.div>
-            </div>
+            {profileImage ? (
+              <img 
+                src={profileImage} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-lg font-medium text-white">
+                {userData.instagram ? userData.instagram.charAt(0).toUpperCase() : 'U'}
+              </span>
+            )}
           </motion.div>
 
-          {/* Enhanced name with magical sparkles */}
+          {/* Nome da pessoa com sparkles */}
           {userData.aiInsights?.name && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-              className="flex items-center justify-center gap-2"
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="flex items-center justify-center gap-1"
             >
-              <motion.i 
-                className="fa-solid fa-sparkles text-accent"
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 10, -10, 0]
-                }}
-                transition={{ 
-                  duration: 2, 
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              <span className="text-lg font-medium text-foreground">
+              <span className="text-small text-gray-500">
                 {userData.aiInsights.name}
               </span>
-              <motion.i 
-                className="fa-solid fa-sparkles text-accent"
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  rotate: [0, -10, 10, 0]
-                }}
-                transition={{ 
-                  duration: 2, 
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 0.5
-                }}
-              />
+              <i className="fa-solid fa-sparkles text-sm text-gray-500"></i>
             </motion.div>
           )}
 
-          {/* Enhanced loading text with typewriter effect */}
-          <div className="h-8 flex items-center justify-center">
+          <div className="h-6 flex items-center justify-center">
             <motion.div
               key={currentStepIndex}
-              initial={{ opacity: 0, y: 20, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.8 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-lg font-medium text-foreground relative"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-content-medium text-foreground"
             >
-              <motion.span
-                animate={{
-                  textShadow: [
-                    "0 0 0px rgba(255,255,255,0.5)",
-                    "0 0 20px rgba(255,255,255,0.8)",
-                    "0 0 0px rgba(255,255,255,0.5)"
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                {currentStepIndex < loadingSteps.length ? loadingSteps[currentStepIndex] : "Concluído!"}
-              </motion.span>
+              {currentStepIndex < loadingSteps.length ? loadingSteps[currentStepIndex] : "Concluído!"}
             </motion.div>
           </div>
 
-          {/* Enhanced progress bar with glow */}
-          <div className="space-y-3">
-            <div className="w-full bg-muted rounded-full h-3 overflow-hidden relative">
-              <motion.div
-                className="h-full bg-gradient-to-r from-primary via-accent to-primary rounded-full relative"
-                initial={{ width: 0 }}
-                animate={{ width: `${(currentStepIndex / loadingSteps.length) * 100}%` }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-              >
-                {/* Animated shine effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                  animate={{ 
-                    x: ["-100%", "100%"] 
-                  }}
-                  transition={{ 
-                    duration: 1.5, 
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-              </motion.div>
-            </div>
-            
-            {/* Progress percentage */}
+          <div className="w-full bg-gray-200 rounded-full h-2">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-sm text-muted-foreground font-medium"
-            >
-              {Math.round((currentStepIndex / loadingSteps.length) * 100)}%
-            </motion.div>
+              className="bg-gray-800 h-2 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${(currentStepIndex / loadingSteps.length) * 100}%` }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            />
           </div>
-        </div>
+
+
+        </CustomCard>
       </motion.div>
     </div>
   );
