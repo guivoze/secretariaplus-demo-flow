@@ -79,8 +79,8 @@ function hashEmail(email) {
 }
 
 function hashPhone(phone) {
-  const clean = phone.replace(/\D/g, '');
-  return crypto.createHash('sha256').update(clean).digest('hex');
+  const formatted = formatPhoneE164(phone);
+  return crypto.createHash('sha256').update(formatted).digest('hex');
 }
 
 function hashString(str) {
@@ -88,4 +88,9 @@ function hashString(str) {
     .createHash('sha256')
     .update(str.toLowerCase().trim())
     .digest('hex');
+}
+
+function formatPhoneE164(phone) {
+  const digits = phone.replace(/\D/g, '');
+  return digits.startsWith('55') ? '+' + digits : '+55' + digits;
 }

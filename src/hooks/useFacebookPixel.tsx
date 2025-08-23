@@ -55,6 +55,15 @@ const getEnrichedData = () => {
   };
 };
 
+function normalizeEmail(email: string): string {
+  return email.toLowerCase().trim();
+}
+
+function normalizePhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  return digits.startsWith('55') ? '+' + digits : '+55' + digits;
+}
+
 export const useFacebookPixel = () => {
   // Atualiza Advanced Matching quando temos dados do usuário
   const updateAdvancedMatching = useCallback((userData: any) => {
@@ -66,8 +75,8 @@ export const useFacebookPixel = () => {
   const trackEvent = useCallback((eventName: string, parameters?: Record<string, any>) => {
     if (typeof window !== 'undefined' && window.fbq) {
       const enrichedParams = {
+        ...getEnrichedData(),
         ...parameters,
-        ...getEnrichedData()
       };
       window.fbq('track', eventName, enrichedParams);
       console.log(`[Facebook Pixel] Evento "${eventName}" disparado:`, enrichedParams);
@@ -87,7 +96,15 @@ export const useFacebookPixel = () => {
       return;
     }
 
-    updateAdvancedMatching(userData);
+    const normalizedEmail = normalizeEmail(userData.email);
+    const normalizedPhone = normalizePhone(userData.whatsapp);
+    const normalizedUser = {
+      ...userData,
+      email: normalizedEmail,
+      whatsapp: normalizedPhone,
+    };
+
+    updateAdvancedMatching(normalizedUser);
 
     const eventId = window.generateEventId ? window.generateEventId() : 'evt_' + Date.now();
 
@@ -102,14 +119,14 @@ export const useFacebookPixel = () => {
       content_ids: ['demo_secretariaplus'],
       value: 1.0,
       currency: 'BRL',
-      email: userData.email,
-      phone: userData.whatsapp,
-      fn: userData.nome ? userData.nome.split(' ')[0] : undefined,
-      ln: userData.nome ? userData.nome.split(' ').slice(1).join(' ') : undefined,
-      instagram: userData.instagram,
-      nome: userData.nome,
-      whatsapp: userData.whatsapp,
-      especialidade: userData.especialidade
+      email: normalizedEmail,
+      phone: normalizedPhone,
+      fn: normalizedUser.nome ? normalizedUser.nome.split(' ')[0] : undefined,
+      ln: normalizedUser.nome ? normalizedUser.nome.split(' ').slice(1).join(' ') : undefined,
+      instagram: normalizedUser.instagram,
+      nome: normalizedUser.nome,
+      whatsapp: normalizedUser.whatsapp,
+      especialidade: normalizedUser.especialidade,
     };
 
     // Dispara via Pixel
@@ -118,11 +135,11 @@ export const useFacebookPixel = () => {
     // Dispara via Conversion API com o mesmo eventID
     try {
       await trackLeadConversionApi({
-        ...userData,
+        ...normalizedUser,
         eventID: eventId,
         fbp: parameters.fbp,
         fbc: parameters.fbc,
-        external_id: parameters.external_id
+        external_id: parameters.external_id,
       });
     } catch (error) {
       console.error('[Facebook Pixel] Erro na Conversion API:', error);

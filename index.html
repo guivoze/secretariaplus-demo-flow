@@ -74,6 +74,12 @@
         return null;
       };
 
+      // Função para normalizar telefone no formato E.164
+      function normalizePhone(phone) {
+        const digits = phone.replace(/\D/g, '');
+        return digits.startsWith('55') ? '+' + digits : '+55' + digits;
+      }
+
       // Facebook Pixel - Código Base com Advanced Matching
       !(function (f, b, e, v, n, t, s) {
         if (f.fbq) return;
@@ -101,15 +107,22 @@
       window.updateFacebookAdvancedMatching = function (userData) {
         if (userData) {
           fbq('init', '1245486659923087', {
-            em: userData.email ? userData.email.toLowerCase() : undefined,
+            em: userData.email
+              ? userData.email.toLowerCase().trim()
+              : undefined,
             ph: userData.whatsapp
-              ? userData.whatsapp.replace(/\D/g, '')
+              ? normalizePhone(userData.whatsapp)
               : undefined,
             fn: userData.nome
-              ? userData.nome.split(' ')[0].toLowerCase()
+              ? userData.nome.split(' ')[0].toLowerCase().trim()
               : undefined,
             ln: userData.nome
-              ? userData.nome.split(' ').slice(1).join(' ').toLowerCase()
+              ? userData.nome
+                  .split(' ')
+                  .slice(1)
+                  .join(' ')
+                  .toLowerCase()
+                  .trim()
               : undefined,
             external_id: window.getExternalId(),
           });
