@@ -25,13 +25,7 @@ export const Step8Confirmation = () => {
           nome: userData.nome,
           email: userData.email,
           whatsapp: userData.whatsapp,
-          especialidade: userData.especialidade,
-          faturamento: userData.faturamento,
-          followers: userData.followers,
-          posts: userData.posts,
-          clinicName: userData.clinicName,
-          procedures: userData.procedures,
-          aiInsights: userData.aiInsights
+          especialidade: userData.especialidade
         });
       }
     };
