@@ -119,13 +119,11 @@ export const useFacebookPixel = () => {
       content_ids: ['demo_secretariaplus'],
       value: 1.0,
       currency: 'BRL',
-      email: normalizedEmail,
-      phone: normalizedPhone,
+      em: normalizedEmail,
+      ph: normalizedPhone,
       fn: normalizedUser.nome ? normalizedUser.nome.split(' ')[0] : undefined,
       ln: normalizedUser.nome ? normalizedUser.nome.split(' ').slice(1).join(' ') : undefined,
       instagram: normalizedUser.instagram,
-      nome: normalizedUser.nome,
-      whatsapp: normalizedUser.whatsapp,
       especialidade: normalizedUser.especialidade,
     };
 
