@@ -9,22 +9,25 @@ export const Step12Result = () => {
 
   const cases = [
     {
-      name: "Dra. Alana Ferri",
-      specialty: "Harmonização Facial",
-      text: "A gente perdia muito paciente pela demora no atendimento. Agora é tudo automático e nossa conversão triplicou!",
-      rating: 5
+      name: "Dra. Fernanda Rabelo",
+      specialty: "Cirurgia Plástica",
+      text: "Investimos por aqui mais de 20 mil em tráfego e a secretaria plus arrebenta com os leads",
+      rating: 5,
+      image: "/imgs/fernanda.webp"
     },
     {
-      name: "Dra. Adriana Martins",
+      name: "Dra. Adriana Martinuzzo",
       specialty: "Estética Avançada",
-      text: "Ela responde igualzinho um humano... Meus pacientes nem percebem que é uma IA. Incrível!",
-      rating: 5
+      text: "Ela responde igualzinho um humano e gera muita empatia com os pacientes",
+      rating: 5,
+      image: "/imgs/adriana.webp"
     },
     {
-      name: "Dra. Tânia Kelly",
+      name: "Dra. Danielle Freitas",
       specialty: "Dermatologia Estética",
-      text: "Dispensei um time comercial que custava R$ 8mil/mês. A IA faz tudo melhor e 24h por dia.",
-      rating: 5
+      text: "tirou um peso das minhas costas",
+      rating: 5,
+      image: "/imgs/danif.webp"
     }
   ];
 
@@ -65,10 +68,12 @@ export const Step12Result = () => {
               <CustomCard variant="bordered" className="p-4 hover:shadow-lg transition-all duration-300">
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-gray-600 text-sm font-bold">
-                        {caseItem.name.split(' ')[1].charAt(0)}
-                      </span>
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <img 
+                        src={caseItem.image} 
+                        alt={caseItem.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 text-sm">{caseItem.name}</h4>
@@ -82,7 +87,6 @@ export const Step12Result = () => {
                   </div>
 
                   <div className="relative">
-                    <Quote className="w-4 h-4 text-gray-400 absolute -top-1 -left-1" />
                     <p className="text-xs text-gray-700 leading-relaxed pl-3">
                       "{caseItem.text}"
                     </p>

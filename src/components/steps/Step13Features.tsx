@@ -37,11 +37,12 @@ export const Step13Features = () => {
             className="space-y-6"
           >
             {/* Placeholder para imagem do CRM */}
-            <div className="bg-gray-100 rounded-lg p-8 border border-gray-200 flex items-center justify-center min-h-[140px]">
-              <div className="text-center space-y-2">
-                <CreditCard className="w-8 h-8 text-amber-600 mx-auto" />
-                <div className="text-xs text-gray-500 font-mono">CRM_INTERFACE_PLACEHOLDER</div>
-              </div>
+            <div className="bg-gray-100 rounded-lg p-8 border border-gray-200 flex items-center justify-center min-h-[140px] overflow-hidden">
+              <img 
+                src="/imgs/crm.webp" 
+                alt="Interface do CRM automático" 
+                className="w-full h-full object-cover rounded-lg"
+              />
             </div>
 
             <div className="space-y-4">
@@ -67,17 +68,12 @@ export const Step13Features = () => {
             className="space-y-6"
           >
             {/* Placeholder para imagem do áudio */}
-            <div className="bg-gray-100 rounded-lg p-8 border border-gray-200 flex items-center justify-center min-h-[160px]">
-              <div className="text-center space-y-2">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <div className="w-20 h-2 bg-green-200 rounded-full">
-                    <div className="w-3/4 h-full bg-green-500 rounded-full"></div>
-                  </div>
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                </div>
-                <div className="text-xs text-gray-500 font-mono">AUDIO_PROCESSING_PLACEHOLDER</div>
-              </div>
+            <div className="bg-gray-100 rounded-lg p-8 border border-gray-200 flex items-center justify-center min-h-[160px] overflow-hidden">
+              <img 
+                src="/imgs/audio.webp" 
+                alt="Processamento de áudio" 
+                className="w-full h-full object-cover rounded-lg"
+              />
             </div>
 
             <div className="space-y-4">
@@ -104,23 +100,12 @@ export const Step13Features = () => {
             className="space-y-6"
           >
             {/* Placeholder para imagem do follow-up */}
-            <div className="bg-gray-100 rounded-lg p-6 border border-gray-200 min-h-[200px]">
-              <div className="space-y-3">
-                {/* Simulação de conversa WhatsApp */}
-                <div className="bg-green-100 p-3 rounded-lg max-w-[80%] ml-auto">
-                  <div className="text-xs text-gray-500 mb-1">Pati, vi que nossa conversa ficou em aberto...</div>
-                  <div className="text-xs text-gray-400">18:29 ✓✓</div>
-                </div>
-                <div className="bg-green-100 p-3 rounded-lg max-w-[80%] ml-auto">
-                  <div className="text-xs text-gray-500 mb-1">Está por aí? 👀</div>
-                  <div className="text-xs text-gray-400">18:32 ✓✓</div>
-                </div>
-                <div className="flex items-center justify-center mt-4">
-                  <div className="w-12 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <div className="text-xs text-gray-500 font-mono">CHAT_PLACEHOLDER</div>
-                  </div>
-                </div>
-              </div>
+            <div className="bg-gray-100 rounded-lg p-6 border border-gray-200 min-h-[200px] overflow-hidden">
+              <img 
+                src="/imgs/follow up.webp" 
+                alt="Interface de follow-up" 
+                className="w-full h-full object-cover rounded-lg"
+              />
             </div>
 
             <div className="space-y-4">

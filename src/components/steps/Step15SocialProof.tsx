@@ -13,28 +13,28 @@ export const Step15SocialProof = () => {
       specialty: "Harmonização Facial",
       text: "A gente perdia muito paciente pela demora no atendimento. Agora é tudo automático e nossa conversão triplicou!",
       rating: 5,
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face"
+      image: "/imgs/loadai.webp"
     },
     {
       name: "Dra. Adriana Martins",
       specialty: "Estética Avançada",
       text: "Ela responde igualzinho um humano... Meus pacientes nem percebem que é uma IA. Incrível!",
       rating: 5,
-      image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=100&h=100&fit=crop&crop=face"
+      image: "/imgs/loadai.webp"
     },
     {
       name: "Dra. Tânia Kelly",
       specialty: "Dermatologia Estética",
       text: "Dispensei um time comercial que custava R$ 8mil/mês. A IA faz tudo melhor e 24h por dia.",
       rating: 5,
-      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face"
+      image: "/imgs/loadai.webp"
     },
     {
       name: "Dra. Fernanda Rabelo",
       specialty: "Cirurgia Plástica",
       text: "Investimos mais de 20 mil em outras soluções que não funcionaram. Essa aqui vale cada centavo!",
       rating: 5,
-      image: "https://images.unsplash.com/photo-1594824389862-a70b1c28d2b4?w=100&h=100&fit=crop&crop=face"
+      image: "/imgs/loadai.webp"
     }
   ];
 

@@ -38,11 +38,12 @@ export const Step14Emergency = () => {
             className="space-y-4"
           >
             {/* Toast notification placeholder */}
-            <div className="bg-gray-100 rounded-lg p-8 border border-gray-200 flex items-center justify-center min-h-[120px]">
-              <div className="text-center space-y-2">
-                <AlertTriangle className="w-8 h-8 text-red-600 mx-auto" />
-                <div className="text-xs text-gray-500 font-mono">TOAST_NOTIFICATION_PLACEHOLDER</div>
-              </div>
+            <div className="flex items-center justify-center min-h-[120px]">
+              <img 
+                src="/imgs/step14.webp" 
+                alt="Notificação de emergência" 
+                className="w-full max-w-md h-auto drop-shadow-lg"
+              />
             </div>
           </motion.div>
 

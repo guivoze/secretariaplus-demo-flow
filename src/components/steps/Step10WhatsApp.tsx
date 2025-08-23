@@ -518,7 +518,7 @@ export const Step10WhatsApp = () => {
 							<div className="mx-auto max-w-sm bg-white rounded-lg shadow-2xl p-4 text-center">
 								<div className="flex items-start gap-3">
 									<div className="text-green-500 text-2xl">✅</div>
-									<div className="flex-1">
+									<div className="flex-1 text-left">
 										<h3 className="font-semibold text-gray-900">Novo Agendamento!</h3>
 										<p className="text-sm text-gray-600 mt-1">Paciente acabou de marcar {appointment?.procedure || userData.especialidade || 'procedimento'}</p>
 									</div>

@@ -77,10 +77,12 @@ Quero implementar na minha clínica!`;
             className="space-y-4"
           >
             {/* Placeholder para logo SVG */}
-            <div className="bg-gray-100 rounded-lg p-6 border border-gray-200 flex items-center justify-center min-h-[80px]">
-              <div className="text-center space-y-2">
-                <div className="text-xs text-gray-500 font-mono">SECRETARIAPLUS_LOGO_SVG_PLACEHOLDER</div>
-              </div>
+            <div className="flex items-center justify-center min-h-[80px]">
+              <img 
+                src="/imgs/logo-blk.svg" 
+                alt="Logo SecretariaPlus" 
+                className="w-16 h-16"
+              />
             </div>
           </motion.div>
 

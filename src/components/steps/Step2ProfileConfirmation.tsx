@@ -49,7 +49,7 @@ export const Step2ProfileConfirmation = () => {
               const profile = {
                 at: `@${data[userKey]}`,
                 username: data[nameKey] || data[userKey],
-                photo: data[pfpKey] || 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
+                photo: data[pfpKey] || '/imgs/loadai.webp'
               };
               profileOptions.push(profile);
             }
@@ -64,7 +64,7 @@ export const Step2ProfileConfirmation = () => {
         setProfiles([{
           at: `@${userData.instagram}`,
           username: userData.instagram,
-          photo: 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
+          photo: '/imgs/loadai.webp'
         }]);
       }
     } else {
@@ -72,7 +72,7 @@ export const Step2ProfileConfirmation = () => {
       setProfiles([{
         at: `@${userData.instagram}`,
         username: userData.instagram,
-        photo: 'https://via.placeholder.com/150x150/E5C197/000000?text=Profile'
+        photo: '/imgs/loadai.webp'
       }]);
     }
   }, [userData.instagram, nextStep]);

@@ -7,11 +7,11 @@ export const Step8Confirmation = () => {
   const { userData, nextStep } = useDemo();
 
   const procedureImages = [
-    "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=200&h=200&fit=crop&crop=face",
-    "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=200&h=200&fit=crop",
-    "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&h=200&fit=crop",
-    "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=200&h=200&fit=crop",
-    "https://images.unsplash.com/photo-1594824389862-a70b1c28d2b4?w=200&h=200&fit=crop"
+    "/imgs/crm.webp",
+    "/imgs/audio.webp",
+    "/imgs/follow up.webp",
+    "/imgs/step14.webp",
+    "/imgs/loadai.webp"
   ];
 
   return (

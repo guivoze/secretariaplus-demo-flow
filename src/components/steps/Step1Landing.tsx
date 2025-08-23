@@ -78,21 +78,25 @@ export const Step1Landing = () => {
         <div className="bg-card rounded-3xl shadow-2xl border border-border/50 overflow-hidden backdrop-blur-sm">
           {/* Hero Image Area */}
           <div className="relative h-32 sm:h-40 bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
-            <div className="absolute inset-0 mix-blend-overlay">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-full h-full">
-                <path d="M0 0h100v100H0z" fill="#ffffff" fillOpacity="0.1" />
-              </svg>
-            </div>
+            {/* Background Image */}
+            <img 
+              src="/imgs/step1.webp" 
+              alt="Background" 
+              className="absolute inset-0 w-full h-full object-cover brightness-75"
+            />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-card rounded-2xl shadow-lg flex items-center justify-center">
-                <div className="text-xl sm:text-2xl font-bold text-primary">
-              </div>
+                <img 
+                  src="/imgs/logo2.svg" 
+                  alt="Logo" 
+                  className="w-10 h-10 sm:w-12 sm:h-12"
+                />
               </div>
             </div>
           </div>
 
           {/* Content */}
-          <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+          <div className="p-6 sm:p-8 space-y-8 sm:space-y-10">
             <motion.div initial={{
             opacity: 0,
             y: 20

@@ -14,17 +14,17 @@ const getLoadingSteps = (rapport1: string, rapport2: string) => [
 
 const instagramPosts = [
   {
-    image: "https://via.placeholder.com/300x300/E5C197/000000?text=Post+1",
+    image: "/imgs/loadai.webp",
     likes: "142",
     comments: "23"
   },
   {
-    image: "https://via.placeholder.com/300x300/E5C197/000000?text=Post+2", 
+    image: "/imgs/loadai.webp", 
     likes: "89",
     comments: "12"
   },
   {
-    image: "https://via.placeholder.com/300x300/E5C197/000000?text=Post+3",
+    image: "/imgs/loadai.webp",
     likes: "201",
     comments: "34"
   }
@@ -131,7 +131,7 @@ export const Step6Loading = () => {
           initial={{ opacity: 0, scale: 1.1 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${posts[currentPostIndex].image})`,
@@ -202,6 +202,8 @@ export const Step6Loading = () => {
               transition={{ duration: 0.5, ease: "easeOut" }}
             />
           </div>
+
+
         </CustomCard>
       </motion.div>
     </div>

@@ -522,7 +522,7 @@ export const SupabaseDemoProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const nextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 15)); // Max 15 steps now (0-15, but step 15 is CTA)
+    setCurrentStep(prev => Math.min(prev + 1, 16)); // Max 16 steps now (0-16, but step 16 is CTA)
   };
 
   const prevStep = () => {

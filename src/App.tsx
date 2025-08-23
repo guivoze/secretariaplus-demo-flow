@@ -13,6 +13,7 @@ import { Step3Pain } from "@/components/steps/Step3Pain";
 import { Step4Agitate } from "@/components/steps/Step4Agitate";
 import { Step5Solution } from "@/components/steps/Step5Solution";
 import { Step6Loading } from "@/components/steps/Step6Loading";
+import { StepLoadingProfile } from "@/components/steps/StepLoadingProfile";
 import { Step7Form } from "@/components/steps/Step7Form";
 import { Step9PreChat } from "@/components/steps/Step9PreChat";
 import { Step10WhatsApp } from "@/components/steps/Step10WhatsApp";
@@ -42,11 +43,11 @@ const DemoContent = () => {
 	useEffect(() => {
 		(window as any).nav = {
 			goto: (step: number) => {
-				if (step >= 0 && step <= 15) {
+				if (step >= 0 && step <= 16) {
 					setCurrentStep(step);
 					console.log(`✅ Navegando para o step ${step}`);
 				} else {
-					console.log(`❌ Step inválido. Use um número entre 0 e 15`);
+					console.log(`❌ Step inválido. Use um número entre 0 e 16`);
 				}
 			},
 			next: () => {
@@ -68,7 +69,7 @@ const DemoContent = () => {
 			help: () => {
 				console.log(`
 🚀 COMANDOS DE NAVEGAÇÃO:
-nav.goto(N)  - Vai para o step N (0-15)
+nav.goto(N)  - Vai para o step N (0-16)
 nav.next()   - Próximo step
 nav.prev()   - Step anterior  
 nav.current()- Mostra step atual
@@ -84,14 +85,15 @@ nav.help()   - Mostra esta ajuda
 5  - Agitate
 6  - Solution
 7  - Loading
-8  - Form
-9  - PreChat
-10 - WhatsApp
-11 - Calendar
-12 - Result
-13 - Features
-14 - Emergency
-15 - CTA
+8  - Loading Profile (se necessário)
+9  - Form
+10 - PreChat
+11 - WhatsApp
+12 - Calendar
+13 - Result
+14 - Features
+15 - Emergency
+16 - CTA
 				`);
 			}
 		};
@@ -162,20 +164,22 @@ nav.help()   - Mostra esta ajuda
 			case 7:
 				return <Step6Loading />;
 			case 8:
-				return <Step7Form />;
+				return <StepLoadingProfile />;
 			case 9:
-				return <Step9PreChat />;
+				return <Step7Form />;
 			case 10:
-				return <Step10WhatsApp />;
+				return <Step9PreChat />;
 			case 11:
-				return <Step11Calendar />;
+				return <Step10WhatsApp />;
 			case 12:
-				return <Step12Result />;
+				return <Step11Calendar />;
 			case 13:
-				return <Step13Features />;
+				return <Step12Result />;
 			case 14:
-				return <Step14Emergency />;
+				return <Step13Features />;
 			case 15:
+				return <Step14Emergency />;
+			case 16:
 				return <Step16CTA />;
 			default:
 				return <Step16CTA />;

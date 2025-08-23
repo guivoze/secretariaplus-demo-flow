@@ -2,7 +2,7 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
-import { MessageCircle, User, Bot, Phone, Video, MoreVertical, Send } from "lucide-react";
+import { MessageCircle, User, Phone, Video, MoreVertical, Send, Zap } from "lucide-react";
 export const Step9PreChat = () => {
   const {
     nextStep,
@@ -118,7 +118,7 @@ export const Step9PreChat = () => {
               </div>
               <div className="text-lg text-muted-foreground">VS</div>
               <div className="text-center">
-                <Bot className="w-6 h-6 text-gray-800 mx-auto mb-2" />
+                <Zap className="w-6 h-6 text-gray-800 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">I.A como<br />Secretária</p>
               </div>
             </div>
