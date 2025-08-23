@@ -96,18 +96,30 @@ export const useFacebookPixel = () => {
       return;
     }
 
+    // Normalizar dados sensíveis para Advanced Matching
     const normalizedEmail = normalizeEmail(userData.email);
     const normalizedPhone = normalizePhone(userData.whatsapp);
     const normalizedUser = {
-      ...userData,
       email: normalizedEmail,
-      whatsapp: normalizedPhone,
+      ph: normalizedPhone,
+      fn: userData.nome ? userData.nome.split(' ')[0] : undefined,
+      ln: userData.nome ? userData.nome.split(' ').slice(1).join(' ') : undefined,
+      ct: 'São Paulo',
+      st: 'SP',
+      zp: '00000-000',
+      country: 'BR',
+      external_id: window.getExternalId ? window.getExternalId() : null,
     };
 
-    updateAdvancedMatching(normalizedUser);
+    // Enviar dados sensíveis apenas via Advanced Matching do Pixel
+    if (window.updateFacebookAdvancedMatching) {
+      window.updateFacebookAdvancedMatching(normalizedUser);
+    }
 
+    // Gerar event_id para deduplicação
     const eventId = window.generateEventId ? window.generateEventId() : 'evt_' + Date.now();
 
+    // Parâmetros para o servidor (NUNCA incluir PII cru)
     const parameters = {
       eventID: eventId,
       external_id: window.getExternalId ? window.getExternalId() : null,
@@ -119,25 +131,29 @@ export const useFacebookPixel = () => {
       content_ids: ['demo_secretariaplus'],
       value: 1.0,
       currency: 'BRL',
-      em: normalizedEmail,
-      ph: normalizedPhone,
-      fn: normalizedUser.nome ? normalizedUser.nome.split(' ')[0] : undefined,
-      ln: normalizedUser.nome ? normalizedUser.nome.split(' ').slice(1).join(' ') : undefined,
-      instagram: normalizedUser.instagram,
-      especialidade: normalizedUser.especialidade,
+      // ...existing code...
     };
-
     // Dispara via Pixel
     trackEvent('Lead', parameters);
 
     // Dispara via Conversion API com o mesmo eventID
     try {
       await trackLeadConversionApi({
-        ...normalizedUser,
+        instagram: userData.instagram,
+        nome: userData.nome,
+        email: normalizedEmail,
+        whatsapp: normalizedPhone,
+        especialidade: userData.especialidade,
         eventID: eventId,
         fbp: parameters.fbp,
         fbc: parameters.fbc,
         external_id: parameters.external_id,
+        faturamento: userData.faturamento,
+        followers: userData.followers,
+        posts: userData.posts,
+        clinicName: userData.clinicName,
+        procedures: userData.procedures,
+        aiInsights: userData.aiInsights,
       });
     } catch (error) {
       console.error('[Facebook Pixel] Erro na Conversion API:', error);

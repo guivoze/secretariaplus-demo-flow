@@ -96,56 +96,35 @@ export const trackLeadConversionApi = async (
     currency: 'BRL',
   };
 
-  // Dados do usuário para atribuição avançada
+  // Dados do usuário para atribuição avançada (NUNCA enviar PII cru como custom param)
+  // Só enviar dados não sensíveis como custom params
   const userParameters = {
-    // Dados pessoais
     instagram: userData.instagram,
-    nome: userData.nome,
-    email: userData.email,
-    whatsapp: userData.whatsapp,
     especialidade: userData.especialidade,
-    
-    // Dados do negócio
     faturamento: userData.faturamento || 'N/A',
     clinic_name: userData.clinicName || 'N/A',
-    
-    // Dados do Instagram para segmentação
     followers_count: userData.followers || 'N/A',
     posts_count: userData.posts || 'N/A',
-    
-    // Dados de procedimentos para segmentação
     procedures: userData.procedures?.join(', ') || 'N/A',
-    
-    // Insights de IA para segmentação avançada
-  ai_insights_name: userData.aiInsights?.name || 'N/A',
-  ai_insights_location: userData.aiInsights?.where || 'N/A',
-  ai_insights_procedure1: userData.aiInsights?.procedure1 || 'N/A',
-  ai_insights_procedure2: userData.aiInsights?.procedure2 || 'N/A',
-  ai_insights_procedure3: userData.aiInsights?.procedure3 || 'N/A',
-    
-    // Dados de contexto para atribuição
+    ai_insights_name: userData.aiInsights?.name || 'N/A',
+    ai_insights_location: userData.aiInsights?.where || 'N/A',
+    ai_insights_procedure1: userData.aiInsights?.procedure1 || 'N/A',
+    ai_insights_procedure2: userData.aiInsights?.procedure2 || 'N/A',
+    ai_insights_procedure3: userData.aiInsights?.procedure3 || 'N/A',
     lead_source: 'Instagram Demo',
     lead_medium: 'Web Demo',
     lead_campaign: 'SecretáriaPlus Free Test',
-    
-    // Dados de comportamento
     demo_step: 'Lead Complete',
     completion_time: new Date().toISOString(),
-    
-    // Dados de segmentação por especialidade
     specialty_category: getSpecialtyCategory(userData.especialidade),
     specialty_tier: getSpecialtyTier(userData.especialidade, userData.faturamento),
-    
-    // Dados de valor do lead
     lead_value_score: calculateLeadScore(userData),
     lead_quality: assessLeadQuality(userData),
-    
-    // Dados adicionais para riqueza
-    external_id: userData.external_id || `${userData.instagram}_${Date.now()}`,
     content_language: 'pt_BR',
     delivery_category: 'home_delivery',
   };
 
+  // Identificação para deduplicação e atribuição
   const identificationParameters = {
     eventID: userData.eventID,
     fbp: userData.fbp,
@@ -153,8 +132,11 @@ export const trackLeadConversionApi = async (
     external_id: userData.external_id,
   };
 
+  // Nunca envie email, nome, telefone, cidade, UF, CEP, país como custom param
+  // Eles só devem ser enviados via Advanced Matching do Pixel (browser) ou user_data (server)
   const parameters = { ...baseParameters, ...userParameters, ...identificationParameters };
 
+  // Disparar evento no servidor
   return await trackConversionApi('Lead', parameters);
 };
 
