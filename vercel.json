@@ -1,6 +1,12 @@
 {
+  "rewrites": [
+    {
+      "source": "/api/facebook-conversion",
+      "destination": "/api/facebook-conversion.js"
+    }
+  ],
   "functions": {
-    "api/img.js": {
+    "api/facebook-conversion.js": {
       "maxDuration": 10
     }
   }

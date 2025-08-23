@@ -3,13 +3,17 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { CustomInput } from "@/components/ui/custom-input";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
+import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { motion } from "framer-motion";
+
 export const Step7Form = () => {
   const {
     userData,
     setUserData,
     nextStep
   } = useSupabaseDemo();
+  const { trackLead } = useFacebookPixel();
+  
   const [formData, setFormData] = useState({
     email: userData.email || '',
     whatsapp: userData.whatsapp || ''
@@ -22,17 +26,45 @@ export const Step7Form = () => {
   const hasProcedure = !!(procedure1 && procedure1.trim());
   const hasLocation = !!(location && location.trim());
   const backgroundImage = userData.realProfilePic || null;
+  
   const isValidEmail = (email: string) => {
     // Simples validação RFC 5322-like (suficiente para UX)
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
   };
+  
   const isFormValid = isValidEmail(formData.email) && formData.whatsapp;
-  const handleSubmit = () => {
+  
+  const handleSubmit = async () => {
     if (isFormValid) {
       setUserData({
         email: formData.email,
         whatsapp: formData.whatsapp
       });
+
+      // Disparar evento "Lead" quando todos os dados estiverem completos
+      if (
+        userData.instagram &&
+        userData.nome &&
+        formData.email &&
+        formData.whatsapp &&
+        userData.especialidade
+      ) {
+        console.log('[Facebook Pixel] Todos os dados completos, disparando evento Lead');
+        await trackLead({
+          instagram: userData.instagram,
+          nome: userData.nome,
+          email: formData.email,
+          whatsapp: formData.whatsapp,
+          especialidade: userData.especialidade,
+          faturamento: userData.faturamento,
+          followers: userData.followers,
+          posts: userData.posts,
+          clinicName: userData.clinicName,
+          procedures: userData.procedures,
+          aiInsights: userData.aiInsights
+        });
+      }
+
       nextStep();
     }
   };

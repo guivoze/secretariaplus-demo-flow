@@ -15,13 +15,13 @@ export const Step13Features = () => {
         transition={{ duration: 0.6 }}
         className="w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto"
       >
-        <CustomCard variant="elevated" className="space-y-8">
+        <CustomCard variant="elevated" className="space-y-6">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-left space-y-3"
+            className="text-left space-y-2"
           >
             <Sparkles className="w-6 h-6 text-gray-900" />
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
@@ -131,7 +131,7 @@ export const Step13Features = () => {
               onClick={nextStep}
               className="w-full bg-gray-900 hover:bg-gray-800 text-white py-4 rounded-lg font-medium text-lg"
             >
-              Testar Agora →
+              Continuar →
             </CustomButton>
           </motion.div>
         </CustomCard>
