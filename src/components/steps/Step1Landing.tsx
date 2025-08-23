@@ -79,18 +79,10 @@ export const Step1Landing = () => {
           {/* Hero Image Area */}
           <div className="relative h-32 sm:h-40 bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
             {/* Background Image */}
-            <img 
-              src="/imgs/step1.webp" 
-              alt="Background" 
-              className="absolute inset-0 w-full h-full object-cover brightness-75"
-            />
+            <img src="/imgs/step1.webp" alt="Background" className="absolute inset-0 w-full h-full object-cover brightness-75" />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-card rounded-2xl shadow-lg flex items-center justify-center">
-                <img 
-                  src="/imgs/logo2.svg" 
-                  alt="Logo" 
-                  className="w-10 h-10 sm:w-12 sm:h-12"
-                />
+                <img src="/imgs/logo2.svg" alt="Logo" className="w-10 h-10 sm:w-12 sm:h-12" />
               </div>
             </div>
           </div>
@@ -111,7 +103,7 @@ export const Step1Landing = () => {
                 [Grátis] Teste sua Nova Secretária de I.A. em 1 Min.
               </h1>
               
-              <p className="text-muted-foreground leading-relaxed mb-12">Treinaremos ela com base no seu Instagram automagicamente ✨</p>
+              <p className="text-muted-foreground leading-relaxed mb-12">Treinaremos ela com base no seu Instagram automágicamente ✨</p>
             </motion.div>
 
             <motion.div initial={{
