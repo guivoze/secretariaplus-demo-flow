@@ -505,34 +505,36 @@ export const Step10WhatsApp = () => {
 			<AnimatePresence>
 				{showFirstNudge && (
 					<motion.div
-						initial={{ opacity: 0, y: 20 }}
+						initial={{ opacity: 0, y: 10 }}
 						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: -20 }}
-						className="fixed left-4 right-4 z-40 bg-primary/90 backdrop-blur-sm text-primary-foreground px-4 py-3 rounded-lg shadow-lg"
+						exit={{ opacity: 0, y: 10 }}
+						className="fixed left-4 right-4 z-40"
 						style={{
-							top: `calc(72px + 16px)`, // header height + margin
-							bottom: `calc(${effectiveKB}px + 80px + 16px)` // keyboard + input + margin
+							bottom: `calc(${effectiveKB}px + 88px)` // just above input
 						}}
 					>
-						<p className="text-sm text-center">
-							Dica: tente agendar e confirmar uma consulta para ver uma surpresa 🤯
-						</p>
+						<div className="bg-white text-black px-3 py-2 rounded-full shadow-md mx-auto max-w-fit">
+							<p className="text-xs text-center">
+								Dica: tente agendar e confirmar uma consulta para ver uma surpresa 🤯
+							</p>
+						</div>
 					</motion.div>
 				)}
 				{showSecondNudge && (
 					<motion.div
-						initial={{ opacity: 0, y: 20 }}
+						initial={{ opacity: 0, y: 10 }}
 						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: -20 }}
-						className="fixed left-4 right-4 z-40 bg-destructive/90 backdrop-blur-sm text-destructive-foreground px-4 py-3 rounded-lg shadow-lg"
+						exit={{ opacity: 0, y: 10 }}
+						className="fixed left-4 right-4 z-40"
 						style={{
-							top: `calc(72px + 16px)`, // header height + margin
-							bottom: `calc(${effectiveKB}px + 80px + 16px)` // keyboard + input + margin
+							bottom: `calc(${effectiveKB}px + 88px)` // just above input
 						}}
 					>
-						<p className="text-sm text-center">
-							Aviso: Caso você não agende um horário em 30 segundos, iremos avançar para a próxima etapa automaticamente.
-						</p>
+						<div className="bg-white text-black px-3 py-2 rounded-full shadow-md mx-auto max-w-fit">
+							<p className="text-xs text-center">
+								Aviso: Caso você não agende um horário em 30 segundos, iremos avançar para a próxima etapa automaticamente.
+							</p>
+						</div>
 					</motion.div>
 				)}
 			</AnimatePresence>
