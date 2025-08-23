@@ -33,12 +33,12 @@ Quero implementar na minha clínica!`;
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto"
+        className="w-full max-w-3xl my-8"
       >
         <CustomCard variant="elevated" className="text-center space-y-8">
           {/* Confetti effect */}

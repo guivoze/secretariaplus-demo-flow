@@ -9,17 +9,6 @@ export const Step11Calendar = () => {
   const { nextStep, userData, appointment } = useSupabaseDemo();
   console.log('[calendar-ui] appointment from context:', appointment);
 
-  // Garantir que o scroll esteja travado nesta tela (responsividade consistente)
-  useEffect(() => {
-    const prevBody = document.body.style.overflow;
-    const prevHtml = document.documentElement.style.overflow;
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prevBody;
-      document.documentElement.style.overflow = prevHtml;
-    };
-  }, []);
 
   const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const monthDays = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -106,12 +95,12 @@ export const Step11Calendar = () => {
   const appointments = generateSmartAppointments();
 
   return (
-    <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto"
+        className="w-full max-w-lg my-8"
       >
         <CustomCard variant="elevated" className="space-y-4 p-4 sm:p-6">
           <motion.div
