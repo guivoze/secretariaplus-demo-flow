@@ -80,9 +80,16 @@ interface SupabaseDemoContextType {
   findPreviousSession: (instagramHandle: string) => Promise<boolean>;
 }
 
+// Função para sanitizar dados e remover "null" strings
+const sanitizeValue = (value: any): string => {
+  if (value === null || value === undefined || value === 'null' || value === 'undefined') {
+    return '';
+  }
+  return String(value).trim();
+};
+
 const initialUserData: UserData = {
   instagram: '',
-  instagramConfirmed: false,
   nome: '',
   email: '',
   whatsapp: '',
@@ -90,14 +97,14 @@ const initialUserData: UserData = {
   faturamento: '',
   followers: '1.2K',
   posts: '324',
-  profilePic: null,
+  profilePic: '',
   clinicName: 'Clínica Exemplo',
   procedures: ['Botox', 'Preenchimento', 'Limpeza de Pele'],
   hasInstagramData: false,
-  realProfilePic: null,
+  realProfilePic: '',
   realPosts: [],
   aiInsights: null,
-  instagramRequestTime: null
+  instagramRequestTime: 0,
 };
 
 const SupabaseDemoContext = createContext<SupabaseDemoContextType | undefined>(undefined);
@@ -454,19 +461,19 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
     
     // Restore user data
     const restoredData: UserData = {
-      instagram: String(foundPreviousSession.instagram_handle || ''),
-      nome: String(foundPreviousSession.nome || ''),
-      email: String(foundPreviousSession.email || ''),
-      whatsapp: String(foundPreviousSession.whatsapp || ''),
-      especialidade: String(foundPreviousSession.especialidade || ''),
-      faturamento: String(foundPreviousSession.faturamento || ''),
-      followers: String(foundPreviousSession.followers_count || '1.2K'),
-      posts: String(foundPreviousSession.posts_count || '324'),
-      profilePic: String(foundPreviousSession.profile_pic_url || ''),
+      instagram: sanitizeValue(foundPreviousSession.instagram_handle),
+      nome: sanitizeValue(foundPreviousSession.nome),
+      email: sanitizeValue(foundPreviousSession.email),
+      whatsapp: sanitizeValue(foundPreviousSession.whatsapp),
+      especialidade: sanitizeValue(foundPreviousSession.especialidade),
+      faturamento: sanitizeValue(foundPreviousSession.faturamento),
+      followers: sanitizeValue(foundPreviousSession.followers_count) || '1.2K',
+      posts: sanitizeValue(foundPreviousSession.posts_count) || '324',
+      profilePic: sanitizeValue(foundPreviousSession.profile_pic_url),
       clinicName: 'Clínica Exemplo',
       procedures: ['Botox', 'Preenchimento', 'Limpeza de Pele'],
       hasInstagramData: Boolean(foundPreviousSession.has_instagram_data),
-      realProfilePic: String(foundPreviousSession.real_profile_pic_url || ''),
+      realProfilePic: sanitizeValue(foundPreviousSession.real_profile_pic_url),
       realPosts: Array.isArray(foundPreviousSession.real_posts) 
         ? foundPreviousSession.real_posts as string[] 
         : [],
@@ -507,7 +514,25 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
 
   const setUserData = (data: Partial<UserData>) => {
     setUserDataState(prev => {
-      const newData = { ...prev, ...data };
+      // Sanitiza campos específicos que podem vir como "null" string
+      const sanitizedData = { ...data };
+      if (sanitizedData.email !== undefined) {
+        sanitizedData.email = sanitizeValue(sanitizedData.email);
+      }
+      if (sanitizedData.whatsapp !== undefined) {
+        sanitizedData.whatsapp = sanitizeValue(sanitizedData.whatsapp);
+      }
+      if (sanitizedData.nome !== undefined) {
+        sanitizedData.nome = sanitizeValue(sanitizedData.nome);
+      }
+      if (sanitizedData.instagram !== undefined) {
+        sanitizedData.instagram = sanitizeValue(sanitizedData.instagram);
+      }
+      if (sanitizedData.especialidade !== undefined) {
+        sanitizedData.especialidade = sanitizeValue(sanitizedData.especialidade);
+      }
+
+      const newData = { ...prev, ...sanitizedData };
       
       // Só busca sessão anterior quando Instagram estiver CONFIRMADO
       if (

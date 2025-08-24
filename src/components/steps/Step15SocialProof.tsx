@@ -4,7 +4,12 @@ import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 import { Star, Heart, Quote } from "lucide-react";
 
+import { useEffect } from "react";
+
 export const Step15SocialProof = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const { nextStep } = useSupabaseDemo();
 
   const testimonials = [

@@ -4,7 +4,12 @@ import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 import { AlertTriangle, CheckCircle, Phone, MessageCircle } from "lucide-react";
 
+import { useEffect } from "react";
+
 export const Step16CTA = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const { userData } = useSupabaseDemo();
 
   const benefits = [
@@ -20,25 +25,25 @@ export const Step16CTA = () => {
     const message = `Olá! Acabei de testar a demonstração da SecretáriaPlus e quero saber mais!
 
 Meus dados:
-- Nome: ${userData.nome}
-- Instagram: @${userData.instagram}
-- Especialidade: ${userData.especialidade}
-- Email: ${userData.email}
-- WhatsApp: ${userData.whatsapp}
+- Nome: ${userData.nome || 'Não informado'}
+- Instagram: @${userData.instagram || 'Não informado'}
+- Especialidade: ${userData.especialidade || 'Não informada'}
+- Email: ${userData.email || 'Não informado'}
+- WhatsApp: ${userData.whatsapp || 'Não informado'}
 
 Quero implementar na minha clínica!`;
 
-    const whatsappUrl = `https://wa.me/5511999999999?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/551140405847?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+    <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-3xl my-12 pb-12"
+        className="w-full max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto"
       >
         <CustomCard variant="elevated" className="text-center space-y-8">
           {/* Confetti effect */}

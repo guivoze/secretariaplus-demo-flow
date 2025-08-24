@@ -5,20 +5,21 @@ import { CustomInput } from "@/components/ui/custom-input";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { motion } from "framer-motion";
+import { sanitizeValue } from "@/utils/sanitize";
 
 export const Step7Form = () => {
   const { userData, setUserData, nextStep } = useSupabaseDemo();
   const { trackLead } = useFacebookPixel();
   
   const [formData, setFormData] = useState({
-    email: userData.email || '',
-    whatsapp: userData.whatsapp || ''
+    email: sanitizeValue(userData.email),
+    whatsapp: sanitizeValue(userData.whatsapp)
   });
 
   // Pegar primeiro nome e dados da análise do Instagram
-  const firstName = userData.nome ? userData.nome.split(' ')[0] : '';
-  const procedure1 = userData.aiInsights?.procedure1 || '';
-  const location = userData.aiInsights?.where || '';
+  const firstName = sanitizeValue(userData.nome) ? sanitizeValue(userData.nome).split(' ')[0] : '';
+  const procedure1 = sanitizeValue(userData.aiInsights?.procedure1);
+  const location = sanitizeValue(userData.aiInsights?.where);
   const hasProcedure = !!(procedure1 && procedure1.trim());
   const hasLocation = !!(location && location.trim());
   const backgroundImage = userData.realProfilePic || null;

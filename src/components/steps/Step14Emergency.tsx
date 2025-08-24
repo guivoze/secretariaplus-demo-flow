@@ -4,7 +4,12 @@ import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 
+import { useEffect } from "react";
+
 export const Step14Emergency = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const { nextStep } = useSupabaseDemo();
 
   return (

@@ -81,11 +81,11 @@ export const Step8Confirmation = () => {
               </div>
               <div className="p-3 rounded-xl bg-muted/50 border border-border">
                 <span className="text-small text-muted-foreground">Email:</span>
-                <p className="text-content-medium text-foreground">{userData.email}</p>
+                <p className="text-content-medium text-foreground">{userData.email || '-'}</p>
               </div>
               <div className="p-3 rounded-xl bg-muted/50 border border-border">
                 <span className="text-small text-muted-foreground">WhatsApp:</span>
-                <p className="text-content-medium text-foreground">{userData.whatsapp}</p>
+                <p className="text-content-medium text-foreground">{userData.whatsapp || '-'}</p>
               </div>
             </div>
           </motion.div>
