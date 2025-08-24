@@ -302,9 +302,9 @@ export const Step10WhatsApp = () => {
         setShowFirstNudge(true);
         setTimeout(() => setShowFirstNudge(false), 9000); // Hide after 9 seconds
       }
-    }, 600000);
+    }, 60000); // 60 seconds
 
-    // Second nudge at 90 seconds
+    // Second nudge at 120 seconds (2 minutes) - gives more time between nudges
     const secondTimer = setTimeout(() => {
       if (!appointment) { // Only show if no appointment yet
         setShowSecondNudge(true);
@@ -313,7 +313,7 @@ export const Step10WhatsApp = () => {
           nextStep(); // Auto advance after showing the nudge
         }, 30000); // Hide after 30 seconds and advance
       }
-    }, 90000);
+    }, 120000); // 120 seconds (2 minutes)
 
     return () => {
       clearTimeout(firstTimer);

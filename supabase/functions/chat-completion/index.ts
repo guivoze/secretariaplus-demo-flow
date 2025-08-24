@@ -219,68 +219,47 @@ serve(async (req)=>{
               console.log('[chat-fn] get_date ->', result);
             } else if (fn.name === 'appointment') {
               const { dateISO, displayDate, displayTime, patientName, procedure } = args;
-              const tz = 'America/Sao_Paulo';
-              const nowBase = nowEpochMs ? new Date(nowEpochMs) : new Date();
-
-              // Helper para formatar um Date (em tz) para ISO local -03:00
-              const toLocalISO = (d: Date) => {
-                const fmt = new Intl.DateTimeFormat('en-CA', {
-                  timeZone: tz,
-                  year: 'numeric', month: '2-digit', day: '2-digit',
-                  hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
-                });
-                const p = fmt.formatToParts(d);
-                const y = p.find(x=>x.type==='year')?.value;
-                const m = p.find(x=>x.type==='month')?.value;
-                const dd = p.find(x=>x.type==='day')?.value;
-                const hh = p.find(x=>x.type==='hour')?.value;
-                const mm = p.find(x=>x.type==='minute')?.value;
-                const ss = p.find(x=>x.type==='second')?.value;
-                return `${y}-${m}-${dd}T${hh}:${mm}:${ss}-03:00`;
-              };
-
-              let base = dateISO ? new Date(dateISO) : new Date();
-
-              // Normalização de datas antigas: se estiver no passado, ajuste para ano atual, e se ainda ficar no passado, empurre 7 dias
-              const now = nowBase;
-              const nowYear = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric' }).format(now);
-              const bYear = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric' }).format(base);
-              if (parseInt(bYear) < parseInt(nowYear)) {
-                // Reescreve o ano do agendamento para o ano corrente, mantendo mês/dia/hora
-                const parts = new Intl.DateTimeFormat('en-CA', {
-                  timeZone: tz,
-                  year: 'numeric', month: '2-digit', day: '2-digit',
-                  hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
-                }).formatToParts(base);
-                const m = parts.find(x=>x.type==='month')?.value;
-                const d = parts.find(x=>x.type==='day')?.value;
-                const hh = parts.find(x=>x.type==='hour')?.value;
-                const mm = parts.find(x=>x.type==='minute')?.value;
-                const ss = parts.find(x=>x.type==='second')?.value;
-                const rebuilt = `${nowYear}-${m}-${d}T${hh}:${mm}:${ss}-03:00`;
-                base = new Date(rebuilt);
-              }
-              // Se ainda estiver no passado, empurra em blocos de 7 dias até ficar no futuro próximo
-              let safety = 0;
-              while (base.getTime() < now.getTime() && safety < 8) {
-                base = new Date(base.getTime() + 7 * 24 * 60 * 60 * 1000);
-                safety++;
+              
+              // Simplifica: usa a data que veio da IA diretamente, pois ela já foi instruída a usar get_date() como base
+              let appointmentDate = dateISO ? new Date(dateISO) : new Date();
+              
+              // Se a data estiver no passado (considerando UTC), adiciona 7 dias
+              const now = nowEpochMs ? new Date(nowEpochMs) : new Date();
+              if (appointmentDate.getTime() < now.getTime()) {
+                appointmentDate = new Date(appointmentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
               }
 
-              const localISO = toLocalISO(base);
-              const dateLabel = new Intl.DateTimeFormat('pt-BR', {
-                timeZone: tz,
-                day: '2-digit', month: 'long', year: 'numeric'
-              }).format(base);
-              const timeLabel = new Intl.DateTimeFormat('pt-BR', {
-                timeZone: tz,
-                hour: '2-digit', minute: '2-digit', hour12: false
-              }).format(base);
+              // Formata para timezone brasileiro (-03:00)
+              const brazilTime = new Intl.DateTimeFormat('sv-SE', {
+                timeZone: 'America/Sao_Paulo',
+                year: 'numeric',
+                month: '2-digit', 
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+              }).format(appointmentDate);
+              
+              const localISO = `${brazilTime}-03:00`;
+              
+              const dateLabel = displayDate || new Intl.DateTimeFormat('pt-BR', {
+                timeZone: 'America/Sao_Paulo',
+                day: '2-digit', 
+                month: 'long', 
+                year: 'numeric'
+              }).format(appointmentDate);
+              
+              const timeLabel = displayTime || new Intl.DateTimeFormat('pt-BR', {
+                timeZone: 'America/Sao_Paulo',
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: false
+              }).format(appointmentDate);
 
               appointmentPayload = {
                 dateISO: localISO,
-                displayDate: displayDate || dateLabel,
-                displayTime: displayTime || timeLabel,
+                displayDate: dateLabel,
+                displayTime: timeLabel,
                 patientName: patientName || null,
                 procedure: procedure || null
               };
