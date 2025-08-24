@@ -63,9 +63,7 @@ export const sendLeadWebhook = async (leadData: LeadData): Promise<void> => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        body: webhookData,
-      }),
+      body: JSON.stringify(webhookData),
     });
 
     if (!response.ok) {
