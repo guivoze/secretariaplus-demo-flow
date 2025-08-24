@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
-import { CustomInput } from "@/components/ui/custom-input";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
-import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { motion } from "framer-motion";
+import { CustomInput } from "@/components/ui/custom-input";
+import { useFacebookPixel } from "@/hooks/useFacebookPixel";
+import { sendLeadWebhook } from "@/utils/webhook";
 import { sanitizeValue } from "@/utils/sanitize";
 
 export const Step7Form = () => {
@@ -44,13 +45,23 @@ export const Step7Form = () => {
         whatsapp: mergedData.whatsapp,
       });
 
-      await trackLead({
-        instagram: mergedData.instagram,
-        nome: mergedData.nome,
-        email: mergedData.email,
-        whatsapp: mergedData.whatsapp,
-        especialidade: mergedData.especialidade,
-      });
+      // Dispara pixel do Facebook e webhook simultaneamente
+      await Promise.all([
+        trackLead({
+          instagram: mergedData.instagram,
+          nome: mergedData.nome,
+          email: mergedData.email,
+          whatsapp: mergedData.whatsapp,
+          especialidade: mergedData.especialidade,
+        }),
+        sendLeadWebhook({
+          instagram: mergedData.instagram,
+          nome: mergedData.nome,
+          email: mergedData.email,
+          whatsapp: mergedData.whatsapp,
+          especialidade: mergedData.especialidade,
+        })
+      ]);
 
       nextStep();
     }
