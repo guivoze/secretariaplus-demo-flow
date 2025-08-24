@@ -13,7 +13,6 @@ export const Step2ProfileConfirmation = () => {
     userData,
     setUserData,
     nextStep,
-    resetDemo,
     sessionId,
     findPreviousSession,
     openResumeModal

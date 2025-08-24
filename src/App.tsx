@@ -1,8 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { SupabaseDemoProvider, useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { RotateCcw, ChevronLeft } from "lucide-react";
-import { motion } from "framer-motion";
 import { Step1Landing } from "@/components/steps/Step1Landing";
 import { Step2Modal } from "@/components/steps/Step2Modal";
 import { Step2PersonalizationForm } from "@/components/steps/Step2PersonalizationForm";
@@ -22,7 +20,7 @@ import { Step14Emergency } from "@/components/steps/Step14Emergency";
 import { Step16CTA } from "@/components/steps/Step16CTA";
 
 const DemoContent = () => {
-  const { currentStep, prevStep, resetDemo, isLoading } = useSupabaseDemo();
+  const { currentStep, isLoading } = useSupabaseDemo();
   const stepContainerRef = useRef<HTMLDivElement>(null);
 
   // Força scroll do container de steps para o topo a cada troca de step, exceto no Step10WhatsApp
@@ -119,28 +117,6 @@ const DemoContent = () => {
       )}
       <div className="h-full overflow-auto" ref={stepContainerRef}>
         {renderCurrentStep()}
-      </div>
-      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 pb-5">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={prevStep}
-          className="bg-gray-800 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-full shadow-card hover:bg-gray-700 transition-all flex items-center gap-2 text-small"
-          title="Voltar etapa"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Voltar</span>
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={resetDemo}
-          className="bg-gray-800 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-full shadow-card hover:bg-gray-700 transition-all flex items-center gap-2 text-small"
-          title="Reiniciar demonstração"
-        >
-          <RotateCcw className="w-4 h-4" />
-          <span className="hidden sm:inline">Reiniciar</span>
-        </motion.button>
       </div>
     </div>
   );
