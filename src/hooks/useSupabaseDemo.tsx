@@ -171,21 +171,37 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
     }
   }, []);
 
-  // Restore step on refresh
+  // Reset to step 1 on page reload/exit
   useEffect(() => {
-    const savedStep = localStorage.getItem('current-step');
-    if (savedStep) {
-      const stepNum = parseInt(savedStep, 10);
-      if (!Number.isNaN(stepNum)) {
-        setCurrentStep(stepNum);
-      }
-    }
-  }, []);
+    // Always start at step 0 on mount (page load/reload)
+    setCurrentStep(0);
+    
+    // Clear any persisted step data
+    localStorage.removeItem('current-step');
+    
+    // Listen for page unload to reset step
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('current-step');
+      // Reset to step 0 for next session
+      setCurrentStep(0);
+    };
 
-  // Persist step on change
-  useEffect(() => {
-    localStorage.setItem('current-step', String(currentStep));
-  }, [currentStep]);
+    // Listen for visibility change (tab switch, minimize, etc)
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // User left the tab, prepare for potential reload
+        localStorage.removeItem('current-step');
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   // Search for previous sessions by Instagram handle
   const searchPreviousSession = useCallback(async (instagramHandle: string) => {
