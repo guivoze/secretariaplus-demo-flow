@@ -23,7 +23,13 @@ export default async function handler(req, res) {
     const eventId = parameters.eventID ||
       ('api_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9));
 
-    const { email, whatsapp, nome, fbp, fbc, external_id, ...custom_data } = parameters;
+    // Obter URL da fonte do evento (prioriza o que veio do client)
+    const eventSourceUrl =
+      (typeof parameters.event_source_url === 'string' && parameters.event_source_url.startsWith('http'))
+        ? parameters.event_source_url
+        : (req.headers.referer || req.headers.origin || 'https://flow.secretariaplus.com.br');
+
+    const { email, whatsapp, nome, fbp, fbc, external_id, event_source_url: _, ...custom_data } = parameters;
 
     const conversionData = {
       data: [
@@ -32,7 +38,7 @@ export default async function handler(req, res) {
           event_id: eventId,
           event_time: Math.floor(Date.now() / 1000),
           action_source: 'website',
-          event_source_url: req.headers.referer || 'https://flow.secretariaplus.com.br',
+          event_source_url: eventSourceUrl, // OBRIGATÓRIO para eventos web
           user_data: {
             fbp: fbp || undefined,
             fbc: fbc || undefined,
@@ -41,22 +47,21 @@ export default async function handler(req, res) {
             ph: whatsapp ? hashPhone(whatsapp) : undefined,
             fn: nome ? hashString(nome.split(' ')[0]) : undefined,
             ln: nome ? hashString(nome.split(' ').slice(1).join(' ')) : undefined,
-            country: hashString(parameters.country || 'br'),
-            ct: hashString(parameters.ct || 'sao paulo'),
-            st: hashString(parameters.st || 'sp'),
-            zp: hashString(parameters.zp || '00000000'),
+            country: hashString('br'),
+            ct: hashString('sao paulo'),
+            st: hashString('sp'),
+            zp: hashString('00000000'),
             client_user_agent: req.headers['user-agent'],
-            client_ip_address: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+            client_ip_address: getClientIp(req),
           },
           custom_data,
         },
       ],
-      access_token: accessToken,
-      test_event_code: null,
+      test_event_code: process.env.FB_TEST_EVENT_CODE || null,
     };
 
     const response = await fetch(
-      `https://graph.facebook.com/v18.0/${pixelId}/events`,
+      `https://graph.facebook.com/v18.0/${pixelId}/events?access_token=${accessToken}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,4 +106,14 @@ function hashString(str) {
 function formatPhoneE164(phone) {
   const digits = phone.replace(/\D/g, '');
   return digits.startsWith('55') ? '+' + digits : '+55' + digits;
+}
+
+// Função para obter IP real do cliente (considerando proxies)
+function getClientIp(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+         req.headers['x-real-ip'] ||
+         req.headers['x-client-ip'] ||
+         req.connection.remoteAddress ||
+         req.socket.remoteAddress ||
+         (req.connection.socket ? req.connection.socket.remoteAddress : null);
 }

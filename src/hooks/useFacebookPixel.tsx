@@ -8,7 +8,6 @@ declare global {
     getExternalId: () => string;
     getFbp: () => string | null;
     getFbc: () => string | null;
-    updateFacebookAdvancedMatching: (userData: Record<string, unknown>) => void;
   }
 }
 
@@ -19,8 +18,7 @@ const getEnrichedData = () => {
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   return {
-    // IDs de tracking
-    eventID: window.generateEventId ? window.generateEventId() : 'evt_' + Date.now(),
+    // IDs de tracking não sensíveis (sem eventID aqui - vai no 4º argumento)
     external_id: window.getExternalId ? window.getExternalId() : null,
     fbp: window.getFbp ? window.getFbp() : null,
     fbc: window.getFbc ? window.getFbc() : null,
@@ -32,13 +30,7 @@ const getEnrichedData = () => {
     event_time: now.getTime(),
     event_time_interval: getTimeInterval(now.getHours()),
 
-    // Dados geográficos
-    country: 'BR',
-    ct: 'São Paulo',
-    st: 'SP',
-    zp: '00000-000',
-
-    // Dados de contexto
+    // Dados de contexto (sem PII geográfico)
     traffic_source: getTrafficSource(),
     plugin: 'SecretáriaPlus Demo',
     plugin_info: 'https://flow.secretariaplus.com.br',
@@ -65,25 +57,22 @@ function normalizePhone(phone: string): string {
 }
 
 export const useFacebookPixel = () => {
-  // Atualiza Advanced Matching quando temos dados do usuário
-  const updateAdvancedMatching = useCallback(
-    (userData: Record<string, unknown>) => {
-      if (window.updateFacebookAdvancedMatching) {
-        window.updateFacebookAdvancedMatching(userData);
-      }
-    },
-    []
-  );
-
   const trackEvent = useCallback(
-    (eventName: string, parameters?: Record<string, unknown>) => {
+    (eventName: string, parameters?: Record<string, unknown>, eventData?: Record<string, unknown>) => {
       if (typeof window !== 'undefined' && window.fbq) {
         const enrichedParams = {
           ...getEnrichedData(),
           ...parameters,
         };
-        window.fbq('track', eventName, enrichedParams);
-        console.log(`[Facebook Pixel] Evento "${eventName}" disparado:`, enrichedParams);
+        
+        // Se eventData foi fornecido (para deduplicação), incluí-lo como 4º parâmetro
+        if (eventData) {
+          window.fbq('track', eventName, enrichedParams, eventData);
+          console.log(`[Facebook Pixel] Evento "${eventName}" disparado com eventID:`, eventData);
+        } else {
+          window.fbq('track', eventName, enrichedParams);
+          console.log(`[Facebook Pixel] Evento "${eventName}" disparado:`, enrichedParams);
+        }
       }
     },
     []
@@ -104,39 +93,43 @@ export const useFacebookPixel = () => {
       ph: normalizedPhone,
       fn: userData.nome ? userData.nome.split(' ')[0] : undefined,
       ln: userData.nome ? userData.nome.split(' ').slice(1).join(' ') : undefined,
-      ct: 'São Paulo',
-      st: 'SP',
-      zp: '00000-000',
-      country: 'BR',
       external_id: window.getExternalId ? window.getExternalId() : null,
     };
 
-    // Enviar dados sensíveis apenas via Advanced Matching do Pixel
-    if (window.updateFacebookAdvancedMatching) {
-      window.updateFacebookAdvancedMatching(normalizedUser);
-    }
+    // Gerar event_id ÚNICO para deduplicação (CRÍTICO)
+    const eventId = window.generateEventId ? window.generateEventId() : 'evt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-    // Gerar event_id para deduplicação
-    const eventId = window.generateEventId ? window.generateEventId() : 'evt_' + Date.now();
-
-    // Parâmetros para o servidor (NUNCA incluir PII cru)
-    const parameters = {
-      eventID: eventId,
-      external_id: window.getExternalId ? window.getExternalId() : null,
-      fbp: window.getFbp ? window.getFbp() : null,
-      fbc: window.getFbc ? window.getFbc() : null,
+    // Parâmetros básicos para o pixel (SEM dados sensíveis)
+    const pixelParameters = {
       content_name: 'Demo SecretáriaPlus - Free Test',
       content_category: 'Lead Generation',
       content_type: 'product',
       content_ids: ['demo_secretariaplus'],
       value: 1.0,
       currency: 'BRL',
-      // ...existing code...
+      // Dados de contexto (não sensíveis)
+      instagram: userData.instagram,
+      especialidade: userData.especialidade,
+      faturamento: userData.faturamento || 'N/A',
+      clinic_name: userData.clinicName || 'N/A',
+      lead_source: 'Instagram Demo',
+      lead_medium: 'Web Demo',
+      lead_campaign: 'SecretáriaPlus Free Test',
     };
-    // Dispara via Pixel
-    trackEvent('Lead', parameters);
 
-    // Dispara via Conversion API com o mesmo eventID
+    // CORRETO: Advanced Matching no 3º argumento do evento Lead
+    const amParams = {
+      em: normalizedEmail,
+      ph: normalizedPhone,
+      fn: normalizedUser.fn,
+      ln: normalizedUser.ln,
+      external_id: normalizedUser.external_id,
+    };
+
+    // Dispara via Pixel com Advanced Matching CORRETO e eventID para deduplicação
+    trackEvent('Lead', { ...pixelParameters, ...amParams }, { eventID: eventId });
+
+    // Dispara via Conversion API com o MESMO eventID
     try {
       await trackLeadConversionApi({
         instagram: userData.instagram,
@@ -144,10 +137,10 @@ export const useFacebookPixel = () => {
         email: normalizedEmail,
         whatsapp: normalizedPhone,
         especialidade: userData.especialidade,
-        eventID: eventId,
-        fbp: parameters.fbp,
-        fbc: parameters.fbc,
-        external_id: parameters.external_id,
+        eventID: eventId, // MESMO ID para deduplicação
+        fbp: window.getFbp ? window.getFbp() : null,
+        fbc: window.getFbc ? window.getFbc() : null,
+        external_id: window.getExternalId ? window.getExternalId() : null,
         faturamento: userData.faturamento,
         followers: userData.followers,
         posts: userData.posts,
@@ -158,14 +151,13 @@ export const useFacebookPixel = () => {
     } catch (error) {
       console.error('[Facebook Pixel] Erro na Conversion API:', error);
     }
-  }, [trackEvent, updateAdvancedMatching]);
+  }, [trackEvent]);
 
   return {
     trackEvent,
     trackLead,
     trackPageView: () => trackEvent('PageView'),
     trackCustomEvent: trackEvent,
-    updateAdvancedMatching
   };
 };
 

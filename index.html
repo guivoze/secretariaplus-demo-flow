@@ -74,12 +74,6 @@
         return null;
       };
 
-      // Função para normalizar telefone no formato E.164
-      function normalizePhone(phone) {
-        const digits = phone.replace(/\D/g, '');
-        return digits.startsWith('55') ? '+' + digits : '+55' + digits;
-      }
-
       // Facebook Pixel - Código Base com Advanced Matching
       !(function (f, b, e, v, n, t, s) {
         if (f.fbq) return;
@@ -98,36 +92,10 @@
         s.parentNode.insertBefore(t, s);
       })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
-      // Inicializa com Advanced Matching vazio (será preenchido dinamicamente)
+      // Inicializa o pixel uma ÚNICA vez com external_id
       fbq('init', '1245486659923087', {
         external_id: window.getExternalId(),
       });
-
-      // Função global para atualizar Advanced Matching quando tivermos dados do usuário
-      window.updateFacebookAdvancedMatching = function (userData) {
-        if (userData) {
-          fbq('init', '1245486659923087', {
-            em: userData.email
-              ? userData.email.toLowerCase().trim()
-              : undefined,
-            ph: userData.whatsapp
-              ? normalizePhone(userData.whatsapp)
-              : undefined,
-            fn: userData.nome
-              ? userData.nome.split(' ')[0].toLowerCase().trim()
-              : undefined,
-            ln: userData.nome
-              ? userData.nome
-                  .split(' ')
-                  .slice(1)
-                  .join(' ')
-                  .toLowerCase()
-                  .trim()
-              : undefined,
-            external_id: window.getExternalId(),
-          });
-        }
-      };
 
       const now = new Date();
       const days = [
@@ -171,9 +139,9 @@
         return 'Referral';
       }
 
-      // Dispara PageView enriquecido
+      // Dispara PageView com eventID no 4º argumento (CORRETO para deduplicação)
+      const pageViewEventId = window.generateEventId();
       fbq('track', 'PageView', {
-        eventID: window.generateEventId(),
         external_id: window.getExternalId(),
         fbp: window.getFbp(),
         fbc: window.getFbc(),
@@ -194,11 +162,8 @@
         page_title: document.title,
         page_id: 'landing',
         content_language: 'pt_BR',
-        country: 'BR',
-        ct: 'São Paulo',
-        st: 'SP',
-        zp: '00000-000',
-      });
+        // ❌ Removido ct/st/zp/country - evitar PII no pixel
+      }, { eventID: pageViewEventId });
     </script>
     <!-- End Facebook Pixel Code -->
   </head>

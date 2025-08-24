@@ -85,6 +85,11 @@ export const trackLeadConversionApi = async (
     return { success: false, reason: 'filtered_specialty' };
   }
 
+  // CRÍTICO: Garantir que event_source_url seja sempre enviado
+  const eventSourceUrl = typeof window !== 'undefined' 
+    ? window.location.href 
+    : 'https://flow.secretariaplus.com.br';
+
   // Dados básicos do evento
   const baseParameters = {
     content_name: 'Demo SecretáriaPlus - Free Test',
@@ -93,6 +98,8 @@ export const trackLeadConversionApi = async (
     content_ids: ['demo_secretariaplus'],
     value: 1.00,
     currency: 'BRL',
+    // CRÍTICO: URL da fonte do evento para atribuição correta
+    event_source_url: eventSourceUrl,
   };
 
   // Dados do usuário para atribuição avançada (NUNCA enviar PII cru como custom param)
@@ -123,13 +130,16 @@ export const trackLeadConversionApi = async (
     delivery_category: 'home_delivery',
   };
 
-  // Identificação para deduplicação e atribuição
+  // Identificação para deduplicação e atribuição (CRÍTICO)
   const identificationParameters = {
-    eventID: userData.eventID,
+    eventID: userData.eventID || ('evt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)),
     fbp: userData.fbp,
     fbc: userData.fbc,
     external_id: userData.external_id,
-    // user_data será montado e hasheado no backend
+    // PII (email, nome, telefone) será enviado via user_data no backend
+    email: userData.email, // Será hasheado no backend
+    whatsapp: userData.whatsapp, // Será hasheado no backend
+    nome: userData.nome, // Será hasheado no backend
   };
 
   // Nunca envie email, nome, telefone, cidade, UF, CEP, país como custom param
