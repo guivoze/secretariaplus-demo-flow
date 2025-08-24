@@ -43,42 +43,11 @@ export const Step1Landing = () => {
         body: JSON.stringify({
           instagram: cleanInstagram
         })
-      }).then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          console.warn('API response is not JSON, content-type:', contentType);
-          const text = await response.text();
-          console.log('Raw response:', text);
-          // Return a fallback structure
-          return { total_found: 0 };
-        }
-        
-        const text = await response.text();
-        if (!text.trim()) {
-          console.warn('API response is empty');
-          return { total_found: 0 };
-        }
-        
-        try {
-          return JSON.parse(text);
-        } catch (parseError) {
-          console.error('JSON parse error:', parseError);
-          console.log('Raw response that failed to parse:', text);
-          return { total_found: 0 };
-        }
-      }).then(data => {
+      }).then(response => response.json()).then(data => {
         console.log('Profile query response:', data);
         // Store response for later use
         localStorage.setItem('profile-query-result', JSON.stringify(data));
-      }).catch(error => {
-        console.error('Error querying profiles:', error);
-        // Store fallback data
-        localStorage.setItem('profile-query-result', JSON.stringify({ total_found: 0 }));
-      });
+      }).catch(error => console.error('Error querying profiles:', error));
       nextStep(); // Goes to Step2Modal
     }
   };
@@ -160,19 +129,7 @@ export const Step1Landing = () => {
               </CustomButton>
             </motion.div>
 
-            {/* Disclaimer */}
-            <motion.div initial={{
-            opacity: 0
-          }} animate={{
-            opacity: 1
-          }} transition={{
-            delay: 0.5,
-            duration: 0.6
-          }} className="text-center">
-              <p className="text-muted-foreground/80 leading-relaxed text-xs">
-                A análise do seu perfil é feita apenas com suas informações públicas da rede social.
-              </p>
-            </motion.div>
+
 
             {/* Live counter */}
             <motion.div initial={{
