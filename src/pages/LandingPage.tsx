@@ -26,9 +26,9 @@ export const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
+    <div className="bg-gradient-to-br from-background via-background to-muted/30">
       {/* Fold 1 - Hero */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 py-8">
+      <section className="relative h-screen flex items-center justify-center px-4">
         {/* Background decorative elements */}
         <div className="absolute inset-0 opacity-10">
           <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -44,10 +44,10 @@ export const LandingPage = () => {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-4xl mx-auto text-center space-y-8 relative z-10"
+          className="max-w-4xl mx-auto text-center space-y-6 relative z-10"
         >
           {/* Logo */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-card rounded-2xl shadow-lg flex items-center justify-center">
               <img src="/imgs/logo2.svg" alt="Logo" className="w-10 h-10" />
             </div>
@@ -57,7 +57,7 @@ export const LandingPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="title-main text-foreground max-w-3xl mx-auto"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground max-w-3xl mx-auto leading-tight"
           >
             Sua <span className="text-primary">"Recepção Invisível"</span> para Harmonização Orofacial
           </motion.h1>
@@ -66,58 +66,58 @@ export const LandingPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           >
             Conversa como uma secretária sênior, quebra objeções de HOF e agenda protocolos e Full Faces no automático.
           </motion.p>
-
-          {/* Bullets */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12"
-          >
-            <div className="bg-card rounded-2xl p-6 shadow-soft border border-border/50">
-              <MessageCircle className="w-8 h-8 text-primary mb-4 mx-auto" />
-              <p className="text-sm text-foreground">Responde "qual valor do botox?", "quantos mls?", "dói?" com linguagem premium</p>
-            </div>
-            <div className="bg-card rounded-2xl p-6 shadow-soft border border-border/50">
-              <Sparkles className="w-8 h-8 text-primary mb-4 mx-auto" />
-              <p className="text-sm text-foreground">Sugere avaliação e conduz para toxina, preenchedores, bioestimuladores e Full Face</p>
-            </div>
-            <div className="bg-card rounded-2xl p-6 shadow-soft border border-border/50">
-              <Clock className="w-8 h-8 text-primary mb-4 mx-auto" />
-              <p className="text-sm text-foreground">Integra com sua agenda e atende 24/7 (texto e áudio)</p>
-            </div>
-          </motion.div>
 
           {/* Prova mini */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-primary/10 rounded-2xl p-6 max-w-2xl mx-auto"
+            transition={{ delay: 0.4 }}
+            className="bg-primary/10 rounded-2xl p-4 max-w-lg mx-auto"
           >
-            <p className="text-foreground font-medium text-lg">+500 clínicas de HOF no Brasil</p>
-            <p className="text-muted-foreground text-sm mt-2">Ninguém percebe que é I.A.</p>
+            <p className="text-foreground font-medium">+500 clínicas de HOF no Brasil</p>
+            <p className="text-muted-foreground text-sm mt-1">Ninguém percebe que é I.A.</p>
           </motion.div>
 
           {/* CTA */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="space-y-4"
+            transition={{ delay: 0.5 }}
+            className="space-y-3 pt-4"
           >
             <CustomButton 
               onClick={handleCTA}
               size="lg" 
-              className="text-white bg-black hover:bg-gray-900 px-12 py-4 text-xl font-semibold transform hover:scale-105 transition-all duration-300"
+              className="text-white bg-black hover:bg-gray-900 px-8 py-3 text-lg font-semibold transform hover:scale-105 transition-all duration-300"
             >
               Quero ver funcionando →
             </CustomButton>
             <p className="text-xs text-muted-foreground">na próxima tela você faz um teste grátis com o @ do seu Instagram</p>
+          </motion.div>
+
+          {/* Bullets compactos */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto pt-6"
+          >
+            <div className="bg-card rounded-xl p-4 shadow-soft border border-border/50">
+              <MessageCircle className="w-6 h-6 text-primary mb-2 mx-auto" />
+              <p className="text-xs text-foreground">Responde "qual valor do botox?", "quantos mls?", "dói?" com linguagem premium</p>
+            </div>
+            <div className="bg-card rounded-xl p-4 shadow-soft border border-border/50">
+              <Sparkles className="w-6 h-6 text-primary mb-2 mx-auto" />
+              <p className="text-xs text-foreground">Sugere avaliação e conduz para toxina, preenchedores, bioestimuladores e Full Face</p>
+            </div>
+            <div className="bg-card rounded-xl p-4 shadow-soft border border-border/50">
+              <Clock className="w-6 h-6 text-primary mb-2 mx-auto" />
+              <p className="text-xs text-foreground">Integra com sua agenda e atende 24/7 (texto e áudio)</p>
+            </div>
           </motion.div>
         </motion.div>
       </section>
