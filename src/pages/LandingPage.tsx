@@ -26,9 +26,9 @@ export const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
       {/* Fold 1 - Hero */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 py-12">
+      <section className="relative min-h-screen flex items-center justify-center px-4 py-8">
         {/* Background decorative elements */}
         <div className="absolute inset-0 opacity-10">
           <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
