@@ -26,7 +26,7 @@ export const LandingPage = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-background via-background to-muted/30">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30" style={{ overflow: 'auto' }}>
       {/* Fold 1 - Hero */}
       <section className="relative h-screen flex items-center justify-center px-4">
         {/* Background decorative elements */}
