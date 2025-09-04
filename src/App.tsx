@@ -18,9 +18,11 @@ import { Step12Result } from "@/components/steps/Step12Result";
 import { Step13Features } from "@/components/steps/Step13Features";
 import { Step14Emergency } from "@/components/steps/Step14Emergency";
 import { Step16CTA } from "@/components/steps/Step16CTA";
+import { Step16CTADisqualified } from "@/components/steps/Step16CTADisqualified";
+import { isDisqualifiedLead } from "@/utils/leadQualification";
 
 const DemoContent = () => {
-  const { currentStep, isLoading } = useSupabaseDemo();
+  const { currentStep, isLoading, userData } = useSupabaseDemo();
   const stepContainerRef = useRef<HTMLDivElement>(null);
 
   // Força scroll do container de steps para o topo a cada troca de step, exceto no Step10WhatsApp
@@ -79,9 +81,9 @@ const DemoContent = () => {
       case 15:
         return <Step14Emergency />;
       case 16:
-        return <Step16CTA />;
+        return isDisqualifiedLead(userData.especialidade) ? <Step16CTADisqualified /> : <Step16CTA />;
       default:
-        return <Step16CTA />;
+        return isDisqualifiedLead(userData.especialidade) ? <Step16CTADisqualified /> : <Step16CTA />;
     }
   };
 

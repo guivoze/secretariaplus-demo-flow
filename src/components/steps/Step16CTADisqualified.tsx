@@ -1,15 +1,14 @@
-import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
-import { AlertTriangle, CheckCircle, Phone, MessageCircle } from "lucide-react";
-
+import { CheckCircle, Clock } from "lucide-react";
 import { useEffect } from "react";
 
-export const Step16CTA = () => {
+export const Step16CTADisqualified = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+  
   const { userData } = useSupabaseDemo();
 
   const benefits = [
@@ -20,22 +19,6 @@ export const Step16CTA = () => {
     "Follow-up automático",
     "Notificações de emergência médica"
   ];
-
-  const handleContact = () => {
-    const message = `Olá! Acabei de testar a demonstração da SecretáriaPlus e quero saber mais!
-
-Meus dados:
-- Nome: ${userData.nome || 'Não informado'}
-- Instagram: @${userData.instagram || 'Não informado'}
-- Especialidade: ${userData.especialidade || 'Não informada'}
-- Email: ${userData.email || 'Não informado'}
-- WhatsApp: ${userData.whatsapp || 'Não informado'}
-
-Quero implementar na minha clínica!`;
-
-    const whatsappUrl = `https://wa.me/551140405847?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 py-8">
@@ -82,7 +65,7 @@ Quero implementar na minha clínica!`;
             transition={{ delay: 0.1 }}
             className="space-y-4"
           >
-            {/* Placeholder para logo SVG */}
+            {/* Logo */}
             <div className="flex items-center justify-center min-h-[80px]">
               <img 
                 src="/imgs/logo-blk.svg" 
@@ -135,20 +118,18 @@ Quero implementar na minha clínica!`;
             transition={{ delay: 0.8, duration: 0.4 }}
             className="space-y-4"
           >
-            <CustomButton
-              onClick={handleContact}
-              size="lg"
-              className="w-full text-lg py-4 flex items-center justify-center gap-3"
-            >
-              <MessageCircle className="w-6 h-6" />
-              Falar com consultor
-            </CustomButton>
+            {/* Texto informativo ao invés do botão */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 flex items-center justify-center gap-3">
+              <Clock className="w-6 h-6 text-blue-600" />
+              <p className="text-lg font-semibold text-blue-800">
+                Um consultor entrará em contato em até 24h
+              </p>
+            </div>
 
-            <div className="flex items-center justify-center gap-2 text-gray-600 font-semibold">
-              <AlertTriangle className="w-5 h-5" />
-              <span className="text-sm">
-                Atenção: Só conseguimos atender 4 novas clínicas por semana.
-              </span>
+            <div className="text-gray-600 text-sm">
+              <p>
+                Recebemos seus dados e nossa equipe analisará o melhor plano para seu negócio.
+              </p>
             </div>
           </motion.div>
         </CustomCard>
