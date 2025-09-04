@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
+import { useClarity } from "@/hooks/useClarity";
 import { motion } from "framer-motion";
 import { CustomInput } from "@/components/ui/custom-input";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
@@ -11,6 +12,9 @@ import { sanitizeValue } from "@/utils/sanitize";
 export const Step7Form = () => {
   const { userData, setUserData, nextStep } = useSupabaseDemo();
   const { trackLead } = useFacebookPixel();
+  const clarity = useClarity({ 
+    projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
+  });
   
   const [formData, setFormData] = useState({
     email: sanitizeValue(userData.email),
@@ -47,6 +51,14 @@ export const Step7Form = () => {
       setUserData({
         email: mergedData.email,
         whatsapp: mergedData.whatsapp,
+      });
+
+      // Track lead capture no Clarity
+      clarity.trackFunnelEvent('lead_captured', 7, mergedData);
+      clarity.trackInteraction('form_submission', {
+        has_email: mergedData.email ? 'true' : 'false',
+        has_whatsapp: mergedData.whatsapp ? 'true' : 'false',
+        specialty: mergedData.especialidade || 'unknown'
       });
 
       // Dispara pixel do Facebook e webhook simultaneamente (com proteção anti-duplo)

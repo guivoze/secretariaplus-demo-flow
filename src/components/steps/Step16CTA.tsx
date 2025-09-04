@@ -1,5 +1,6 @@
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
+import { useClarity } from "@/hooks/useClarity";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Clock, Calendar, MessageSquare, Settings, Users, Zap, Shield, Star } from "lucide-react";
 import { useEffect } from "react";
@@ -10,9 +11,21 @@ export const Step16CTA = () => {
   }, []);
   
   const { userData } = useSupabaseDemo();
+  const clarity = useClarity({ 
+    projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
+  });
 
   const handlePlanClick = (planUrl: string, planName: string) => {
-    // Tracking opcional se necessário
+    // Tracking avançado no Clarity para conversões
+    clarity.trackConversion(planName, userData);
+    
+    // Tracking adicional da interação
+    clarity.trackInteraction('plan_click', {
+      plan_name: planName,
+      user_specialty: userData.especialidade || 'unknown',
+      has_instagram_data: userData.hasInstagramData ? 'true' : 'false'
+    });
+    
     console.log(`Plan selected: ${planName}`);
     window.open(planUrl, '_blank');
   };

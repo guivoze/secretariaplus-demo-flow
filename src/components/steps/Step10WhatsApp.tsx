@@ -1,5 +1,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
+import { useClarity } from "@/hooks/useClarity";
+import { useChatMessages } from "@/hooks/useChatMessages";
+import { useKeyboardGlue } from "@/hooks/useKeyboardGlue";
+import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Phone, Video, MoreVertical, CheckCheck } from "lucide-react";
+import { toast } from "sonner";
+
 // Função para limpar tags HTML
 function sanitizeMessage(text: string) {
   return text.replace(/<[^>]*>?/gm, '');
@@ -7,13 +16,6 @@ function sanitizeMessage(text: string) {
 
 const MAX_MESSAGE_LENGTH = 300;
 const SUSPICIOUS_CHARS = /[<>]/;
-import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
-import { useChatMessages } from "@/hooks/useChatMessages";
-import { useKeyboardGlue } from "@/hooks/useKeyboardGlue";
-import { supabase } from "@/integrations/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
-import { Send, Phone, Video, MoreVertical, CheckCheck } from "lucide-react";
-import { toast } from "sonner";
 interface Message {
   id: string;
   text: string;
@@ -31,6 +33,9 @@ export const Step10WhatsApp = () => {
     threadId,
     setThreadId
   } = useSupabaseDemo();
+  const clarity = useClarity({ 
+    projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
+  });
   const {
     chatMessages,
     sendUserMessage,
@@ -213,6 +218,14 @@ export const Step10WhatsApp = () => {
     }
     const userMessage = inputValue.trim();
     setInputValue('');
+    
+    // Track interação do chat
+    clarity.trackInteraction('chat_message_sent', {
+      message_length: userMessage.length.toString(),
+      message_count: (chatMessages.length + 1).toString(),
+      has_appointment: appointment ? 'true' : 'false'
+    });
+    
     try {
       await sendUserMessage(userMessage);
       setIsLoading(true);

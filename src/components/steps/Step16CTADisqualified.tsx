@@ -1,5 +1,6 @@
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
+import { useClarity } from "@/hooks/useClarity";
 import { motion } from "framer-motion";
 import { CheckCircle, Clock } from "lucide-react";
 import { useEffect } from "react";
@@ -10,6 +11,16 @@ export const Step16CTADisqualified = () => {
   }, []);
   
   const { userData } = useSupabaseDemo();
+  const clarity = useClarity({ 
+    projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
+  });
+
+  // Track quando usuário chega na página de desqualificação
+  useEffect(() => {
+    if (userData.especialidade) {
+      clarity.trackDisqualification(userData.especialidade, userData);
+    }
+  }, [userData, clarity]);
 
   const benefits = [
     "Sua I.A treinada e configurada em 1 dia",

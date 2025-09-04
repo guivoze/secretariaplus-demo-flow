@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { SupabaseDemoProvider, useSupabaseDemo } from "@/hooks/useSupabaseDemo";
+import { useClarity } from "@/hooks/useClarity";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Step1Landing } from "@/components/steps/Step1Landing";
 import { Step2Modal } from "@/components/steps/Step2Modal";
@@ -25,6 +26,14 @@ const DemoContent = () => {
   const { currentStep, isLoading, userData } = useSupabaseDemo();
   const stepContainerRef = useRef<HTMLDivElement>(null);
 
+  // Inicializar Microsoft Clarity
+  const clarity = useClarity({ 
+    projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
+  });
+
+  // Tracking de tempo por step
+  const stepStartTime = useRef<number>(Date.now());
+
   // Força scroll do container de steps para o topo a cada troca de step, exceto no Step10WhatsApp
   useEffect(() => {
     if (currentStep !== 11 && stepContainerRef.current) {
@@ -34,6 +43,57 @@ const DemoContent = () => {
       window.scrollTo(0, 0);
     }
   }, [currentStep]);
+
+  // Track mudanças de step no Clarity com dados avançados
+  useEffect(() => {
+    if (currentStep) {
+      // Calcular tempo gasto no step anterior
+      const timeSpent = Date.now() - stepStartTime.current;
+      if (currentStep > 1) {
+        clarity.trackStepTime(currentStep - 1, timeSpent, true);
+      }
+      
+      // Resetar timer para novo step
+      stepStartTime.current = Date.now();
+      
+      // Track evento de step
+      clarity.trackFunnelEvent('step_viewed', currentStep, userData);
+      
+      // Identificar usuário se tiver dados
+      if (userData.email || userData.instagram) {
+        clarity.identify(
+          userData.email || userData.instagram || 'anonymous',
+          undefined,
+          `step_${currentStep}`,
+          userData.nome || userData.instagram
+        );
+      }
+      
+      // Marcar steps críticos
+      if (currentStep === 7) {
+        clarity.setTag('reached_form', 'true');
+      }
+      if (currentStep === 11) {
+        clarity.setTag('reached_demo', 'true');
+      }
+      if (currentStep === 16) {
+        clarity.setTag('reached_conversion', 'true');
+      }
+    }
+  }, [currentStep, clarity, userData]);
+
+  // Track abandono quando o usuário sai da página
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (currentStep && currentStep < 16) {
+        const timeSpent = Date.now() - stepStartTime.current;
+        clarity.trackStepAbandonment(currentStep, timeSpent, userData);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [currentStep, clarity, userData]);
 
   if (isLoading) {
     return (
