@@ -148,37 +148,15 @@
         return 'Referral';
       }
 
-      // Dispara PageView enriquecido com eventID no 4º argumento
-      const pageViewParams = {
-        external_id: window.getExternalId(),
-        fbp: window.getFbp(),
-        fbc: window.getFbc(),
-        content_name: 'SecretáriaPlus - Free Test',
-        content_category: 'Demo Flow',
-        content_type: 'product',
-        content_ids: ['demo_secretariaplus'],
-        value: 0.0,
-        currency: 'BRL',
-        event_day: days[now.getDay()],
-        event_day_in_month: now.getDate().toString(),
-        event_month: months[now.getMonth()],
-        event_time: now.getTime(),
-        event_time_interval: getTimeInterval(now.getHours()),
-        traffic_source: getTrafficSource(),
-        plugin: 'SecretáriaPlus Demo',
-        plugin_info: 'https://flow.secretariaplus.com.br',
-        page_title: document.title,
-        page_id: 'landing',
-        content_language: 'pt_BR',
-        country: 'BR',
-        ct: 'São Paulo',
-        st: 'SP',
-        zp: '00000-000',
-      };
-      const pageViewEventId = window.generateEventId();
-      // Importante: PageView deve ser enviado no formato simples para o Pixel Helper reconhecer corretamente
-      // Não enviamos dados customizados nem eventID aqui. Dados enriquecidos ficam para eventos de conversão (Lead) via CAPI.
+      // Dispara PageView básico - formato que o Pixel Helper reconhece
       fbq('track', 'PageView');
+      
+      // Debug: verificar se o pixel foi carregado
+      console.log('[Facebook Pixel] Status:', {
+        fbqLoaded: typeof fbq !== 'undefined',
+        pixelId: '1245486659923087',
+        timestamp: new Date().toISOString()
+      });
     </script>
     <!-- End Facebook Pixel Code -->
   </head>
