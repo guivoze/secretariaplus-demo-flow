@@ -43,8 +43,7 @@
       window.getExternalId = function () {
         let externalId = localStorage.getItem('sp_external_id');
         if (!externalId) {
-          externalId =
-            'sp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+          externalId = 'sp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
           localStorage.setItem('sp_external_id', externalId);
         }
         return externalId;
@@ -56,19 +55,31 @@
         return match ? match[1] : null;
       };
 
-      // Função para obter fbc cookie (Facebook Click ID)
+      // Detecta se a sessão atual veio do Facebook/Instagram
+      window.isFacebookSession = function () {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const fbclid = params.get('fbclid');
+          const utm = (params.get('utm_source') || '').toLowerCase();
+          const ref = (document.referrer || '').toLowerCase();
+          const cameFromFb = !!fbclid || utm.includes('facebook') || utm.includes('instagram') || ref.includes('facebook') || ref.includes('instagram');
+          if (cameFromFb) sessionStorage.setItem('sp_session_is_fb', '1');
+          return cameFromFb || sessionStorage.getItem('sp_session_is_fb') === '1';
+        } catch (_) {
+          return false;
+        }
+      };
+
+      // Função para obter fbc (Facebook Click ID) SOMENTE quando a sessão é FB
       window.getFbc = function () {
+        if (!window.isFacebookSession || !window.isFacebookSession()) return null;
         const match = document.cookie.match(/_fbc=([^;]+)/);
         if (match) return match[1];
-
-        // Se não existe cookie, tenta pegar do URL
         const urlParams = new URLSearchParams(window.location.search);
         const fbclid = urlParams.get('fbclid');
         if (fbclid) {
           const fbc = 'fb.1.' + Date.now() + '.' + fbclid;
-          // Salva o fbc em cookie para uso futuro
-          document.cookie =
-            '_fbc=' + fbc + '; max-age=' + 90 * 24 * 60 * 60 + '; path=/';
+          document.cookie = '_fbc=' + fbc + '; max-age=' + 90 * 24 * 60 * 60 + '; path=/';
           return fbc;
         }
         return null;
@@ -107,52 +118,18 @@
       window.updateFacebookAdvancedMatching = function (userData) {
         if (userData) {
           fbq('init', '1245486659923087', {
-            em: userData.email
-              ? userData.email.toLowerCase().trim()
-              : undefined,
-            ph: userData.whatsapp
-              ? normalizePhone(userData.whatsapp)
-              : undefined,
-            fn: userData.nome
-              ? userData.nome.split(' ')[0].toLowerCase().trim()
-              : undefined,
-            ln: userData.nome
-              ? userData.nome
-                  .split(' ')
-                  .slice(1)
-                  .join(' ')
-                  .toLowerCase()
-                  .trim()
-              : undefined,
+            em: userData.email ? userData.email.toLowerCase().trim() : undefined,
+            ph: userData.whatsapp ? normalizePhone(userData.whatsapp) : undefined,
+            fn: userData.nome ? userData.nome.split(' ')[0].toLowerCase().trim() : undefined,
+            ln: userData.nome ? userData.nome.split(' ').slice(1).join(' ').toLowerCase().trim() : undefined,
             external_id: window.getExternalId(),
           });
         }
       };
 
       const now = new Date();
-      const days = [
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-      ];
-      const months = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ];
+      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
       function getTimeInterval(hour) {
         if (hour >= 0 && hour < 6) return '0-6';
@@ -162,7 +139,7 @@
       }
 
       function getTrafficSource() {
-        const referrer = document.referrer.toLowerCase();
+        const referrer = (document.referrer || '').toLowerCase();
         if (!referrer) return 'Direct';
         if (referrer.includes('google')) return 'Google';
         if (referrer.includes('facebook')) return 'Facebook';
@@ -171,9 +148,8 @@
         return 'Referral';
       }
 
-      // Dispara PageView enriquecido
-      fbq('track', 'PageView', {
-        eventID: window.generateEventId(),
+      // Dispara PageView enriquecido com eventID no 4º argumento
+      const pageViewParams = {
         external_id: window.getExternalId(),
         fbp: window.getFbp(),
         fbc: window.getFbc(),
@@ -198,7 +174,11 @@
         ct: 'São Paulo',
         st: 'SP',
         zp: '00000-000',
-      });
+      };
+      const pageViewEventId = window.generateEventId();
+      // Importante: PageView deve ser enviado no formato simples para o Pixel Helper reconhecer corretamente
+      // Não enviamos dados customizados nem eventID aqui. Dados enriquecidos ficam para eventos de conversão (Lead) via CAPI.
+      fbq('track', 'PageView');
     </script>
     <!-- End Facebook Pixel Code -->
   </head>
