@@ -1,27 +1,28 @@
 import { useCallback } from 'react';
-import { trackLeadConversionApi, LeadUserData } from '@/utils/facebookPixel';
+import { trackLeadConversionApi } from '@/utils/facebookPixel';
 
 declare global {
   interface Window {
-    fbq: (...args: unknown[]) => void;
+    fbq: any;
     generateEventId: () => string;
     getExternalId: () => string;
     getFbp: () => string | null;
     getFbc: () => string | null;
+    updateFacebookAdvancedMatching: (userData: any) => void;
   }
 }
 
-// Função para obter dados enriquecidos completos
+// Função para obter dados enriquecidos completos (sem PII e sem eventID)
 const getEnrichedData = () => {
   const now = new Date();
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   return {
-    // IDs de tracking não sensíveis (sem eventID aqui - vai no 4º argumento)
+    // IDs de tracking (somente identificadores de sessão/contexto)
     external_id: window.getExternalId ? window.getExternalId() : null,
     fbp: window.getFbp ? window.getFbp() : null,
-    fbc: window.getFbc ? window.getFbc() : null,
+    fbc: getAllowedFbc(),
 
     // Dados temporais
     event_day: days[now.getDay()],
@@ -30,7 +31,13 @@ const getEnrichedData = () => {
     event_time: now.getTime(),
     event_time_interval: getTimeInterval(now.getHours()),
 
-    // Dados de contexto (sem PII geográfico)
+    // Dados geográficos (genéricos)
+    country: 'BR',
+    ct: 'São Paulo',
+    st: 'SP',
+    zp: '00000-000',
+
+    // Dados de contexto
     traffic_source: getTrafficSource(),
     plugin: 'SecretáriaPlus Demo',
     plugin_info: 'https://flow.secretariaplus.com.br',
@@ -57,110 +64,104 @@ function normalizePhone(phone: string): string {
 }
 
 export const useFacebookPixel = () => {
-  const trackEvent = useCallback(
-    (eventName: string, parameters?: Record<string, unknown>, eventData?: Record<string, unknown>) => {
-      if (typeof window !== 'undefined' && window.fbq) {
-        const enrichedParams = {
-          ...getEnrichedData(),
-          ...parameters,
-        };
-        
-        // Se eventData foi fornecido (para deduplicação), incluí-lo como 4º parâmetro
-        if (eventData) {
-          window.fbq('track', eventName, enrichedParams, eventData);
-          console.log(`[Facebook Pixel] Evento "${eventName}" disparado com eventID:`, eventData);
+  // Atualiza Advanced Matching quando temos dados do usuário
+  const updateAdvancedMatching = useCallback((userData: any) => {
+    if (window.updateFacebookAdvancedMatching) {
+      window.updateFacebookAdvancedMatching(userData);
+    }
+  }, []);
+
+  // Aceita options no 4º argumento (ex.: { eventID })
+  const trackEvent = useCallback((eventName: string, parameters?: Record<string, any>, options?: Record<string, any>) => {
+    if (typeof window !== 'undefined' && window.fbq) {
+      const enrichedParams = {
+        ...getEnrichedData(),
+        ...parameters,
+      };
+      try {
+        if (options && Object.keys(options).length > 0) {
+          window.fbq('track', eventName, enrichedParams, options);
         } else {
           window.fbq('track', eventName, enrichedParams);
-          console.log(`[Facebook Pixel] Evento "${eventName}" disparado:`, enrichedParams);
         }
+        console.log(`[Facebook Pixel] Evento "${eventName}" disparado:`, enrichedParams, options ? { options } : '');
+      } catch (e) {
+        console.error('[Facebook Pixel] Erro ao disparar evento:', e);
       }
-    },
-    []
-  );
+    }
+  }, []);
 
-  const trackLead = useCallback(async (userData: LeadUserData) => {
+  const trackLead = useCallback(async (userData: {
+    instagram: string;
+    nome: string;
+    email: string;
+    whatsapp: string;
+    especialidade: string;
+  }) => {
     // Filtrar Estética Geral
     if (userData.especialidade === 'Estética Geral (salão, micro, make)') {
       console.log('[Facebook Pixel] Lead filtrado - Estética Geral');
       return;
     }
 
-    // Normalizar dados sensíveis para Advanced Matching
     const normalizedEmail = normalizeEmail(userData.email);
     const normalizedPhone = normalizePhone(userData.whatsapp);
     const normalizedUser = {
+      ...userData,
       email: normalizedEmail,
-      ph: normalizedPhone,
-      fn: userData.nome ? userData.nome.split(' ')[0] : undefined,
-      ln: userData.nome ? userData.nome.split(' ').slice(1).join(' ') : undefined,
-      external_id: window.getExternalId ? window.getExternalId() : null,
+      whatsapp: normalizedPhone,
     };
 
-    // Gerar event_id ÚNICO para deduplicação (CRÍTICO)
-    const eventId = window.generateEventId ? window.generateEventId() : 'evt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    // Atualiza AM (em, ph, fn, ln, external_id) corretamente
+    updateAdvancedMatching(normalizedUser);
 
-    // Parâmetros básicos para o pixel (SEM dados sensíveis)
-    const pixelParameters = {
+    // Gera eventId único a ser compartilhado com o Pixel (options) e CAPI
+    const eventId = window.generateEventId ? window.generateEventId() : 'evt_' + Date.now();
+
+    // Parâmetros do Pixel (sem PII no 3º argumento)
+    const parameters = {
       content_name: 'Demo SecretáriaPlus - Free Test',
       content_category: 'Lead Generation',
       content_type: 'product',
       content_ids: ['demo_secretariaplus'],
       value: 1.0,
       currency: 'BRL',
-      // Dados de contexto (não sensíveis)
-      instagram: userData.instagram,
-      especialidade: userData.especialidade,
-      faturamento: userData.faturamento || 'N/A',
-      clinic_name: userData.clinicName || 'N/A',
-      lead_source: 'Instagram Demo',
-      lead_medium: 'Web Demo',
-      lead_campaign: 'SecretáriaPlus Free Test',
+      instagram: normalizedUser.instagram,
+      nome_length: normalizedUser.nome ? normalizedUser.nome.length : undefined,
+      especialidade: normalizedUser.especialidade,
     };
 
-    // CORRETO: Advanced Matching no 3º argumento do evento Lead
-    const amParams = {
-      em: normalizedEmail,
-      ph: normalizedPhone,
-      fn: normalizedUser.fn,
-      ln: normalizedUser.ln,
-      external_id: normalizedUser.external_id,
-    };
+    // Dispara via Pixel com eventID no 4º argumento (options) — deduplicação
+    trackEvent('Lead', parameters, { eventID: eventId });
 
-    // Dispara via Pixel com Advanced Matching CORRETO e eventID para deduplicação
-    trackEvent('Lead', { ...pixelParameters, ...amParams }, { eventID: eventId });
-
-    // Dispara via Conversion API com o MESMO eventID
+    // Dispara via Conversion API com o mesmo eventID
     try {
+      const fbp = window.getFbp ? window.getFbp() : null;
+      const fbc = getAllowedFbc();
+      const external_id = window.getExternalId ? window.getExternalId() : null;
+
       await trackLeadConversionApi({
-        instagram: userData.instagram,
-        nome: userData.nome,
-        email: normalizedEmail,
-        whatsapp: normalizedPhone,
-        especialidade: userData.especialidade,
-        eventID: eventId, // MESMO ID para deduplicação
-        fbp: window.getFbp ? window.getFbp() : null,
-        fbc: window.getFbc ? window.getFbc() : null,
-        external_id: window.getExternalId ? window.getExternalId() : null,
-        faturamento: userData.faturamento,
-        followers: userData.followers,
-        posts: userData.posts,
-        clinicName: userData.clinicName,
-        procedures: userData.procedures,
-        aiInsights: userData.aiInsights,
+        ...normalizedUser,
+        eventID: eventId,
+        fbp,
+        fbc,            // só quando sessão atual é FB/IG
+        external_id,    // será hash no backend
       });
     } catch (error) {
       console.error('[Facebook Pixel] Erro na Conversion API:', error);
     }
-  }, [trackEvent]);
+  }, [trackEvent, updateAdvancedMatching]);
 
   return {
     trackEvent,
     trackLead,
     trackPageView: () => trackEvent('PageView'),
     trackCustomEvent: trackEvent,
+    updateAdvancedMatching
   };
 };
 
+// Intervalo de horas em blocos
 function getTimeInterval(hour: number): string {
   if (hour >= 0 && hour < 6) return '0-6';
   if (hour >= 6 && hour < 12) return '6-12';
@@ -168,11 +169,59 @@ function getTimeInterval(hour: number): string {
   return '18-24';
 }
 
+// Fonte de tráfego simples — prioriza UTM
 function getTrafficSource(): string {
-  const referrer = document.referrer.toLowerCase();
-  if (!referrer) return 'Direct';
-  if (referrer.includes('google')) return 'Google';
-  if (referrer.includes('facebook')) return 'Facebook';
-  if (referrer.includes('instagram')) return 'Instagram';
-  return 'Referral';
+  try {
+    const url = new URL(window.location.href);
+    const utm = url.searchParams.get('utm_source')?.toLowerCase();
+    if (utm) return utm;
+  } catch {}
+  const referrer = (document.referrer || '').toLowerCase();
+  if (!referrer) return 'direct';
+  if (referrer.includes('google')) return 'google';
+  if (referrer.includes('facebook')) return 'facebook';
+  if (referrer.includes('instagram')) return 'instagram';
+  if (referrer.includes('t.co') || referrer.includes('twitter') || referrer.includes('x.com')) return 'twitter';
+  return 'referral';
+}
+
+// ——— Helpers para bloquear fbc fora de sessão FB/IG ———
+function detectFacebookSession(): boolean {
+  try {
+    const url = new URL(window.location.href);
+    const utm = url.searchParams.get('utm_source')?.toLowerCase();
+    const fbclid = url.searchParams.get('fbclid');
+    const ref = (document.referrer || '').toLowerCase();
+    return Boolean(
+      fbclid ||
+      utm === 'facebook' ||
+      utm === 'instagram' ||
+      ref.includes('facebook') ||
+      ref.includes('instagram')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isFacebookSession(): boolean {
+  if (typeof window === 'undefined') return false;
+  const current = detectFacebookSession();
+  const saved = sessionStorage.getItem('fb_session');
+  // Promove para '1' se detectar FB na navegação atual
+  if (current) {
+    if (saved !== '1') sessionStorage.setItem('fb_session', '1');
+    return true;
+  }
+  // Se nunca vimos nada, inicializa
+  if (saved === null) {
+    sessionStorage.setItem('fb_session', '0');
+    return false;
+  }
+  // Mantém o estado anterior na mesma sessão
+  return saved === '1';
+}
+
+function getAllowedFbc(): string | null {
+  return isFacebookSession() && window.getFbc ? window.getFbc() : null;
 }
