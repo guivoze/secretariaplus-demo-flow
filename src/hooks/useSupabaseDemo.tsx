@@ -528,6 +528,38 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
     initializeSession();
   }, [initializeSession]);
 
+  // Debug helpers: permitir navegação por console (goto10, gotoStep(n), next(), prev())
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const MAX_STEP = 16;
+    const clamp = (n: number) => Math.max(0, Math.min(MAX_STEP, Math.floor(Number(n) || 0)));
+
+    (window as any).gotoStep = (n: number | string) => {
+      const target = clamp(Number(n));
+      setCurrentStep(target);
+      console.info(`[Debug] gotoStep -> ${target}`);
+    };
+
+    for (let i = 0; i <= MAX_STEP; i++) {
+      (window as any)[`goto${i}`] = () => {
+        setCurrentStep(i);
+        console.info(`[Debug] goto${i}`);
+      };
+    }
+
+    (window as any).next = () => setCurrentStep((prev: number) => Math.min(prev + 1, MAX_STEP));
+    (window as any).prev = () => setCurrentStep((prev: number) => Math.max(prev - 1, 0));
+
+    console.info('Debug ativo: use gotoStep(n), goto0..goto16, next(), prev() no console');
+
+    return () => {
+      delete (window as any).gotoStep;
+      for (let i = 0; i <= MAX_STEP; i++) delete (window as any)[`goto${i}`];
+      delete (window as any).next;
+      delete (window as any).prev;
+    };
+  }, []);
+
   const setUserData = (data: Partial<UserData>) => {
     setUserDataState(prev => {
       // Sanitiza campos específicos que podem vir como "null" string

@@ -16,6 +16,7 @@ export const Step7Form = () => {
     email: sanitizeValue(userData.email),
     whatsapp: sanitizeValue(userData.whatsapp)
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Pegar primeiro nome e dados da análise do Instagram
   const firstName = sanitizeValue(userData.nome) ? sanitizeValue(userData.nome).split(' ')[0] : '';
@@ -30,10 +31,13 @@ export const Step7Form = () => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
   };
   
-  const isFormValid = isValidEmail(formData.email) && formData.whatsapp;
+  const isFormValid = isValidEmail(formData.email) && formData.whatsapp && !isSubmitting;
   
   const handleSubmit = async () => {
-    if (isFormValid) {
+    if (!isFormValid || isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
       const mergedData = {
         ...userData,
         email: formData.email,
@@ -45,7 +49,7 @@ export const Step7Form = () => {
         whatsapp: mergedData.whatsapp,
       });
 
-      // Dispara pixel do Facebook e webhook simultaneamente
+      // Dispara pixel do Facebook e webhook simultaneamente (com proteção anti-duplo)
       await Promise.all([
         trackLead({
           instagram: mergedData.instagram,
@@ -64,6 +68,10 @@ export const Step7Form = () => {
       ]);
 
       nextStep();
+    } catch (error) {
+      console.error('Erro ao enviar dados:', error);
+      // Reset para permitir nova tentativa
+      setIsSubmitting(false);
     }
   };
   const formatWhatsApp = (value: string) => {
@@ -157,7 +165,9 @@ export const Step7Form = () => {
         }} transition={{
           delay: 0.3
         }} className="space-y-3">
-            <CustomButton onClick={handleSubmit} disabled={!isFormValid} className="w-full" size="lg">Conversar com minha nova secretária →</CustomButton>
+            <CustomButton onClick={handleSubmit} disabled={!isFormValid || isSubmitting} className="w-full" size="lg">
+              {isSubmitting ? 'Enviando...' : 'Conversar com minha nova secretária →'}
+            </CustomButton>
           </motion.div>
         </CustomCard>
       </motion.div>
