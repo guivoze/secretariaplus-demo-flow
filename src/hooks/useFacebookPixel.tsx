@@ -98,12 +98,6 @@ export const useFacebookPixel = () => {
     whatsapp: string;
     especialidade: string;
   }) => {
-    // Debug log
-    console.log('[Facebook Pixel] trackLead chamado:', { 
-      especialidade: userData.especialidade,
-      fbqExists: typeof window.fbq !== 'undefined'
-    });
-
     // Filtrar Estética Geral
     if (userData.especialidade === 'Estética Geral (salão, micro, make)') {
       console.log('[Facebook Pixel] Lead filtrado - Estética Geral');
@@ -124,7 +118,7 @@ export const useFacebookPixel = () => {
     // Gera eventId único a ser compartilhado com o Pixel (options) e CAPI
     const eventId = window.generateEventId ? window.generateEventId() : 'evt_' + Date.now();
 
-    // Parâmetros básicos do Pixel (sem PII no 3º argumento)
+    // Parâmetros do Pixel (sem PII no 3º argumento)
     const parameters = {
       content_name: 'Demo SecretáriaPlus - Free Test',
       content_category: 'Lead Generation',
@@ -132,10 +126,12 @@ export const useFacebookPixel = () => {
       content_ids: ['demo_secretariaplus'],
       value: 1.0,
       currency: 'BRL',
+      instagram: normalizedUser.instagram,
+      nome_length: normalizedUser.nome ? normalizedUser.nome.length : undefined,
+      especialidade: normalizedUser.especialidade,
     };
 
     // Dispara via Pixel com eventID no 4º argumento (options) — deduplicação
-    console.log('[Facebook Pixel] Disparando evento Lead via browser:', { eventId, parameters });
     trackEvent('Lead', parameters, { eventID: eventId });
 
     // Dispara via Conversion API com o mesmo eventID
@@ -144,8 +140,6 @@ export const useFacebookPixel = () => {
       const fbc = getAllowedFbc();
       const external_id = window.getExternalId ? window.getExternalId() : null;
 
-      console.log('[Facebook Pixel] Disparando via CAPI:', { eventId, fbp, fbc, external_id });
-      
       await trackLeadConversionApi({
         ...normalizedUser,
         eventID: eventId,
