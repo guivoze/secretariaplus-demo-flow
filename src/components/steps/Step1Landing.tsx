@@ -12,6 +12,7 @@ export const Step1Landing = () => {
   } = useSupabaseDemo();
   const [instagram, setInstagram] = useState(userData.instagram || '');
   const [liveCount, setLiveCount] = useState(() => 130 + Math.floor(Math.random() * 91)); // 130..220
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Increment live count every 3 seconds
   useEffect(() => {
@@ -27,7 +28,9 @@ export const Step1Landing = () => {
     return () => clearInterval(interval);
   }, []);
   const handleSubmit = async () => {
-    if (instagram.trim()) {
+    if (instagram.trim() && !isSubmitting) {
+      setIsSubmitting(true);
+      
       const cleanInstagram = instagram.trim();
       setUserData({
         instagram: cleanInstagram,
@@ -124,8 +127,15 @@ export const Step1Landing = () => {
               textTransform: 'lowercase'
             }} autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} inputMode="text" />
 
-              <CustomButton onClick={handleSubmit} disabled={!instagram.trim()} size="md" className="w-full text-white bg-black hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] rounded-md text-center mx-0 py-[13px]">
-                Testar Minha I.A Agora 🚀
+              <CustomButton onClick={handleSubmit} disabled={!instagram.trim() || isSubmitting} size="md" className="w-full text-white bg-black hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] rounded-md text-center mx-0 py-[13px]">
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Iniciando teste...
+                  </div>
+                ) : (
+                  'Testar Minha I.A Agora 🚀'
+                )}
               </CustomButton>
             </motion.div>
 

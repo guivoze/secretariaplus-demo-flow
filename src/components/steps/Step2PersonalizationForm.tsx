@@ -20,11 +20,14 @@ export const Step2PersonalizationForm = () => {
     nome: userData.nome || "",
     especialidade: userData.especialidade || ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isFormValid = formData.nome.trim() && formData.especialidade;
+  const isFormValid = formData.nome.trim() && formData.especialidade && !isSubmitting;
 
   const handleSubmit = () => {
-    if (!isFormValid) return;
+    if (!isFormValid || isSubmitting) return;
+    
+    setIsSubmitting(true);
 
     setUserData({
       nome: formData.nome.trim(),
@@ -73,14 +76,16 @@ export const Step2PersonalizationForm = () => {
                 {specialties.map((specialty) => (
                   <motion.button
                     key={specialty}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setFormData({ ...formData, especialidade: specialty })}
+                    whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                    onClick={() => !isSubmitting && setFormData({ ...formData, especialidade: specialty })}
+                    disabled={isSubmitting}
                     className={`
                       p-3 rounded-xl border-2 text-content font-medium transition-all duration-200
+                      ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
                       ${formData.especialidade === specialty
                         ? 'border-gray-800 bg-gray-50 text-foreground'
-                        : 'border-gray-200 hover:border-gray-400 text-muted-foreground hover:text-foreground'
+                        : 'border-gray-200 hover:border-gray-300 text-muted-foreground hover:text-foreground'
                       }
                     `}
                   >
@@ -97,7 +102,14 @@ export const Step2PersonalizationForm = () => {
             className="w-full"
             size="lg"
           >
-            Começar →
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Iniciando...
+              </div>
+            ) : (
+              'Começar →'
+            )}
           </CustomButton>
         </CustomCard>
       </motion.div>

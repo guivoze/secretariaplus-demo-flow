@@ -20,6 +20,7 @@ export const Step2ProfileConfirmation = () => {
   const [profiles, setProfiles] = useState<ProfileOption[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [totalFound, setTotalFound] = useState<number>(0);
+  const [isConfirming, setIsConfirming] = useState<boolean>(false);
   useEffect(() => {
     // Get cached profile query result
     const cachedResult = localStorage.getItem('profile-query-result');
@@ -76,10 +77,14 @@ export const Step2ProfileConfirmation = () => {
     }
   }, [userData.instagram, nextStep]);
   const handleProfileSelect = (profileAt: string) => {
+    if (isConfirming) return; // Impede seleção durante loading
     setSelectedProfile(profileAt);
   };
-  const handleConfirm = () => {
-    if (!selectedProfile) return;
+  const handleConfirm = async () => {
+    if (!selectedProfile || isConfirming) return;
+    
+    setIsConfirming(true);
+    
     const confirmedUsername = selectedProfile.replace('@', '');
 
     // Update user data with confirmed profile (marca como confirmado)
@@ -125,10 +130,13 @@ export const Step2ProfileConfirmation = () => {
     }).catch(error => console.error('Error during getting data:', error));
 
     // Após confirmação, segue o fluxo sem modal
-    (async () => {
+    try {
       await findPreviousSession(confirmedUsername);
       nextStep();
-    })();
+    } catch (error) {
+      console.error('Error in profile confirmation:', error);
+      setIsConfirming(false);
+    }
   };
   return <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <motion.div initial={{
@@ -160,7 +168,8 @@ export const Step2ProfileConfirmation = () => {
             duration: 0.4
           }} onClick={() => handleProfileSelect(profile.at)} className={`
                   flex items-center space-x-4 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200
-                  ${selectedProfile === profile.at ? 'border-gray-800 bg-gray-50' : 'border-gray-200 hover:border-gray-400 hover:bg-gray-50'}
+                  ${isConfirming ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-400'}
+                  ${selectedProfile === profile.at ? 'border-gray-800 bg-gray-50' : 'border-gray-200'}
                 `}>
                 <img src={profile.photo} alt={profile.username} className="w-12 h-12 rounded-lg object-cover" />
                 <div className="flex-1 text-left">
@@ -178,12 +187,26 @@ export const Step2ProfileConfirmation = () => {
           </div>
 
           <div className="space-y-3">
-            <CustomButton onClick={handleConfirm} disabled={!selectedProfile} className="w-full" size="lg">Confirmar Perfil</CustomButton>
+            <CustomButton 
+              onClick={handleConfirm} 
+              disabled={!selectedProfile || isConfirming} 
+              className="w-full" 
+              size="lg"
+            >
+              {isConfirming ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Confirmando...
+                </div>
+              ) : (
+                'Confirmar Perfil'
+              )}
+            </CustomButton>
 
             <CustomButton onClick={() => {
             // Apenas fecha o modal/segue o fluxo sem resetar para step 0
             nextStep();
-          }} variant="outline" size="lg" className="w-full bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200 text-xs font-light">Eita... não é nenhum desses</CustomButton>
+          }} variant="outline" size="lg" className="w-full bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200 text-xs font-light" disabled={isConfirming}>Eita... não é nenhum desses</CustomButton>
           </div>
         </CustomCard>
       </motion.div>
