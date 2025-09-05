@@ -28,7 +28,7 @@ const DemoContent = () => {
 
   // Inicializar Microsoft Clarity
   const clarity = useClarity({ 
-    projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
+    projectId: import.meta.env.VITE_CLARITY_PROJECT_ID || "t5ehdfteyd" 
   });
 
   // Tracking de tempo por step
