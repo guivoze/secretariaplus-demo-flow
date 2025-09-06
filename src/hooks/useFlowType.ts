@@ -6,9 +6,10 @@ export const useFlowType = (): FlowType => {
   const [flowType, setFlowType] = useState<FlowType>('default');
 
   useEffect(() => {
-    const path = window.location.pathname;
+    const urlParams = new URLSearchParams(window.location.search);
+    const flow = urlParams.get('flow');
     
-    if (path.includes('/lead')) {
+    if (flow === 'lead') {
       setFlowType('lead');
     } else {
       setFlowType('default');
