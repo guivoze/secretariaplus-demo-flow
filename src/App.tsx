@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { SupabaseDemoProvider, useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useClarity } from "@/hooks/useClarity";
+import { useFlowType } from "@/hooks/useFlowType";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Step1Landing } from "@/components/steps/Step1Landing";
 import { Step2Modal } from "@/components/steps/Step2Modal";
@@ -25,6 +26,7 @@ import { isDisqualifiedLead } from "@/utils/leadQualification";
 const DemoContent = () => {
   const { currentStep, isLoading, userData } = useSupabaseDemo();
   const stepContainerRef = useRef<HTMLDivElement>(null);
+  const flowType = useFlowType();
 
   // Inicializar Microsoft Clarity
   const clarity = useClarity({ 
@@ -141,9 +143,19 @@ const DemoContent = () => {
       case 15:
         return <Step14Emergency />;
       case 16:
-        return isDisqualifiedLead(userData.especialidade) ? <Step16CTADisqualified /> : <Step16CTA />;
+        // Leads desqualificados sempre vão para a página sem consultor
+        if (isDisqualifiedLead(userData.especialidade)) {
+          return <Step16CTADisqualified />;
+        }
+        // Leads qualificados: planos ou consultor baseado no flowType
+        return <Step16CTA flowType={flowType} />;
       default:
-        return isDisqualifiedLead(userData.especialidade) ? <Step16CTADisqualified /> : <Step16CTA />;
+        // Leads desqualificados sempre vão para a página sem consultor
+        if (isDisqualifiedLead(userData.especialidade)) {
+          return <Step16CTADisqualified />;
+        }
+        // Leads qualificados: planos ou consultor baseado no flowType
+        return <Step16CTA flowType={flowType} />;
     }
   };
 

@@ -3,6 +3,7 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useClarity } from "@/hooks/useClarity";
+import { useFlowType } from "@/hooks/useFlowType";
 import { motion } from "framer-motion";
 import { CustomInput } from "@/components/ui/custom-input";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
@@ -12,6 +13,7 @@ import { sanitizeValue } from "@/utils/sanitize";
 export const Step7Form = () => {
   const { userData, setUserData, nextStep } = useSupabaseDemo();
   const { trackLead } = useFacebookPixel();
+  const flowType = useFlowType();
   const clarity = useClarity({ 
     projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
   });
@@ -76,7 +78,7 @@ export const Step7Form = () => {
           email: mergedData.email,
           whatsapp: mergedData.whatsapp,
           especialidade: mergedData.especialidade,
-        })
+        }, flowType)
       ]);
 
       nextStep();

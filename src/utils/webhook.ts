@@ -1,3 +1,5 @@
+import { FlowType, getWebhookUrl } from '@/hooks/useFlowType';
+
 interface LeadWebhookData {
   name_1: string;
   email_1: string;
@@ -36,7 +38,7 @@ const getUTMParams = () => {
   };
 };
 
-export const sendLeadWebhook = async (leadData: LeadData): Promise<void> => {
+export const sendLeadWebhook = async (leadData: LeadData, flowType: FlowType = 'default'): Promise<void> => {
   try {
     const utmParams = getUTMParams();
     const currentTime = new Date().toISOString().replace('T', ' ').slice(0, 19);
@@ -58,7 +60,9 @@ export const sendLeadWebhook = async (leadData: LeadData): Promise<void> => {
       entry_time: currentTime,
     };
 
-    const response = await fetch('https://n8nsplus.up.railway.app/webhook/demo-session-lead', {
+    const webhookUrl = getWebhookUrl(flowType);
+    
+    const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

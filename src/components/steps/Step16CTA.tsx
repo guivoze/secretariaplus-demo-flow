@@ -1,11 +1,23 @@
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useClarity } from "@/hooks/useClarity";
+import { FlowType } from "@/hooks/useFlowType";
+import { Step16CTALegacy } from "./Step16CTALegacy";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Clock, Calendar, MessageSquare, Settings, Users, Zap, Shield, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export const Step16CTA = () => {
+interface Step16CTAProps {
+  flowType: FlowType;
+}
+
+export const Step16CTA = ({ flowType }: Step16CTAProps) => {
+  // Se for flow legacy (/lead), renderiza o componente de consultor
+  if (flowType === 'lead') {
+    return <Step16CTALegacy />;
+  }
+
+  // Flow padrão - renderiza os planos
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
