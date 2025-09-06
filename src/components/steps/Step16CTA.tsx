@@ -47,11 +47,11 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
     monthly: {
       basic: {
         price: "R$ 497/mês",
-        url: "https://pay.kiwify.com.br/Ap8sMvI"
+        url: "https://pay.kiwify.com.br/uo9AbpE"
       },
       pro: {
         price: "R$ 997/mês", 
-        url: "https://pay.kiwify.com.br/JTGpvzG"
+        url: "https://pay.kiwify.com.br/Meup5i9"
       }
     },
     annual: {
