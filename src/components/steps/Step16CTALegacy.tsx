@@ -25,11 +25,19 @@ export const Step16CTALegacy = () => {
       has_instagram_data: userData.hasInstagramData ? 'true' : 'false'
     });
     
-    const message = `Oi! Acabei de fazer meu teste gratuito do SecretáriaPlus e tenho interesse em conversar com um consultor sobre a implementação na minha clínica de ${userData.especialidade || 'saúde'}.
-
-Meu nome é ${userData.nome || 'não informado'}.`;
+    const instagramInfo = userData.instagram 
+      ? `• Instagram: @${userData.instagram}` 
+      : '• Instagram: Não informado';
     
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=5511936191391&text=${encodeURIComponent(message)}`;
+    const message = `Oi! Acabei de fazer o teste gratuito do SecretáriaPlus.
+
+• Nome: ${userData.nome || 'Não informado'}
+• Especialidade: ${userData.especialidade || 'Não informado'}
+${instagramInfo}
+
+Gostaria de falar sobre os planos disponíveis.`;
+    
+    const whatsappUrl = `http://wa.me/551140405847?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
