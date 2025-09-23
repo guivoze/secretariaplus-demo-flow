@@ -4,8 +4,8 @@ import { useClarity } from "@/hooks/useClarity";
 import { FlowType } from "@/hooks/useFlowType";
 import { Step16CTALegacy } from "./Step16CTALegacy";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Clock, Calendar, MessageSquare, Settings, Users, Zap, Shield, Star } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowRight, Settings, Users, Zap, Shield, Calendar, MessageSquare, Clock } from "lucide-react";
+import { useEffect, useMemo, useState, useRef } from "react";
 
 interface Step16CTAProps {
   flowType: FlowType;
@@ -27,45 +27,174 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
     projectId: import.meta.env.VITE_CLARITY_PROJECT_ID || "t5ehdfteyd" 
   });
 
-  // Estado do switcher de planos
-  const [isAnnual, setIsAnnual] = useState(false);
-  
-  // Estado para o botão do WhatsApp
-  const [showWhatsApp, setShowWhatsApp] = useState(false);
-
-  // Mostrar botão do WhatsApp após 5 segundos
+  // Mostrar planos (e heading com nome) somente após 2:58
+  const [showPlans, setShowPlans] = useState(false);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowWhatsApp(true);
-    }, 5000);
+    const delayMs = 2 * 60 * 1000 + 58 * 1000; // 2:58
+    const t = setTimeout(() => setShowPlans(true), delayMs);
+    return () => clearTimeout(t);
+  }, []);
+  // Permite destravar via query (?unlock=1) para QA
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('unlock') === '1') setShowPlans(true);
+    } catch {}
+  }, []);
 
+  // Toggle iOS (anual por padrão)
+  const [isAnnual, setIsAnnual] = useState(true);
+
+  // Estados dos bônus com timers específicos
+  const [showBonus1, setShowBonus1] = useState(false);
+  const [showBonus2, setShowBonus2] = useState(false);
+  const [showBonus3, setShowBonus3] = useState(false);
+  const [showGuarantee, setShowGuarantee] = useState(false);
+
+  // Comandos no console para QA/Debug
+  useEffect(() => {
+    (window as any).showPlans = () => setShowPlans(true);
+    (window as any).hidePlans = () => setShowPlans(false);
+    (window as any).showBonus1 = () => setShowBonus1(true);
+    (window as any).hideBonus1 = () => setShowBonus1(false);
+    (window as any).showBonus2 = () => setShowBonus2(true);
+    (window as any).hideBonus2 = () => setShowBonus2(false);
+    (window as any).showBonus3 = () => setShowBonus3(true);
+    (window as any).hideBonus3 = () => setShowBonus3(false);
+    (window as any).showGuarantee = () => setShowGuarantee(true);
+    (window as any).hideGuarantee = () => setShowGuarantee(false);
+    (window as any).toggleAnnual = () => setIsAnnual(prev => !prev);
+    (window as any).showAll = () => {
+      setShowPlans(true);
+      setShowBonus1(true);
+      setShowBonus2(true);
+      setShowBonus3(true);
+      setShowGuarantee(true);
+    };
+    (window as any).hideAll = () => {
+      setShowPlans(false);
+      setShowBonus1(false);
+      setShowBonus2(false);
+      setShowBonus3(false);
+      setShowGuarantee(false);
+    };
+    
+    console.log('🎮 Comandos disponíveis:');
+    console.log('showPlans() / hidePlans() - Mostrar/ocultar seção de planos');
+    console.log('showBonus1() / hideBonus1() - Mostrar/ocultar bônus 1');
+    console.log('showBonus2() / hideBonus2() - Mostrar/ocultar bônus 2');
+    console.log('showBonus3() / hideBonus3() - Mostrar/ocultar bônus 3');
+    console.log('showGuarantee() / hideGuarantee() - Mostrar/ocultar garantia');
+    console.log('toggleAnnual() - Alternar entre mensal/anual');
+    console.log('showAll() - Mostrar tudo');
+    console.log('hideAll() - Ocultar tudo');
+  }, []);
+
+  // Timers para bônus e garantia
+  useEffect(() => {
+    const bonus1Timer = setTimeout(() => setShowBonus1(true), 3 * 60 * 1000 + 25 * 1000); // 3:25
+    const bonus2Timer = setTimeout(() => setShowBonus2(true), 4 * 60 * 1000); // 4:00
+    const bonus3Timer = setTimeout(() => setShowBonus3(true), 4 * 60 * 1000 + 33 * 1000); // 4:33
+    const guaranteeTimer = setTimeout(() => setShowGuarantee(true), 5 * 60 * 1000 + 30 * 1000); // 5:30
+
+    return () => {
+      clearTimeout(bonus1Timer);
+      clearTimeout(bonus2Timer);
+      clearTimeout(bonus3Timer);
+      clearTimeout(guaranteeTimer);
+    };
+  }, []);
+
+  // Unlock para QA - destravar todos os timers
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('unlock') === '1') {
+        setShowBonus1(true);
+        setShowBonus2(true);
+        setShowBonus3(true);
+        setShowGuarantee(true);
+      }
+    } catch {}
+  }, []);
+
+  // Botão do WhatsApp (3 min e 10s)
+  const [showWhatsApp, setShowWhatsApp] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowWhatsApp(true), 3 * 60 * 1000 + 10 * 1000); // 3:10
     return () => clearTimeout(timer);
   }, []);
 
-  // Configuração dos planos
+  // VTurb player (Web Component) com fallback para iframe
+  const vturbScriptSrc = useMemo(() =>
+    "https://scripts.converteai.net/8ddd9233-b1be-436f-9067-8ebf120271e1/players/68d1c3470bbc693b0cadac02/v4/player.js",
+  []);
+  const [useWebComponent, setUseWebComponent] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  useEffect(() => {
+    // Evita injetar script duplicado
+    const alreadyLoaded = Array.from(document.scripts).some(s => s.src.includes("68d1c3470bbc693b0cadac02/v4/player.js"));
+    let fallbackTimer: number | undefined;
+
+    if (!alreadyLoaded) {
+      const s = document.createElement('script');
+      s.src = vturbScriptSrc;
+      s.async = true;
+      s.onload = () => {
+        // Se o custom element estiver definido, seguimos com web component
+        if ((window as any).customElements && (window as any).customElements.get && (window as any).customElements.get('vturb-smartplayer')) {
+          setUseWebComponent(true);
+        }
+      };
+      s.onerror = () => {
+        setUseWebComponent(false);
+        // Carrega SDK auxiliar (iframe embed)
+        const sdk = document.createElement('script');
+        sdk.src = 'https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js';
+        sdk.async = true;
+        document.head.appendChild(sdk);
+      };
+      document.head.appendChild(s);
+    }
+
+    // Fallback se o custom element não registrar em tempo hábil
+    fallbackTimer = window.setTimeout(() => {
+      const defined = (window as any).customElements?.get?.('vturb-smartplayer');
+      if (!defined) {
+        setUseWebComponent(false);
+        const sdk = document.createElement('script');
+        sdk.src = 'https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js';
+        sdk.async = true;
+        document.head.appendChild(sdk);
+      }
+    }, 3000);
+
+    return () => {
+      if (fallbackTimer) window.clearTimeout(fallbackTimer);
+    };
+  }, [vturbScriptSrc]);
+
+  // Define src do iframe quando em fallback
+  useEffect(() => {
+    if (!useWebComponent && iframeRef.current && !iframeRef.current.src) {
+      const base = 'https://scripts.converteai.net/8ddd9233-b1be-436f-9067-8ebf120271e1/players/68d1c3470bbc693b0cadac02/v4/embed.html';
+      const q = window.location.search || '?';
+      const vl = encodeURIComponent(window.location.href);
+      iframeRef.current.src = `${base}${q}&vl=${vl}`;
+    }
+  }, [useWebComponent]);
+
   const planConfig = {
     monthly: {
-      basic: {
-        price: "R$ 497/mês",
-        url: "https://pay.kiwify.com.br/uo9AbpE"
-      },
-      pro: {
-        price: "R$ 997/mês", 
-        url: "https://pay.kiwify.com.br/Meup5i9"
-      }
+      basic: { price: "R$ 497/mês", url: "https://pay.kiwify.com.br/uo9AbpE" },
+      pro: { price: "R$ 997/mês", url: "https://pay.kiwify.com.br/Meup5i9" },
     },
     annual: {
-      basic: {
-        price: "12x de R$ 397",
-        url: "https://pay.kiwify.com.br/CuBpHY7"
-      },
-      pro: {
-        price: "12x de R$ 797",
-        url: "https://pay.kiwify.com.br/ld4p1H2"
-      }
-    }
-  };
-
+      basic: { price: "12x de R$ 397", url: "https://pay.kiwify.com.br/CuBpHY7" },
+      pro: { price: "12x de R$ 797", url: "https://pay.kiwify.com.br/ld4p1H2" },
+    },
+  } as const;
   const currentPlans = isAnnual ? planConfig.annual : planConfig.monthly;
 
   const handlePlanClick = (planUrl: string, planName: string) => {
@@ -77,7 +206,7 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
       plan_name: planName,
       plan_type: isAnnual ? 'annual' : 'monthly',
       user_specialty: userData.especialidade || 'unknown',
-      has_instagram_data: userData.hasInstagramData ? 'true' : 'false'
+      has_instagram_data: userData.hasInstagramData ? 'true' : 'false',
     });
     
     console.log(`Plan selected: ${planName} (${isAnnual ? 'annual' : 'monthly'})`);
@@ -89,7 +218,7 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
     clarity.trackInteraction('whatsapp_click', {
       user_specialty: userData.especialidade || 'unknown',
       plan_type: isAnnual ? 'annual' : 'monthly',
-      has_instagram_data: userData.hasInstagramData ? 'true' : 'false'
+      has_instagram_data: userData.hasInstagramData ? 'true' : 'false',
     });
     
     window.open('https://api.whatsapp.com/send?phone=5511936191391&text=Oi%20Thamara.%20Acabei%20de%20fazer%20meu%20teste%20gratuito%20e%20tenho%20uma%20d%C3%BAvida%20sobre%20o%20Secret%C3%A1riaPlus.', '_blank');
@@ -102,199 +231,439 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="w-full max-w-lg space-y-6"
+          className="w-full max-w-lg"
         >
-          {/* Header */}
+          {/* Logo no topo */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="flex items-center justify-center mb-[0%]"
+          >
+            <img src="/imgs/logo-blk.svg" alt="Logo SecretariaPlus" className="w-20 h-20" />
+          </motion.div>
+
+          {/* Título e subtítulo (vídeo) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-center space-y-4 mb-8"
+            className="text-center space-y-2 mb-[10%]"
           >
-            <div className="flex items-center justify-center min-h-[60px]">
-              <img 
-                src="/imgs/logo-blk.svg" 
-                alt="Logo SecretariaPlus" 
-                className="w-20 h-20"
-              />
-            </div>
-            <h1 className="text-xl font-bold text-gray-900 leading-tight px-2">
-              {userData?.nome?.split(' ')[0] ? `${userData.nome.split(' ')[0]}, ` : ''}Agora é hora de colocar a I.A pra funcionar no WhatsApp da sua clínica a todo vapor!
-            </h1>
-            <p className="text-gray-700 text-base px-2 leading-relaxed">
-              Para escanear o QR code e ativar sua nova <span className="font-semibold text-gray-900">secretária em menos de 5 minutos</span>, basta escolher um plano.
-            </p>
+            <h1 className="text-2xl font-bold text-gray-900 leading-tight">E quanto custa tudo isso?</h1>
+            <p className="text-base text-gray-600">assista o vídeo e descubra</p>
           </motion.div>
 
-          {/* Plan Switcher */}
+          {/* Player VTurb */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="flex justify-center mb-12"
+            className="flex items-center justify-center"
           >
-            <div className="bg-white border-2 border-gray-200 p-2 rounded-xl flex items-center space-x-2 shadow-sm">
-              <button
-                onClick={() => setIsAnnual(false)}
-                className={`px-8 py-4 rounded-lg text-base font-semibold transition-all duration-300 ${
-                  !isAnnual 
-                    ? 'bg-gray-900 text-white shadow-lg transform scale-105' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                Plano Mensal
-              </button>
-              <button
-                onClick={() => setIsAnnual(true)}
-                className={`px-8 py-3 rounded-lg text-base font-semibold transition-all duration-300 flex flex-col items-center ${
-                  isAnnual 
-                    ? 'bg-gray-900 text-white shadow-lg transform scale-105' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <span>Plano Anual</span>
-                <span className="text-xs font-normal text-gray-400 mt-0.5">2 meses grátis 🔥</span>
-              </button>
+            <div className="w-full" style={{ maxWidth: 400, margin: '0 auto' }}>
+              {useWebComponent ? (
+                <vturb-smartplayer id="vid-68d1c3470bbc693b0cadac02" style={{ display: 'block', width: '100%' }}></vturb-smartplayer>
+              ) : (
+                <div id="ifr_68d1c3470bbc693b0cadac02_wrapper" style={{ margin: '0 auto', width: '100%', maxWidth: 400 }}>
+                  <div id="ifr_68d1c3470bbc693b0cadac02_aspect" style={{ position: 'relative', padding: '125% 0 0 0' }}>
+                    <iframe
+                      ref={iframeRef}
+                      id="ifr_68d1c3470bbc693b0cadac02"
+                      frameBorder={0}
+                      allowFullScreen
+                      referrerPolicy="origin"
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
 
-          {/* Plano Basic */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <CustomCard variant="elevated" className="p-6 space-y-4 border-2 border-gray-200 bg-white">
-              <div className="text-center">
-                <h2 className="text-xl font-bold text-gray-900 mb-4 capitalize">Plano Basic</h2>
-                
-                <div className="space-y-3 text-left text-gray-700 mb-6 text-sm">
-                  <div className="flex items-start gap-3">
-                    <Settings className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                    <span>Configure procedimentos, seus horários, jeito de falar da IA e muito mais</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Zap className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                    <span>Notificações (emergência, agendamentos)</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Clock className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                    <span>Atenda seus pacientes 24/7</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <MessageSquare className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                    <span>Follow up automático</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Calendar className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                    <span>Agenda automática</span>
-                  </div>
-                </div>
+          {/* Heading com nome + switcher e planos (após delay) */}
+          {showPlans && (
+            <>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="text-center space-y-2 mt-[15%] mb-8"
+                id="plans-section"
+              >
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {(userData?.nome?.split(' ')[0] || '').trim() ? `${userData.nome.split(' ')[0]}, ` : ''}
+                  escolha o plano
+                </h2>
+                <p className="text-base text-gray-600 mt-0">que mais combina com você</p>
+              </motion.div>
 
-                <div className="text-3xl font-bold text-gray-900 mb-6">
-                  {isAnnual ? (
-                    <><span className="text-lg font-medium text-gray-600">12x de </span>R$ 397</>
-                  ) : (
-                    <>R$ 497<span className="text-lg text-gray-600">/mês</span></>
-                  )}
-                </div>
-                
-                <button
-                  onClick={() => handlePlanClick(currentPlans.basic.url, 'Basic')}
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                >
-                  Iniciar Agora
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-            </CustomCard>
-          </motion.div>
-
-          {/* Plano Pro */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <CustomCard variant="elevated" className="p-6 space-y-4 border-2 border-gray-600 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
-              {/* Badge Popular */}
-              <div className="absolute -top-1 -right-1">
-                <div className="bg-gray-600 text-white text-xs font-medium px-3 py-1 rounded-bl-lg rounded-tr-lg">
-                  POPULAR
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <img 
-                    src="/imgs/7641727.png" 
-                    alt="Meta Verified" 
-                    className="w-6 h-6"
-                  />
-                  <h2 className="text-xl font-bold text-gray-900 capitalize">Plano Pro</h2>
-                </div>
-                
-                <div className="space-y-3 text-left text-gray-700 mb-6 text-sm">
-                  <div className="flex items-start gap-3">
-                    <span className="text-gray-600 font-medium text-sm mt-0.5 flex-shrink-0">+</span>
-                    <span className="font-medium">Tudo do Basic</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Users className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                    <span>CRM automático</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Shield className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                    <span>Suporte dedicado</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <img 
-                      src="/imgs/7641727.png" 
-                      alt="Meta Verified" 
-                      className="w-4 h-4 mt-0.5 flex-shrink-0"
+              {/* Toggle iOS centralizado */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 }}
+                className="relative w-full h-12 mb-10 "
+              >
+                {/* Toggle sozinho, absolutamente centralizado */}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <button
+                    onClick={() => setIsAnnual(!isAnnual)}
+                    role="switch"
+                    aria-checked={isAnnual}
+                    className={`relative w-16 h-9 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-300 ${
+                      isAnnual ? 'bg-green-500' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 left-1 w-7 h-7 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                        isAnnual ? 'translate-x-7' : 'translate-x-0'
+                      }`}
                     />
-                    <div>
-                      <div><strong>WhatsApp Verificado</strong></div>
-                      <div className="text-xs text-gray-500">(API Meta Cloud)</div>
+                  </button>
+                </div>
+
+                {/* Texto "mensal" à esquerda do toggle */}
+                <div className="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-full -ml-12">
+                  <button
+                    onClick={() => setIsAnnual(false)}
+                    className={`text-sm font-medium transition-colors ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}
+                  >
+                    mensal
+                  </button>
+                </div>
+
+                {/* Texto "anual" à direita do toggle */}
+                <div className="absolute left-1/2 top-1/2 -translate-y-1/2 ml-12">
+                  <div className="flex flex-col items-start">
+                    <button
+                      onClick={() => setIsAnnual(true)}
+                      className={`text-sm font-medium transition-colors ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}
+                    >
+                      anual
+                    </button>
+                    <span className="text-xs text-gray-400">2 meses grátis 🔥</span>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Plano Basic */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="mb-6">
+                <CustomCard variant="elevated" className="p-6 space-y-4 border-2 border-gray-200 bg-white">
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 capitalize">Plano Basic</h3>
+
+                    <div className="space-y-3 text-left text-gray-700 mb-10 text-sm">
+                      <div className="flex items-start gap-3">
+                        <Settings className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                        <span>Configure procedimentos, seus horários, jeito de falar da IA e muito mais</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Zap className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                        <span>Notificações (emergência, agendamentos)</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Clock className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                        <span>Atenda seus pacientes 24/7</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <MessageSquare className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                        <span>Follow up automático</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Calendar className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                        <span>Agenda automática</span>
+                      </div>
+                    </div>
+
+                    <div className="text-5xl font-bold text-gray-900 mb-6">
+                      {isAnnual ? (
+                        <><span className="text-lg font-medium text-gray-600">12x de </span>R$ 397</>
+                      ) : (
+                        <>R$ 497<span className="text-lg text-gray-600">/mês</span></>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => handlePlanClick(currentPlans.basic.url, 'Basic')}
+                      className="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                    >
+                      Iniciar Agora
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </CustomCard>
+              </motion.div>
+
+              {/* Plano Pro */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+                <CustomCard variant="elevated" className="p-6 space-y-4 border-2 border-gray-600 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+                  {/* Badge Popular */}
+                  <div className="absolute -top-1 -right-1">
+                    <div className="bg-gray-600 text-white text-xs font-medium px-3 py-1 rounded-bl-lg rounded-tr-lg">POPULAR</div>
+                  </div>
+
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 capitalize">Plano Pro</h3>
+
+                    <div className="space-y-3 text-left text-gray-700 mb-6 text-sm">
+                      <div className="flex items-start gap-3">
+                        <span className="text-gray-600 font-medium text-sm mt-0.5 flex-shrink-0">+</span>
+                        <span className="font-medium">Tudo do Basic</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Users className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                        <span>CRM automático</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Shield className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                        <span>Suporte dedicado</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div>
+                          <div className="font-medium">WhatsApp Verificado</div>
+                          <div className="text-gray-500 text-xs">(API Meta Cloud)</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-5xl font-bold text-gray-900 mb-2">
+                      {isAnnual ? (
+                        <><span className="text-lg font-medium text-gray-600">12x de </span>R$ 797</>
+                      ) : (
+                        <>R$ 997<span className="text-lg text-gray-600">/mês</span></>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 font-regular mb-6">🤍 Mais escolhido pelos profissionais</p>
+
+                    <button
+                      onClick={() => handlePlanClick(currentPlans.pro.url, 'Pro')}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                    >
+                      Iniciar Agora
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </CustomCard>
+              </motion.div>
+
+              {/* Espaço de respiro entre planos e bônus */}
+              <div className="mb-[20%]"></div>
+
+              {/* Bônus travados (mesmo timer dos planos) */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mt-2 mb-8"
+              >
+                <div className="text-center mb-7 px-4">
+                  <h4 className="text-2xl font-bold text-gray-900">
+                    + de R$ 6 mil em bônus
+                  </h4>
+                  <p className="text-base text-gray-600 mt-1">te acompanham em qualquer plano 🚀</p>
+                </div>
+                <div className="space-y-6">
+                  {/* Bônus 1 */}
+                  <div>
+                    <div className="rounded-3xl border border-gray-300 bg-white shadow-sm p-6 flex items-center gap-4">
+                      {/* Imagem do bônus 1 - condicional */}
+                      <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {showBonus1 ? (
+                          <img src="/imgs/bonus1.jpg" alt="Bônus 1" className="w-full h-full object-cover" />
+                        ) : (
+                          <img src="/imgs/lock.jpg" alt="Bônus Bloqueado" className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                      
+                      {/* Conteúdo do bônus - condicional */}
+                      <div className="flex-1">
+                        {showBonus1 ? (
+                          <>
+                            <h5 className="text-xl font-bold text-gray-900 mb-2">Bônus 1: Conteúdo Infinito</h5>
+                            <p className="text-base text-gray-700 leading-relaxed">
+                              Gere seu clone de IA indistinguível a realidade e economize tempo com produção de conteúdo.
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <h5 className="text-xl font-bold text-gray-900 mb-2">Bônus 1: Assista o Vídeo</h5>
+                            <p className="text-base text-gray-700 leading-relaxed">
+                              Descubra este bônus incrível terminando de assistir o vídeo acima.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Preço discreto embaixo */}
+                    <div className="text-center pt-3 pb-2">
+                      <span className="text-base text-gray-500 line-through mr-2">R$ 1500</span>
+                      <span className="text-base font-semibold text-green-600">Grátis</span>
                     </div>
                   </div>
-                </div>
 
-                <div className="text-3xl font-bold text-gray-900 mb-2">
-                  {isAnnual ? (
-                    <><span className="text-lg font-medium text-gray-600">12x de </span>R$ 797</>
+                  {/* Bônus 2 */}
+                  <div>
+                    <div className="rounded-3xl border border-gray-300 bg-white shadow-sm p-6 flex items-center gap-4">
+                      {/* Imagem do bônus 2 - condicional */}
+                      <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {showBonus2 ? (
+                          <img src="/imgs/bonus2.jpg" alt="Bônus 2" className="w-full h-full object-cover" />
+                        ) : (
+                          <img src="/imgs/lock.jpg" alt="Bônus Bloqueado" className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                      
+                      {/* Conteúdo do bônus - condicional */}
+                      <div className="flex-1">
+                        {showBonus2 ? (
+                          <>
+                            <h5 className="text-xl font-bold text-gray-900 mb-2">Bônus 2: Agente HLD</h5>
+                            <p className="text-base text-gray-700 leading-relaxed">
+                              Tirado da mentoria High Level Doctor, um agente de IA especialista em criação de conteúdo para instagram específico para profissionais da saúde sem tempo.
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <h5 className="text-xl font-bold text-gray-900 mb-2">Bônus 2: Assista o Vídeo</h5>
+                            <p className="text-base text-gray-700 leading-relaxed">
+                              Descubra este bônus incrível terminando de assistir o vídeo acima.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Preço discreto embaixo */}
+                    <div className="text-center pt-3 pb-2">
+                      <span className="text-base text-gray-500 line-through mr-2">R$ 1297</span>
+                      <span className="text-base font-semibold text-green-600">Grátis</span>
+                    </div>
+                  </div>
+
+                  {/* Bônus 3 */}
+                  <div>
+                    <div className="rounded-3xl border border-gray-300 bg-white shadow-sm p-6 flex items-center gap-4">
+                      {/* Imagem do bônus 3 - condicional */}
+                      <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {showBonus3 ? (
+                          <img src="/imgs/bonus3.jpg" alt="Bônus 3" className="w-full h-full object-cover" />
+                        ) : (
+                          <img src="/imgs/lock.jpg" alt="Bônus Bloqueado" className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                      
+                      {/* Conteúdo do bônus - condicional */}
+                      <div className="flex-1">
+                        {showBonus3 ? (
+                          <>
+                            <h5 className="text-xl font-bold text-gray-900 mb-2">Bônus 3: Consultoria de Tráfego Express</h5>
+                            <p className="text-base text-gray-700 leading-relaxed">
+                              Uma call gratuita com um de nossos especialistas em funil de vendas para te ajudar a resolver problemas com anúncios e aquisição de pacientes.
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <h5 className="text-xl font-bold text-gray-900 mb-2">Bônus 3: Assista o Vídeo</h5>
+                            <p className="text-base text-gray-700 leading-relaxed">
+                              Descubra este bônus incrível terminando de assistir o vídeo acima.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Preço discreto embaixo */}
+                    <div className="text-center pt-3 pb-2">
+                      <span className="text-base text-gray-500 line-through mr-2">R$ 3.000</span>
+                      <span className="text-base font-semibold text-green-600">Grátis</span>
+                    </div>
+                  </div>
+
+                  {/* TODO: Lógica de "travado" comentada - implementar depois */}
+                  {/*
+                  {['1','2','3'].map((n) => (
+                    <div
+                      key={n}
+                      className="rounded-3xl border border-gray-300 bg-white shadow-sm p-6 min-h-36 flex items-center justify-center"
+                    >
+                      <span className="text-center text-base text-gray-700 leading-relaxed max-w-[85%]">
+                        🔒 assista o vídeo até o final para revelar o bônus {n}
+                      </span>
+                    </div>
+                  ))}
+                  */}
+                </div>
+              </motion.div>
+
+              {/* Seção de Garantia 30 dias - condicional */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="mt-12 mb-16 text-center"
+              >
+                {/* Imagem da garantia - condicional */}
+                <div className="flex justify-center mb-6">
+                  {showGuarantee ? (
+                    <img src="/imgs/30d.webp" alt="Garantia 30 dias" className="w-32 h-32 object-contain" />
                   ) : (
-                    <>R$ 997<span className="text-lg text-gray-600">/mês</span></>
+                    <img src="/imgs/pad.png" alt="Garantia Bloqueada" className="w-24 h-24 object-contain" />
                   )}
                 </div>
-                <p className="text-xs text-gray-500 font-regular mb-6">🤍 Mais escolhido pelos profissionais</p>
                 
-                <button
-                  onClick={() => handlePlanClick(currentPlans.pro.url, 'Pro')}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                >
-                  Iniciar Agora
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-            </CustomCard>
-          </motion.div>
+                {/* Título e descrição da garantia - condicional */}
+                {showGuarantee ? (
+                  <>
+                    {/* Título da garantia */}
+                    <h4 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
+                      Sua IA não agendou<br />
+                      UM PACIENTE em até 30 dias?
+                    </h4>
+                    
+                    {/* Descrição da garantia */}
+                    <p className="text-base text-gray-700 leading-relaxed max-w-md mx-auto mb-8">
+                      Devolvemos todo seu $$$, e ainda fazemos R$ 500 no seu pix como gesto de perdão pelo seu tempo perdido.
+                    </p>
+                    
+                    {/* Botão Iniciar Agora - idêntico aos dos planos */}
+                    <button
+                      onClick={() => {
+                        const plansSection = document.getElementById('plans-section');
+                        if (plansSection) {
+                          plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }}
+                      className="w-full max-w-sm mx-auto bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                    >
+                      Iniciar Agora
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* Título locked */}
+                    <h4 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
+                      Garantia
+                    </h4>
+                    
+                    {/* Descrição locked */}
+                    <p className="text-base text-gray-700 leading-relaxed max-w-md mx-auto">
+                      Assista o vídeo e descubra sua garantia IRRECUSÁVEL.
+                    </p>
+                  </>
+                )}
+              </motion.div>
+            </>
+          )}
 
-          {/* Footer motivacional */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-center text-gray-600 text-sm px-4 pb-8"
-          >
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Zap className="w-6 h-6 text-gray-600" />
-                <span className="font-bold text-gray-800 text-base">Setup em menos de 5 minutos</span>
-              </div>
-              <p className="text-gray-700 font-regular">Sua nova secretária estará funcionando hoje mesmo, sem parafernálha tecnológica. Cuidamos de tudo pra você.</p>
-            </div>
-          </motion.div>
+          {/* (Removido aviso do timer dos planos) */}
         </motion.div>
       </div>
 
@@ -306,7 +675,6 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
           transition={{ duration: 0.3, ease: "easeOut" }}
           className="fixed bottom-6 right-6 z-50"
         >
-          {/* Tooltip */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -316,18 +684,11 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
             Alguma dúvida?
             <div className="absolute bottom-[-6px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-gray-800"></div>
           </motion.div>
-          
-          {/* Botão do WhatsApp */}
           <button
             onClick={handleWhatsAppClick}
             className="w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
           >
-            <img 
-              src="/imgs/wpp.webp" 
-              alt="WhatsApp" 
-              style={{ width: '32px', height: '32px' }}
-              className="object-contain"
-            />
+            <img src="/imgs/wpp.webp" alt="WhatsApp" style={{ width: '32px', height: '32px' }} className="object-contain" />
           </button>
         </motion.div>
       )}

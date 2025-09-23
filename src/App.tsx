@@ -18,7 +18,6 @@ import { Step10WhatsApp } from "@/components/steps/Step10WhatsApp";
 import { Step11Calendar } from "@/components/steps/Step11Calendar";
 import { Step12Result } from "@/components/steps/Step12Result";
 import { Step13Features } from "@/components/steps/Step13Features";
-import { Step14Emergency } from "@/components/steps/Step14Emergency";
 import { Step16CTA } from "@/components/steps/Step16CTA";
 import { Step16CTADisqualified } from "@/components/steps/Step16CTADisqualified";
 import { isDisqualifiedLead } from "@/utils/leadQualification";
@@ -140,8 +139,6 @@ const DemoContent = () => {
         return <Step12Result />;
       case 14:
         return <Step13Features />;
-      case 15:
-        return <Step14Emergency />;
       case 16:
         // Leads desqualificados sempre vão para a página sem consultor
         if (isDisqualifiedLead(userData.especialidade)) {

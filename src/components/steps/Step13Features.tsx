@@ -125,6 +125,30 @@ export const Step13Features = () => {
             </div>
           </motion.div>
 
+          {/* Notificações (novo item, após Follow Up) */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="space-y-6"
+          >
+            <div className="bg-gray-100 rounded-lg p-6 border border-gray-200 min-h-[160px] overflow-hidden">
+              <img
+                src="/imgs/step14.webp"
+                alt="Notificações de emergência e agendamentos"
+                className="w-full h-full object-cover rounded-lg"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold text-gray-900">Notificações</h2>
+              <p className="text-gray-700 leading-relaxed">
+                Caso ocorram emergências, agendamentos e situações que exijam sua atenção,
+                você recebe um aviso e cai direto na conversa para lidar na íntegra.
+              </p>
+            </div>
+          </motion.div>
+
           {/* Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

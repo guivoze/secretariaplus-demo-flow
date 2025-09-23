@@ -15,7 +15,7 @@ export const Step7Form = () => {
   const { trackLead } = useFacebookPixel();
   const flowType = useFlowType();
   const clarity = useClarity({ 
-    projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
+    projectId: import.meta.env.VITE_CLARITY_PROJECT_ID || "t5ehdfteyd" 
   });
   
   const [formData, setFormData] = useState({
