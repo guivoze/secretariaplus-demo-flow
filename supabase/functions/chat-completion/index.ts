@@ -88,13 +88,13 @@ serve(async (req)=>{
         type: 'function',
         function: {
           name: 'appointment',
-          description: 'Registra um agendamento confirmado na conversa',
+          description: 'Registra um agendamento confirmado na conversa. IMPORTANTE: SEMPRE use a data atual de get_date() como base. Se estamos em 2025, NUNCA use anos anteriores como 2024.',
           parameters: {
             type: 'object',
             properties: {
               dateISO: {
                 type: 'string',
-                description: 'Data/hora em ISO 8601 (ex: 2025-08-20T15:35:00-03:00)'
+                description: 'Data/hora em ISO 8601 (ex: 2025-08-20T15:35:00-03:00). CRÍTICO: SEMPRE use o ano atual ou futuro, nunca anos passados.'
               },
               displayDate: {
                 type: 'string',
@@ -132,8 +132,8 @@ serve(async (req)=>{
         content: message
       }
     ];
-    let appointmentPayload = null;
-    let aiMessage = null;
+    let appointmentPayload: any = null;
+    let aiMessage: string | null = null;
     // Up to 3 tool-call iterations
     for(let i = 0; i < 3; i++){
       console.log('[chat-fn] Iteration', i + 1, 'messages length:', messages.length);
@@ -214,19 +214,41 @@ serve(async (req)=>{
                 iso: localISO,
                 timeZone: tz,
                 dateBR: fmtDate,
-                timeBR: fmtTime
+                timeBR: fmtTime,
+                currentYear: y,
+                note: `Data atual: ${fmtDate} às ${fmtTime}. Use SEMPRE este ano (${y}) ou posterior para agendamentos.`
               };
               console.log('[chat-fn] get_date ->', result);
             } else if (fn.name === 'appointment') {
               const { dateISO, displayDate, displayTime, patientName, procedure } = args;
               
-              // Simplifica: usa a data que veio da IA diretamente, pois ela já foi instruída a usar get_date() como base
-              let appointmentDate = dateISO ? new Date(dateISO) : new Date();
-              
-              // Se a data estiver no passado (considerando UTC), adiciona 7 dias
+              // Usa timestamp do cliente para obter data base correta
               const now = nowEpochMs ? new Date(nowEpochMs) : new Date();
-              if (appointmentDate.getTime() < now.getTime()) {
-                appointmentDate = new Date(appointmentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+              
+              // Parse da data que veio da IA
+              let appointmentDate;
+              if (dateISO) {
+                appointmentDate = new Date(dateISO);
+                console.log(`[appointment] Data original da IA: ${dateISO}, parsed: ${appointmentDate}`);
+                
+                // VALIDAÇÃO CRÍTICA: se a data está em ano anterior ao atual, força ano atual
+                const currentYear = now.getFullYear();
+                console.log(`[appointment] Ano atual: ${currentYear}, ano da data: ${appointmentDate.getFullYear()}`);
+                
+                if (appointmentDate.getFullYear() < currentYear) {
+                  console.log(`[appointment] ⚠️  PROBLEMA: Data em ano anterior detectada: ${appointmentDate.getFullYear()}, forçando para ${currentYear}`);
+                  appointmentDate.setFullYear(currentYear);
+                  console.log(`[appointment] ✅ Data corrigida para: ${appointmentDate}`);
+                }
+                
+                // Se ainda estiver no passado após ajuste de ano, adiciona 7 dias
+                if (appointmentDate.getTime() < now.getTime()) {
+                  console.log('[appointment] Data no passado, adicionando 7 dias');
+                  appointmentDate = new Date(appointmentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+                }
+              } else {
+                // Se não veio dateISO, usa data atual + 7 dias
+                appointmentDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
               }
 
               // Formata para timezone brasileiro (-03:00)
@@ -289,7 +311,7 @@ serve(async (req)=>{
       }
       // No tool calls: capture final content
       aiMessage = msg.content || '';
-      console.log('[chat-fn] Final AI message length:', aiMessage.length);
+      console.log('[chat-fn] Final AI message length:', (aiMessage || '').length);
       break;
     }
     if (!aiMessage) aiMessage = '…';
