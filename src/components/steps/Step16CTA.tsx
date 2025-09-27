@@ -51,45 +51,6 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
   const [showBonus3, setShowBonus3] = useState(false);
   const [showGuarantee, setShowGuarantee] = useState(false);
 
-  // Comandos no console para QA/Debug
-  useEffect(() => {
-    (window as any).showPlans = () => setShowPlans(true);
-    (window as any).hidePlans = () => setShowPlans(false);
-    (window as any).showBonus1 = () => setShowBonus1(true);
-    (window as any).hideBonus1 = () => setShowBonus1(false);
-    (window as any).showBonus2 = () => setShowBonus2(true);
-    (window as any).hideBonus2 = () => setShowBonus2(false);
-    (window as any).showBonus3 = () => setShowBonus3(true);
-    (window as any).hideBonus3 = () => setShowBonus3(false);
-    (window as any).showGuarantee = () => setShowGuarantee(true);
-    (window as any).hideGuarantee = () => setShowGuarantee(false);
-    (window as any).toggleAnnual = () => setIsAnnual(prev => !prev);
-    (window as any).showAll = () => {
-      setShowPlans(true);
-      setShowBonus1(true);
-      setShowBonus2(true);
-      setShowBonus3(true);
-      setShowGuarantee(true);
-    };
-    (window as any).hideAll = () => {
-      setShowPlans(false);
-      setShowBonus1(false);
-      setShowBonus2(false);
-      setShowBonus3(false);
-      setShowGuarantee(false);
-    };
-    
-    console.log('🎮 Comandos disponíveis:');
-    console.log('showPlans() / hidePlans() - Mostrar/ocultar seção de planos');
-    console.log('showBonus1() / hideBonus1() - Mostrar/ocultar bônus 1');
-    console.log('showBonus2() / hideBonus2() - Mostrar/ocultar bônus 2');
-    console.log('showBonus3() / hideBonus3() - Mostrar/ocultar bônus 3');
-    console.log('showGuarantee() / hideGuarantee() - Mostrar/ocultar garantia');
-    console.log('toggleAnnual() - Alternar entre mensal/anual');
-    console.log('showAll() - Mostrar tudo');
-    console.log('hideAll() - Ocultar tudo');
-  }, []);
-
   // Timers para bônus e garantia
   useEffect(() => {
     const bonus1Timer = setTimeout(() => setShowBonus1(true), 3 * 60 * 1000 + 25 * 1000); // 3:25
@@ -376,7 +337,7 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
                       </div>
                     </div>
 
-                    <div className="text-5xl font-bold text-gray-900 mb-6">
+                    <div className="text-3xl font-bold text-gray-900 mb-6">
                       {isAnnual ? (
                         <><span className="text-lg font-medium text-gray-600">12x de </span>R$ 397</>
                       ) : (
@@ -419,20 +380,9 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
                         <Shield className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
                         <span>Suporte dedicado</span>
                       </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="font-medium">WhatsApp Verificado</div>
-                          <div className="text-gray-500 text-xs">(API Meta Cloud)</div>
-                        </div>
-                      </div>
                     </div>
 
-                    <div className="text-5xl font-bold text-gray-900 mb-2">
+                    <div className="text-3xl font-bold text-gray-900 mb-2">
                       {isAnnual ? (
                         <><span className="text-lg font-medium text-gray-600">12x de </span>R$ 797</>
                       ) : (
@@ -607,14 +557,14 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 }}
-                className="mt-12 mb-16 text-center"
+                className="mt-12 mb-12 text-center"
               >
                 {/* Imagem da garantia - condicional */}
                 <div className="flex justify-center mb-6">
                   {showGuarantee ? (
                     <img src="/imgs/30d.webp" alt="Garantia 30 dias" className="w-32 h-32 object-contain" />
                   ) : (
-                    <img src="/imgs/pad.png" alt="Garantia Bloqueada" className="w-24 h-24 object-contain" />
+                    <img src="/imgs/pad.png" alt="Garantia Bloqueada" className="w-32 h-32 object-contain" />
                   )}
                 </div>
                 

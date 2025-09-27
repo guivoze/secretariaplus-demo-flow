@@ -64,41 +64,10 @@ export const Step14Emergency = () => {
             </p>
           </motion.div>
 
-          {/* Nova seção de Notificações */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.4 }}
-            className="space-y-4"
-          >
-            <div className="flex items-center justify-center min-h-[120px]">
-              <img 
-                src="/imgs/step14.webp" 
-                alt="Notificações" 
-                className="w-full max-w-md h-auto drop-shadow-lg"
-              />
-            </div>
-          </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="space-y-4"
-          >
-            <h3 className="text-lg font-bold text-gray-900">
-              Notificações
-            </h3>
-            <p className="text-gray-700 leading-relaxed">
-              Caso ocorram emergências, agendamentos e situações que exijam sua atenção, 
-              você recebe um aviso e cai direto na conversa para lidar na íntegra.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
             className="pt-4"
           >
             <CustomButton

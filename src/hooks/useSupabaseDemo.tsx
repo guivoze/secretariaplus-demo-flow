@@ -620,19 +620,11 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
   };
 
   const nextStep = () => {
-    setCurrentStep(prev => {
-      // pular o step 15: de 14 vai direto para 16
-      if (prev === 14) return 16;
-      return Math.min(prev + 1, 16);
-    });
+    setCurrentStep(prev => Math.min(prev + 1, 16)); // Max 16 steps now (0-16, but step 16 is CTA)
   };
 
   const prevStep = () => {
-    setCurrentStep(prev => {
-      // voltando do 16, cai no 14 (15 removido)
-      if (prev === 16) return 14;
-      return Math.max(prev - 1, 0);
-    });
+    setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 
   const findPreviousSession = useCallback(async (instagramHandle: string) => {

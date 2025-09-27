@@ -34,7 +34,7 @@ export const Step10WhatsApp = () => {
     setThreadId
   } = useSupabaseDemo();
   const clarity = useClarity({ 
-    projectId: import.meta.env.VITE_CLARITY_PROJECT_ID || "t5ehdfteyd" 
+    projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
   });
   const {
     chatMessages,

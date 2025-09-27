@@ -61,11 +61,16 @@ export const Step2PersonalizationForm = () => {
               value={formData.nome}
               onChange={(e) => {
                 const v = e.target.value.replace(/\s+/g, ' ');
-                const title = v.replace(/\b\p{L}/gu, (m) => m.toUpperCase());
+                // Capitaliza apenas a primeira letra de cada palavra, preservando acentos
+                const title = v.split(' ').map(word => {
+                  if (word.length === 0) return word;
+                  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }).join(' ');
                 setFormData({ ...formData, nome: title });
               }}
-              autoCapitalize="words"
-              autoCorrect="on"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck="false"
             />
 
             <div className="space-y-3">
