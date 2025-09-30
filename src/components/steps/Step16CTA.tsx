@@ -152,8 +152,8 @@ export const Step16CTA = ({ flowType }: Step16CTAProps) => {
       pro: { price: "R$ 997/mês", url: "https://pay.kiwify.com.br/Meup5i9" },
     },
     annual: {
-      basic: { price: "12x de R$ 397", url: "https://pay.kiwify.com.br/CuBpHY7" },
-      pro: { price: "12x de R$ 797", url: "https://pay.kiwify.com.br/ld4p1H2" },
+      basic: { price: "12x de R$ 397", url: "https://pay.hub.la/xezMgMYfLckK9OOCQXy4" },
+      pro: { price: "12x de R$ 797", url: "https://pay.hub.la/kaZ1HpFAoTBdYDUhbmVb" },
     },
   } as const;
   const currentPlans = isAnnual ? planConfig.annual : planConfig.monthly;
