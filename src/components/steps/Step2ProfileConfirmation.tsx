@@ -13,6 +13,7 @@ export const Step2ProfileConfirmation = () => {
     userData,
     setUserData,
     nextStep,
+    resetDemo,
     sessionId,
     findPreviousSession,
     openResumeModal
@@ -204,8 +205,8 @@ export const Step2ProfileConfirmation = () => {
             </CustomButton>
 
             <CustomButton onClick={() => {
-            // Apenas fecha o modal/segue o fluxo sem resetar para step 0
-            nextStep();
+            // Reset para step 0 (início do fluxo)
+            resetDemo();
           }} variant="outline" size="lg" className="w-full bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200 text-xs font-light" disabled={isConfirming}>Eita... não é nenhum desses</CustomButton>
           </div>
         </CustomCard>
