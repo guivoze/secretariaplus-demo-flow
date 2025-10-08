@@ -34,7 +34,7 @@ export const Step10WhatsApp = () => {
     setThreadId
   } = useSupabaseDemo();
   const clarity = useClarity({ 
-    projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
+    projectId: import.meta.env.VITE_CLARITY_PROJECT_ID || "t5ehdfteyd" 
   });
   const {
     chatMessages,
@@ -127,10 +127,39 @@ export const Step10WhatsApp = () => {
   })), [chatMessages]);
   useEffect(() => {
     if (chatMessages.length === 0 && !hasInitialMessage) {
-      const initialMessage = `✨ Oie! Pra me testar, aja como um paciente típico, ex: "Qual valor do botox?"
-
-      Estou prontíssima, pode mandar! 🥰`;
-      sendAssistantMessage(initialMessage);
+      // Bloqueia input durante envio das mensagens iniciais
+      setLockInput(true);
+      
+      // Envia as mensagens iniciais em sequência com delays naturais baseados no tempo de leitura
+      const sendInitialMessages = async () => {
+        // Primeira mensagem
+        await sendAssistantMessage('✨ Oie! Pra me testar, aja como um paciente típico, ex: "Qual valor do botox?"');
+        
+        // Segunda mensagem (~3s para ler)
+        await new Promise(resolve => setTimeout(resolve, 2500));
+        await sendAssistantMessage('Apenas te lembrando: fui treinada só com informações públicas do seu Instagram, ta? 😊');
+        
+        // Terceira mensagem (~2.5s para ler)
+        await new Promise(resolve => setTimeout(resolve, 2800));
+        await sendAssistantMessage('Ah... e eu também to digitando mais rápido que o normal pra ficar dinâmico no teste. ⚡️🏃🏻‍♀️');
+        
+        // Quarta mensagem (~4s para ler - mais longa)
+        await new Promise(resolve => setTimeout(resolve, 2300));
+        await sendAssistantMessage('Quando você assinar um plano, poderei ser 100% personalizada — meu jeito de falar, tom, formalidade… tudo com a cara da sua clínica.');
+        
+        // Quinta mensagem (~2s para ler)
+        await new Promise(resolve => setTimeout(resolve, 3500));
+        await sendAssistantMessage('Mas já dá pra ter um gostinho agora.');
+        
+        // Sexta mensagem (~1.5s para ler)
+        await new Promise(resolve => setTimeout(resolve, 1800));
+        await sendAssistantMessage('Estou prontíssima, pode mandar! 🥰');
+        
+        // Desbloqueia input após última mensagem
+        setLockInput(false);
+      };
+      
+      sendInitialMessages();
       setHasInitialMessage(true);
     }
   }, [chatMessages.length, hasInitialMessage, sendAssistantMessage]);
@@ -302,6 +331,26 @@ export const Step10WhatsApp = () => {
     resetChatInMemory();
     setThreadId(uuidv4()); // Use UUID para threadId
     setChatStartTime(Date.now());
+    
+    // Debug commands - use no console para testar popups
+    (window as any).showNudge1 = () => {
+      console.log('🔍 DEBUG: Mostrando primeiro nudge');
+      setShowFirstNudge(true);
+      setTimeout(() => setShowFirstNudge(false), 9000);
+    };
+    (window as any).showNudge2 = () => {
+      console.log('🔍 DEBUG: Mostrando segundo nudge');
+      setShowSecondNudge(true);
+      setTimeout(() => setShowSecondNudge(false), 60000);
+    };
+    (window as any).hideNudges = () => {
+      console.log('🔍 DEBUG: Escondendo todos os nudges');
+      setShowFirstNudge(false);
+      setShowSecondNudge(false);
+    };
+    
+    console.log('💡 DEBUG disponível: showNudge1(), showNudge2(), hideNudges()');
+    
     // não limpamos o DB; apenas a lista em memória, e mudamos o threadId para isolar memória do assistant
   }, [resetChatInMemory]);
 
@@ -324,7 +373,7 @@ export const Step10WhatsApp = () => {
         setTimeout(() => {
           setShowSecondNudge(false);
           nextStep(); // Auto advance after showing the nudge
-        }, 30000); // Hide after 30 seconds and advance
+        }, 60000); // Hide after 60 seconds (1 minute) and advance
       }
     }, 120000); // 120 seconds (2 minutes)
 
@@ -529,34 +578,34 @@ export const Step10WhatsApp = () => {
       <AnimatePresence>
         {showFirstNudge && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
             className="fixed left-4 right-4 z-40"
             style={{
               top: `calc(72px + 16px)` // below header + margin
             }}
           >
-            <div className="bg-white/80 text-black px-4 py-3 rounded-full shadow-md mx-auto max-w-fit">
-              <p className="text-xs text-center">
-                Dica: tente agendar e confirmar uma consulta na conversa para ter uma surpresa 🤯
+            <div className="bg-white border-2 border-yellow-400 text-black px-7 py-5 rounded-2xl shadow-xl mx-auto max-w-fit">
+              <p className="text-base text-center font-medium">
+                <span className="font-bold">Dica:</span> tente agendar e confirmar uma consulta na conversa para ter uma surpresa 🤯
               </p>
             </div>
           </motion.div>
         )}
         {showSecondNudge && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
             className="fixed left-4 right-4 z-40"
             style={{
               top: `calc(72px + 16px)` // below header + margin
             }}
           >
-            <div className="bg-white/80 text-black px-4 py-3 rounded-full shadow-md mx-auto max-w-fit">
-              <p className="text-xs text-center">
-                👀 Aviso: Caso você não agende um horário em 30 segundos, iremos avançar para a próxima etapa automaticamente.
+            <div className="bg-white border-3 border-yellow-400 text-black px-7 py-5 rounded-2xl shadow-xl mx-auto max-w-fit">
+              <p className="text-base text-center font-medium">
+                👀 <span className="font-bold">Aviso:</span> Caso você <span className="font-bold">não agende</span> um horário em <span className="font-bold text-red-600">1 minuto</span>, iremos avançar para a próxima etapa automaticamente.
               </p>
             </div>
           </motion.div>
@@ -580,7 +629,7 @@ export const Step10WhatsApp = () => {
         <div className="mx-4 flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
           <input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyPress={handleKeyPress} onFocus={handleInputFocus} onBlur={handleInputBlur} placeholder="Digite uma mensagem..." className="flex-1 outline-none bg-transparent" style={{
           fontSize: '16px'
-        }} readOnly={isLoading} // bloqueia digitação sem perder foco
+        }} readOnly={isLoading || lockInput} // bloqueia digitação sem perder foco
         aria-disabled={chatDarkened || isLoading || lockInput} autoComplete="off" autoCorrect="on" autoCapitalize="sentences" spellCheck="false" />
           <button onMouseDown={keepFocusPointerDown} onTouchStart={keepFocusPointerDown} onClick={() => {
           sendMessage();
@@ -589,7 +638,7 @@ export const Step10WhatsApp = () => {
               inputRef.current.focus();
             }
           }, 50);
-        }} disabled={!inputValue.trim() || chatDarkened || isLoading} className="text-[#075e54] disabled:text-gray-400 transition-colors p-1">
+        }} disabled={!inputValue.trim() || chatDarkened || isLoading || lockInput} className="text-[#075e54] disabled:text-gray-400 transition-colors p-1">
             <Send className="w-5 h-5" />
           </button>
         </div>

@@ -12,7 +12,7 @@ export const Step16CTADisqualified = () => {
   
   const { userData } = useSupabaseDemo();
   const clarity = useClarity({ 
-    projectId: process.env.REACT_APP_CLARITY_PROJECT_ID || "t5ehdfteyd" 
+    projectId: import.meta.env.VITE_CLARITY_PROJECT_ID || "t5ehdfteyd" 
   });
 
   // Track quando usuário chega na página de desqualificação

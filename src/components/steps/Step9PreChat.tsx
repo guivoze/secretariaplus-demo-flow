@@ -2,7 +2,7 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
-import { MessageCircle, User, Phone, Video, MoreVertical, Send, Zap } from "lucide-react";
+import { MessageCircle, User, Phone, Video, MoreVertical, Send, Zap, AlertTriangle } from "lucide-react";
 export const Step9PreChat = () => {
   const {
     nextStep,
@@ -71,59 +71,43 @@ export const Step9PreChat = () => {
 
       <motion.div initial={{
       opacity: 0,
-      scale: 0.98
+      scale: 0.95
     }} animate={{
       opacity: 1,
       scale: 1
     }} transition={{
-      duration: 0.4,
+      duration: 0.5,
       ease: "easeOut"
     }} className="w-full max-w-lg relative z-10">
-        <CustomCard variant="elevated" className="text-center space-y-6">
+        <CustomCard variant="elevated" className="text-center space-y-8 py-10 px-6">
+          {/* Ícone de alerta com animação de destaque */}
           <motion.div initial={{
           opacity: 0,
-          y: 20
+          scale: 0.5
         }} animate={{
           opacity: 1,
-          y: 0
+          scale: 1
         }} transition={{
           delay: 0.1,
-          duration: 0.5
-        }}>
-            <MessageCircle className="w-12 h-12 text-gray-800 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-foreground">
-              Tá na hora de testar!
-            </h2>
-          </motion.div>
-
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          delay: 0.2
-        }} className="space-y-6">
-            <p className="text-foreground leading-relaxed text-base">Finja que você é um lead/paciente e tente agendar uma consulta. Coloque objeções, aja como um paciente típico seu faria.</p>
-
-            <CustomCard variant="bordered" className="bg-gray-50 border-gray-300">
-              <p className="font-medium text-foreground text-xs">⚠️ Lembre-se: isto é apenas uma prévia. Na versão completa, tudo será personalizado com suas necessidades.</p>
-            </CustomCard>
-
-            <div className="flex items-center justify-center gap-8 py-4">
-              <div className="text-center">
-                <User className="w-6 h-6 text-gray-800 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">Você como<br />Paciente</p>
-              </div>
-              <div className="text-lg text-muted-foreground">VS</div>
-              <div className="text-center">
-                <Zap className="w-6 h-6 text-gray-800 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">I.A como<br />Secretária</p>
+          duration: 0.5,
+          type: "spring",
+          stiffness: 200
+        }} className="flex justify-center">
+            <div className="relative">
+              <motion.div animate={{
+              scale: [1, 1.1, 1]
+            }} transition={{
+              repeat: Infinity,
+              duration: 2,
+              ease: "easeInOut"
+            }} className="absolute inset-0 bg-yellow-400/20 rounded-full blur-xl" />
+              <div className="relative bg-gradient-to-br from-yellow-400 to-yellow-500 w-20 h-20 rounded-full flex items-center justify-center shadow-xl">
+                <AlertTriangle className="w-10 h-10 text-gray-900" strokeWidth={2.5} />
               </div>
             </div>
           </motion.div>
 
+          {/* Título principal */}
           <motion.div initial={{
           opacity: 0,
           y: 20
@@ -131,9 +115,93 @@ export const Step9PreChat = () => {
           opacity: 1,
           y: 0
         }} transition={{
-          delay: 0.3
+          delay: 0.2,
+          duration: 0.5
+        }} className="space-y-3">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+              IMPORTANTE
+            </h2>
+            <p className="text-lg font-medium text-gray-700">
+              Seu teste foi liberado, mas...
+            </p>
+          </motion.div>
+
+          {/* Card de aviso */}
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: 0.3,
+          duration: 0.5
         }}>
-            <CustomButton onClick={nextStep} size="lg" className="px-12">Ir para o chat</CustomButton>
+            <CustomCard variant="bordered" className="bg-yellow-50/50 border-yellow-300 text-left space-y-4 p-5">
+              <div className="space-y-4 text-gray-800">
+                <p className="leading-relaxed">
+                  <b>As respostas não estarão perfeitas</b> - A IA ainda não te conhece 100%.
+                </p>
+                <p className="leading-relaxed">
+                  Ela foi treinada apenas com os seus dados publicos do Instagram <b>de forma superficial</b> enquanto você preenchia as informações.
+                </p>
+              </div>
+            </CustomCard>
+          </motion.div>
+
+          {/* Card de benefícios */}
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: 0.4,
+          duration: 0.5
+        }}>
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 space-y-4 border border-gray-200">
+              <p className="font-semibold text-gray-900 text-base">
+                Ao contratar um plano, você poderá customizar absolutamente tudo:
+              </p>
+              <div className="space-y-2 text-left text-gray-700">
+                <p className="flex items-start gap-2">
+                  <span className="text-gray-900 font-bold">-</span>
+                  <span>Procedimentos</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-gray-900 font-bold">-</span>
+                  <span>Horários</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-gray-900 font-bold">-</span>
+                  <span>Tom de voz</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-gray-900 font-bold">-</span>
+                  <span>Ser mais, ou menos direta</span>
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Call to action final */}
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: 0.5,
+          duration: 0.5
+        }} className="space-y-4 pt-2">
+            <p className="text-gray-900 font-medium text-base flex items-center justify-center gap-2">
+              Mas tá na hora de sentir um gostinho! ✨
+            </p>
+            <CustomButton onClick={nextStep} size="lg" className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-6 text-lg shadow-lg">
+              Entendi, testar agora →
+            </CustomButton>
           </motion.div>
         </CustomCard>
       </motion.div>
