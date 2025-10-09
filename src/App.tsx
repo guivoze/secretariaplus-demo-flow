@@ -140,7 +140,6 @@ const DemoContent = () => {
       case 14:
         return <Step13Features />;
       case 15:
-        return <Step14Emergency />;
       case 16:
         // Leads desqualificados sempre vão para a página sem consultor
         if (isDisqualifiedLead(userData.especialidade)) {
