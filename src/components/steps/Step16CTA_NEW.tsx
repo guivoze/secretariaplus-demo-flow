@@ -84,7 +84,7 @@ export const Step16CTA = () => {
                 <div className="text-3xl font-bold text-gray-900 mb-4">497/mês</div>
                 
                 <button
-                  onClick={() => handlePlanClick('https://pay.kiwify.com.br/uo9AbpE', 'Basic')}
+                  onClick={() => handlePlanClick('https://pay.hub.la/W8HlbFk4vd9GRGqNkGuM', 'Basic')}
                   className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                 >
                   Iniciar Agora
@@ -133,7 +133,7 @@ export const Step16CTA = () => {
                 <div className="text-3xl font-bold text-gray-900 mb-4">997/mês</div>
                 
                 <button
-                  onClick={() => handlePlanClick('https://pay.kiwify.com.br/Meup5i9', 'Pro')}
+                  onClick={() => handlePlanClick('https://pay.hub.la/zFTMlne4LYBxoZyHXPXO', 'Pro')}
                   className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                 >
                   Iniciar Agora
