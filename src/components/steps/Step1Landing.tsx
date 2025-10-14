@@ -11,6 +11,7 @@ export const Step1Landing = () => {
     nextStep
   } = useSupabaseDemo();
   const [instagram, setInstagram] = useState(userData.instagram || '');
+  const [instagramError, setInstagramError] = useState<string | null>(null);
   const [liveCount, setLiveCount] = useState(() => 130 + Math.floor(Math.random() * 91)); // 130..220
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,8 +31,12 @@ export const Step1Landing = () => {
   const handleSubmit = async () => {
     if (instagram.trim() && !isSubmitting) {
       setIsSubmitting(true);
-      
       const cleanInstagram = instagram.trim();
+      if (cleanInstagram.includes('@')) {
+        setInstagramError('Digite apenas o usuário do Instagram (sem e-mail, nem @).');
+        setIsSubmitting(false);
+        return;
+      }
       setUserData({
         instagram: cleanInstagram,
         instagramRequestTime: Date.now()
@@ -123,9 +128,12 @@ export const Step1Landing = () => {
                 <p className="text-muted-foreground mb-3 font-normal text-sm mx-0 my-0 py-0">Insira seu @ profissional abaixo:</p>
               </div>
 
-              <CustomInput prefix="@" placeholder="drabelguerra" value={instagram} onChange={e => setInstagram(e.target.value.toLowerCase())} className="text-center" style={{
+              <CustomInput prefix="@" placeholder="drabelguerra" value={instagram} onChange={e => {
+                setInstagramError(null);
+                setInstagram(e.target.value.toLowerCase());
+              }} className="text-center" style={{
               textTransform: 'lowercase'
-            }} autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} inputMode="text" />
+            }} autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} inputMode="text" name="instagram_handle" error={instagramError || undefined} />
 
               <CustomButton onClick={handleSubmit} disabled={!instagram.trim() || isSubmitting} size="md" className="w-full text-white bg-black hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] rounded-md text-center mx-0 py-[13px]">
                 {isSubmitting ? (
