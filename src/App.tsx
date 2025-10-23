@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SupabaseDemoProvider, useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { useClarity } from "@/hooks/useClarity";
 import { useFlowType } from "@/hooks/useFlowType";
@@ -20,12 +20,14 @@ import { Step12Result } from "@/components/steps/Step12Result";
 import { Step13Features } from "@/components/steps/Step13Features";
 import { Step16CTA } from "@/components/steps/Step16CTA";
 import { Step16CTADisqualified } from "@/components/steps/Step16CTADisqualified";
+import { Step16SketchOffer } from "@/components/steps/Step16SketchOffer";
 import { isDisqualifiedLead } from "@/utils/leadQualification";
 
 const DemoContent = () => {
   const { currentStep, isLoading, userData } = useSupabaseDemo();
   const stepContainerRef = useRef<HTMLDivElement>(null);
   const flowType = useFlowType();
+  const [showSketchOffer, setShowSketchOffer] = useState(false);
 
   // Inicializar Microsoft Clarity
   const clarity = useClarity({ 
@@ -83,6 +85,27 @@ const DemoContent = () => {
     }
   }, [currentStep, clarity, userData]);
 
+  // Expor comandos no console para abrir/fechar a página de sketch (scroll livre)
+  useEffect(() => {
+    const nav: any = (window as any).nav || {};
+    nav.sketchOn = () => {
+      setShowSketchOffer(true);
+      console.info("[nav] sketchOn -> Página de oferta (sketch) aberta");
+    };
+    nav.sketchOff = () => {
+      setShowSketchOffer(false);
+      console.info("[nav] sketchOff -> Voltou ao fluxo normal");
+    };
+    nav.sketch = () => {
+      setShowSketchOffer((v) => !v);
+      console.info("[nav] sketch -> alternou página de oferta (sketch)");
+    };
+    (window as any).nav = nav;
+    return () => {
+      // mantém nav existente, apenas remove handlers se ainda apontarem para este closure
+    };
+  }, []);
+
   // Track abandono quando o usuário sai da página
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -95,6 +118,15 @@ const DemoContent = () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [currentStep, clarity, userData]);
+
+  // Render dedicado para a página de sketch (fora do container com overflow-hidden)
+  if (showSketchOffer) {
+    return (
+      <div className="min-h-screen h-full overflow-auto bg-background">
+        <Step16SketchOffer />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

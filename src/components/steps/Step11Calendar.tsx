@@ -128,7 +128,7 @@ export const Step11Calendar = () => {
               <h3 className="text-content-medium text-foreground text-center">
                 Agendamentos do Dia
               </h3>
-              
+
               <div className="space-y-2">
                 {appointments.map((appointment, index) => (
                   <motion.div
