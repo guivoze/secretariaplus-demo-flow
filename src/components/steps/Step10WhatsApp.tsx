@@ -84,6 +84,7 @@ export const Step10WhatsApp = () => {
   const [stagedChunks, setStagedChunks] = useState<string[]>([]);
   const [visibleChunkCount, setVisibleChunkCount] = useState(0);
   const [isChunkTyping, setIsChunkTyping] = useState(false);
+  const [allowInputFocus, setAllowInputFocus] = useState(false); // Nova flag para controlar quando pode focar
   const previousLockInput = useRef(lockInput);
   
   // Nudge states
@@ -130,6 +131,7 @@ export const Step10WhatsApp = () => {
     if (chatMessages.length === 0 && !hasInitialMessage) {
       // Bloqueia input durante envio das mensagens iniciais
       setLockInput(true);
+      setAllowInputFocus(false); // Bloqueia foco explicitamente
       
       // Envia as mensagens iniciais em sequência com delays naturais baseados no tempo de leitura
       const sendInitialMessages = async () => {
@@ -156,8 +158,10 @@ export const Step10WhatsApp = () => {
         await new Promise(resolve => setTimeout(resolve, 1800));
         await sendAssistantMessage('Estou prontíssima, pode mandar! 🥰');
         
-        // Desbloqueia input após última mensagem
+        // Desbloqueia input após última mensagem com delay adicional
+        await new Promise(resolve => setTimeout(resolve, 500));
         setLockInput(false);
+        setAllowInputFocus(true); // Libera foco apenas depois de tudo
       };
       
       sendInitialMessages();
@@ -310,13 +314,9 @@ export const Step10WhatsApp = () => {
       setInputValue(userMessage);
     } finally {
       setTimeout(() => setIsLoading(false), 350);
-      requestAnimationFrame(() => {
-        if (inputRef.current) {
-          inputRef.current.focus(); // manter teclado aberto após enviar
-        }
-      });
+      // Não restaura foco automaticamente - deixa o usuário decidir quando focar
     }
-  }, [inputValue, isLoading, sendUserMessage, sendAssistantMessage, sessionId, threadId]);
+  }, [inputValue, isLoading, sessionId, threadId, sendUserMessage, sendAssistantMessage, setAppointment, nextStep, appointment, chatMessages.length, clarity]);
   const finishConversation = useCallback(() => {
     setChatDarkened(true);
     setTimeout(() => {
@@ -397,17 +397,19 @@ export const Step10WhatsApp = () => {
     if (e.key === 'Enter') {
       e.preventDefault();
       sendMessage();
-      // Keep keyboard open after sending
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 100);
+      // Remove foco para fechar teclado após enviar
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
     }
   }, [sendMessage]);
   const handleInputFocus = useCallback(() => {
-    // Se estiver bloqueado, apenas ignora
-    if (lockInput || isLoading || chatDarkened) {
+    // Bloqueia foco se ainda não permitido (mensagens iniciais) ou se IA está digitando
+    if (!allowInputFocus || lockInput || isLoading || isChunkTyping || chatDarkened) {
+      // Remove foco imediatamente se tentar focar quando bloqueado
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
       return;
     }
 
@@ -424,7 +426,7 @@ export const Step10WhatsApp = () => {
       window.scrollTo(0, 0);
       scrollToEnd('auto');
     }, 300);
-  }, [scrollToEnd, lockInput, isLoading, chatDarkened]);
+  }, [scrollToEnd, allowInputFocus, lockInput, isLoading, isChunkTyping, chatDarkened]);
   const handleInputBlur = useCallback(() => {
     // Só consideramos "fechar teclado" quando perder foco de verdade
     setIsInputFocused(false);
@@ -656,24 +658,33 @@ export const Step10WhatsApp = () => {
             onFocus={handleInputFocus} 
             onBlur={handleInputBlur}
             placeholder="Digite uma mensagem..." 
-            className={`flex-1 outline-none bg-transparent transition-opacity ${(isLoading || lockInput) ? 'opacity-50' : ''}`}
+            className={`flex-1 outline-none bg-transparent transition-opacity ${(isLoading || lockInput || !allowInputFocus) ? 'opacity-50' : ''}`}
+            disabled={isLoading || lockInput || !allowInputFocus || isChunkTyping || chatDarkened}
+            readOnly={isLoading || lockInput || !allowInputFocus || isChunkTyping}
             style={{
               fontSize: '16px'
-            }} 
-            disabled={chatDarkened}
+            }}
             autoComplete="off" 
             autoCorrect="on" 
             autoCapitalize="sentences" 
             spellCheck="false" 
           />
-          <button onMouseDown={keepFocusPointerDown} onTouchStart={keepFocusPointerDown} onClick={() => {
-          sendMessage();
-          setTimeout(() => {
-            if (inputRef.current) {
-              inputRef.current.focus();
-            }
-          }, 50);
-        }} disabled={!inputValue.trim() || chatDarkened || isLoading || lockInput} className="text-[#075e54] disabled:text-gray-400 transition-colors p-1">
+          <button 
+            onMouseDown={keepFocusPointerDown} 
+            onTouchStart={keepFocusPointerDown} 
+            onClick={() => {
+              if (!allowInputFocus || lockInput || isLoading || isChunkTyping) return;
+              sendMessage();
+              // Remove foco para fechar teclado após enviar
+              setTimeout(() => {
+                if (inputRef.current) {
+                  inputRef.current.blur();
+                }
+              }, 50);
+            }} 
+            disabled={!inputValue.trim() || chatDarkened || isLoading || lockInput || !allowInputFocus || isChunkTyping} 
+            className="text-[#075e54] disabled:text-gray-400 transition-colors p-1"
+          >
             <Send className="w-5 h-5" />
           </button>
         </div>

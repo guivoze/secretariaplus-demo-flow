@@ -15,7 +15,6 @@ import { Step7Form } from "@/components/steps/Step7Form";
 import { Step9PreChat } from "@/components/steps/Step9PreChat";
 import { Step10WhatsApp } from "@/components/steps/Step10WhatsApp";
 import { Step11Calendar } from "@/components/steps/Step11Calendar";
-import { Step12Result } from "@/components/steps/Step12Result";
 import { Step16CTADisqualified } from "@/components/steps/Step16CTADisqualified";
 import { Step16SketchOffer } from "@/components/steps/Step16SketchOffer";
 import { isDisqualifiedLead } from "@/utils/leadQualification";
@@ -133,7 +132,6 @@ const DemoContent = () => {
       case 12:
         return <Step11Calendar />;
       case 13:
-        return <Step12Result />;
       case 14:
       case 15:
       case 16:

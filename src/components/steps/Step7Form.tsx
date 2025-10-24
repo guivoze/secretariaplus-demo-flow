@@ -85,14 +85,24 @@ export const Step7Form = () => {
         }, flowType)
       ]);
 
+      // Mapeamento de códigos para textos completos dos pain points
+      const painPointTexts: Record<string, string> = {
+        'no-secretary': 'Não tenho secretária/auxiliar e não consigo dar atenção para tudo ao mesmo tempo',
+        'bad-secretary': 'Tenho secretária mas ela é "lentinha" - Não converte e não aprende',
+        'high-demand': 'Rodo anúncios e não aguento a alta demanda de leads',
+        'scale-revenue': 'Está tudo certo, só quero ganhar mais dinheiro'
+      };
+      
+      const painPointText = painPointTexts[mergedData.painPoint] || mergedData.painPoint;
+      
       // Webhook para micro-offer (background - não bloqueia nextStep)
-      console.log('[Micro-offer] Sending webhook with:', { session_id: sessionId, pain_point: mergedData.painPoint });
+      console.log('[Micro-offer] Sending webhook with:', { session_id: sessionId, pain_point: painPointText });
       fetch('https://n8nsplus.up.railway.app/webhook/micro-offer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_id: sessionId,
-          pain_point: mergedData.painPoint
+          pain_point: painPointText
         })
       })
       .then(response => {
