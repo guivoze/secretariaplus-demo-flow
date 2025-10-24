@@ -323,6 +323,18 @@ export const Step16SketchOffer = () => {
         
         if (cachedOfferCopy) {
           const copy = JSON.parse(cachedOfferCopy);
+          
+          // Validate session_id to prevent using old cached copy
+          if (copy.session_id && copy.session_id !== sessionId) {
+            console.warn('[Offer] Cached copy is from different session, ignoring:', {
+              cached: copy.session_id,
+              current: sessionId
+            });
+            localStorage.removeItem('offer-copy');
+            setIsLoadingCopy(false);
+            return;
+          }
+          
           console.log('Offer copy loaded from cache:', copy);
           
           setOfferContent({
@@ -347,7 +359,7 @@ export const Step16SketchOffer = () => {
 
     // Carregar imediatamente
     loadOfferCopy();
-  }, []);
+  }, [sessionId]);
 
   // Controladores para posicionar o selo giratório entre os cards dos planos
   const circularBadgeConfig = {

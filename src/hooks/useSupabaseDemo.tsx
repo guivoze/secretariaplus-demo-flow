@@ -530,6 +530,8 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
     setShowResumeModal(false);
     setFoundPreviousSession(null);
     setDbSessionId(null);
+    // Clear offer-copy cache when starting new test
+    localStorage.removeItem('offer-copy');
     // Volta para o passo 0 (novo fluxo) mas NÃO altera/limpa a row antiga no DB
     setCurrentStep(0);
     // Mantemos os dados atuais em memória para experiência fluida;
@@ -624,6 +626,8 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
       clearTimeout(searchTimeout);
       setSearchTimeout(null);
     }
+    // Clear offer-copy cache on reset
+    localStorage.removeItem('offer-copy');
     // Force new session
     initializeSession();
   };

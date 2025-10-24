@@ -117,8 +117,13 @@ export const Step7Form = () => {
         const offerData = data.offer_copy || data;
         
         if (offerData.head_father) {
-          localStorage.setItem('offer-copy', JSON.stringify(offerData));
-          console.log('[Micro-offer] ✅ Cached successfully:', offerData);
+          // Save with session_id to validate later
+          const cacheData = {
+            ...offerData,
+            session_id: sessionId
+          };
+          localStorage.setItem('offer-copy', JSON.stringify(cacheData));
+          console.log('[Micro-offer] ✅ Cached successfully:', cacheData);
         } else {
           console.warn('[Micro-offer] ⚠️ No valid offer data in response. Full response:', JSON.stringify(data, null, 2));
         }
