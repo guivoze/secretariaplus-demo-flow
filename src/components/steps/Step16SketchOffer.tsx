@@ -5,12 +5,12 @@ import { useEffect, useState, useRef } from "react";
 import { Sparkles, Settings, Calendar, MessageSquare, Bell, ArrowRight, Database, CheckCircle, Plus, Flame, ChevronRight } from "lucide-react";
 
 const mockOfferContent = {
-  head: "Nara, você não nasceu pra ser secretária",
-  copy1: "4mil seguem pela expertise em MPT e Cross Peel. Mas quem responde enquanto você tá no culto da @zeloigreja?",
-  copy2: "Você é incrível, mas 'não é dois'.",
-  copy3: "Entre um Ultraformer e outro, entre flores da Expoflora e o Cine Day das crianças — seu tempo escoa.",
-  head2: "Seus posts estão conquistando atenção",
-  copy4: "Imagine voltar do consultório e encontrar 5 agendamentos prontos. Sem áudios. Sem caos. Só notificações de conquistas.",
+  head: "Você não nasceu pra ser secretária",
+  copy1: "Seu trabalho exige dedicação total. Mas quem cuida do WhatsApp enquanto você atende?",
+  copy2: "Seu tempo é valioso",
+  copy3: "Entre consultas, procedimentos e a vida pessoal — cada minuto conta.",
+  head2: "Você merece mais tempo para o que importa",
+  copy4: "Imagine voltar do consultório e encontrar tudo organizado. Sem áudios pendentes. Sem caos. Só resultados.",
 };
 
 // Mapeamento de features por ID
@@ -744,7 +744,7 @@ export const Step16SketchOffer = () => {
                     </div>
                     
                     <button
-                      onClick={() => handlePlanClick('https://pay.hub.la/W8HlbFk4vd9GRGqNkGuM', 'Mensal')}
+                      onClick={() => handlePlanClick('https://pay.hub.la/BYp9dknJxerlzZYJJLRN', 'Mensal')}
                       className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                     >
                       Iniciar Agora
@@ -785,7 +785,7 @@ export const Step16SketchOffer = () => {
                     </div>
                     
                     <button
-                      onClick={() => handlePlanClick('https://pay.hub.la/zFTMlne4LYBxoZyHXPXO', 'Anual')}
+                      onClick={() => handlePlanClick('https://pay.hub.la/NdojLLBPRoAf6cedmdVr', 'Anual')}
                       className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                     >
                       Iniciar Agora
