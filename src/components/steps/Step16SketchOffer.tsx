@@ -393,11 +393,11 @@ export const Step16SketchOffer = () => {
     };
   }, []);
 
-  // Mostrar botão WhatsApp após 12 segundos
+  // Mostrar botão WhatsApp após 20 segundos
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowWhatsApp(true);
-    }, 12000);
+    }, 20000);
     return () => clearTimeout(timer);
   }, []);
 
