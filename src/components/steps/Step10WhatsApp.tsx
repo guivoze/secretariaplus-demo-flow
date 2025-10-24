@@ -84,6 +84,7 @@ export const Step10WhatsApp = () => {
   const [stagedChunks, setStagedChunks] = useState<string[]>([]);
   const [visibleChunkCount, setVisibleChunkCount] = useState(0);
   const [isChunkTyping, setIsChunkTyping] = useState(false);
+  const previousLockInput = useRef(lockInput);
   
   // Nudge states
   const [showFirstNudge, setShowFirstNudge] = useState(false);
@@ -354,15 +355,23 @@ export const Step10WhatsApp = () => {
     // não limpamos o DB; apenas a lista em memória, e mudamos o threadId para isolar memória do assistant
   }, [resetChatInMemory]);
 
+  // Atualiza o ref quando lockInput muda
+  useEffect(() => {
+    previousLockInput.current = lockInput;
+  }, [lockInput]);
+
   // Nudge timers
   useEffect(() => {
     if (!chatStartTime) return;
+
+    let firstHideTimer: NodeJS.Timeout | null = null;
+    let secondHideTimer: NodeJS.Timeout | null = null;
 
     // First nudge at 60 seconds
     const firstTimer = setTimeout(() => {
       if (!appointment) { // Only show if no appointment yet
         setShowFirstNudge(true);
-        setTimeout(() => setShowFirstNudge(false), 9000); // Hide after 9 seconds
+        firstHideTimer = setTimeout(() => setShowFirstNudge(false), 9000); // Hide after 9 seconds
       }
     }, 60000); // 60 seconds
 
@@ -370,7 +379,7 @@ export const Step10WhatsApp = () => {
     const secondTimer = setTimeout(() => {
       if (!appointment) { // Only show if no appointment yet
         setShowSecondNudge(true);
-        setTimeout(() => {
+        secondHideTimer = setTimeout(() => {
           setShowSecondNudge(false);
           nextStep(); // Auto advance after showing the nudge
         }, 60000); // Hide after 60 seconds (1 minute) and advance
@@ -380,6 +389,8 @@ export const Step10WhatsApp = () => {
     return () => {
       clearTimeout(firstTimer);
       clearTimeout(secondTimer);
+      if (firstHideTimer) clearTimeout(firstHideTimer);
+      if (secondHideTimer) clearTimeout(secondHideTimer);
     };
   }, [chatStartTime, appointment, nextStep]);
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
@@ -395,6 +406,11 @@ export const Step10WhatsApp = () => {
     }
   }, [sendMessage]);
   const handleInputFocus = useCallback(() => {
+    // Se estiver bloqueado, apenas ignora
+    if (lockInput || isLoading || chatDarkened) {
+      return;
+    }
+
     setIsInputFocused(true);
 
     // Força header no topo imediatamente
@@ -408,14 +424,18 @@ export const Step10WhatsApp = () => {
       window.scrollTo(0, 0);
       scrollToEnd('auto');
     }, 300);
-  }, [scrollToEnd]);
+  }, [scrollToEnd, lockInput, isLoading, chatDarkened]);
   const handleInputBlur = useCallback(() => {
     // Só consideramos "fechar teclado" quando perder foco de verdade
     setIsInputFocused(false);
   }, []);
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    // Bloqueia mudanças quando estiver em loading ou lockInput
+    if (isLoading || lockInput) {
+      return;
+    }
     setInputValue(e.target.value);
-  }, []);
+  }, [isLoading, lockInput]);
 
   // Altura efetiva só quando o input está focado (evita falsos positivos do Safari)
   const effectiveKB = isInputFocused ? keyboardHeight : 0;
@@ -627,10 +647,25 @@ export const Step10WhatsApp = () => {
       padding: '12px 0'
     }}>
         <div className="mx-4 flex items-center gap-3 bg-white rounded-full px-4 py-2 shadow-sm">
-          <input ref={inputRef} type="text" value={inputValue} onChange={handleInputChange} onKeyPress={handleKeyPress} onFocus={handleInputFocus} onBlur={handleInputBlur} placeholder="Digite uma mensagem..." className="flex-1 outline-none bg-transparent" style={{
-          fontSize: '16px'
-        }} readOnly={isLoading || lockInput} // bloqueia digitação sem perder foco
-        aria-disabled={chatDarkened || isLoading || lockInput} autoComplete="off" autoCorrect="on" autoCapitalize="sentences" spellCheck="false" />
+          <input 
+            ref={inputRef} 
+            type="text" 
+            value={inputValue} 
+            onChange={handleInputChange} 
+            onKeyPress={handleKeyPress} 
+            onFocus={handleInputFocus} 
+            onBlur={handleInputBlur}
+            placeholder="Digite uma mensagem..." 
+            className={`flex-1 outline-none bg-transparent transition-opacity ${(isLoading || lockInput) ? 'opacity-50' : ''}`}
+            style={{
+              fontSize: '16px'
+            }} 
+            disabled={chatDarkened}
+            autoComplete="off" 
+            autoCorrect="on" 
+            autoCapitalize="sentences" 
+            spellCheck="false" 
+          />
           <button onMouseDown={keepFocusPointerDown} onTouchStart={keepFocusPointerDown} onClick={() => {
           sendMessage();
           setTimeout(() => {

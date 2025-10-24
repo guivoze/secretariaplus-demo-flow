@@ -147,8 +147,8 @@ export const Step7Form = () => {
       y: 0
     }} transition={{
       duration: 0.6
-    }} className="w-full max-w-lg relative z-10 max-h-[calc(100vh-2rem)] overflow-y-auto">
-        <CustomCard variant="elevated" className="space-y-6">
+    }} className="w-full max-w-lg relative z-10 max-h-[calc(100vh-2rem)] overflow-y-auto overflow-x-hidden">
+        <CustomCard variant="elevated" className="space-y-6 overflow-hidden">
           <motion.div initial={{
           opacity: 0,
           y: 20
@@ -158,10 +158,10 @@ export const Step7Form = () => {
         }} transition={{
           delay: 0.1
         }} className="text-left space-y-4">
-            <h1 className="text-foreground leading-tight text-2xl md:text-3xl font-bold">
+            <h1 className="text-foreground leading-tight font-bold" style={{ fontSize: '1.7rem', lineHeight: '1.2' }}>
               MUITO legal, {firstName}!
             </h1>
-            <p className="text-foreground leading-relaxed text-lg">
+            <p className="text-foreground leading-relaxed text-base">
               {hasProcedure && <>
                   Já vimos que você se destaca com{' '}
                   <span className="font-semibold">{procedure1}</span>
@@ -208,12 +208,21 @@ export const Step7Form = () => {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-foreground">
-                Qual seu MAIOR problema hoje?
+                Para personalizar sua experiência: Qual seu MAIOR problema hoje?
               </label>
               <select
                 value={formData.painPoint}
                 onChange={e => setFormData(prev => ({ ...prev, painPoint: e.target.value }))}
-                className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full px-3 py-4 rounded-lg border-2 border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer text-base font-medium shadow-sm hover:border-gray-400 transition-colors overflow-hidden"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.75rem center',
+                  backgroundSize: '1.5em 1.5em',
+                  paddingRight: '2.5rem',
+                  minHeight: '3.5rem',
+                  maxWidth: '100%'
+                }}
               >
                 <option value="">Selecione...</option>
                 <option value="no-secretary">😭 Não tenho secretária/auxiliar e não consigo dar atenção para tudo ao mesmo tempo.</option>

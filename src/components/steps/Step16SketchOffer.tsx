@@ -1,8 +1,8 @@
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useAnimationControls } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
-import { Sparkles, Settings, Calendar, MessageSquare, Bell, ArrowRight, Database, CheckCircle, Plus, Flame, ChevronRight } from "lucide-react";
+import { Sparkles, ArrowRight, CheckCircle, Plus, Flame, ChevronRight, Calendar, MessageSquare, Bell, Database, Star } from "lucide-react";
 
 const mockOfferContent = {
   head: "Você não nasceu pra ser secretária",
@@ -13,175 +13,113 @@ const mockOfferContent = {
   copy4: "Imagine voltar do consultório e encontrar tudo organizado. Sem áudios pendentes. Sem caos. Só resultados.",
 };
 
-// Mapeamento de features por ID
-type FeatureId = 'config' | 'agenda' | 'followup' | 'notif' | 'crm' | 'whatsapp';
-type PainPoint = 'no-secretary' | 'bad-secretary' | 'high-demand' | 'scale-revenue';
-
-interface Feature {
-  id: FeatureId;
-  icon: typeof Sparkles;
-  iconColor: string;
-  bgColor: string;
-  title: string;
-  description: string;
-  painPoints: PainPoint[]; // quais dores essa feature resolve
-}
-
-const allFeatures: Record<FeatureId, Feature> = {
-  'config': {
-    id: 'config',
-    icon: Sparkles,
-    iconColor: 'text-gray-700',
-    bgColor: 'bg-gray-100',
-    title: 'Totalmente personalizável',
-    description: 'Ela fala como você. Ensine procedimentos, horários e tom de voz.',
-    painPoints: ['no-secretary', 'bad-secretary', 'scale-revenue']
-  },
-  'agenda': {
-    id: 'agenda',
-    icon: Calendar,
-    iconColor: 'text-gray-700',
-    bgColor: 'bg-gray-100',
-    title: 'Agenda sozinha 24h',
-    description: 'Pacientes marcam direto, mesmo de madrugada.',
-    painPoints: ['no-secretary', 'high-demand', 'scale-revenue']
-  },
-  'followup': {
-    id: 'followup',
-    icon: MessageSquare,
-    iconColor: 'text-gray-700',
-    bgColor: 'bg-gray-100',
-    title: 'Follow-up automático',
-    description: 'Reconquiste os desistentes sem gastar energia.',
-    painPoints: ['no-secretary', 'bad-secretary', 'high-demand']
-  },
-  'notif': {
-    id: 'notif',
-    icon: Bell,
-    iconColor: 'text-gray-700',
-    bgColor: 'bg-gray-100',
-    title: 'Te avisa só do importante',
-    description: 'Emergências e novos agendamentos. Zero ruído.',
-    painPoints: ['no-secretary', 'high-demand', 'scale-revenue']
-  },
-  'crm': {
-    id: 'crm',
-    icon: Database,
-    iconColor: 'text-gray-700',
-    bgColor: 'bg-gray-100',
-    title: 'CRM que se escreve sozinho',
-    description: 'Histórico completo de cada paciente sem você digitar.',
-    painPoints: ['bad-secretary', 'high-demand', 'scale-revenue']
-  },
-  'whatsapp': {
-    id: 'whatsapp',
-    icon: CheckCircle,
-    iconColor: 'text-gray-700',
-    bgColor: 'bg-gray-100',
-    title: 'Selo verificado oficial',
-    description: 'WhatsApp com selo verde da Meta. Credibilidade máxima.',
-    painPoints: ['bad-secretary', 'high-demand', 'scale-revenue']
-  }
-};
-
-// Lógica de seleção de features baseada na dor
-const getTopFeaturesForPain = (painPoint: PainPoint): FeatureId[] => {
-  const mapping: Record<PainPoint, FeatureId[]> = {
-    'no-secretary': ['agenda', 'followup', 'notif'], // prioriza automação total
-    'bad-secretary': ['config', 'followup', 'crm'], // prioriza qualidade e controle
-    'high-demand': ['agenda', 'notif', 'crm'], // prioriza escala e organização
-    'scale-revenue': ['config', 'agenda', 'whatsapp'] // prioriza profissionalismo e escalabilidade
-  };
-  return mapping[painPoint];
-};
-
-// Card Stack - cards empilhados com drag (3 dinâmicos + 1 fixo com imagem)
-const FeatureCardStack = ({ features }: { features: Feature[] }) => {
-  // Card especial com imagem
-  const imageCard = {
-    id: 'interface',
-    isStatic: true,
-    title: 'Interface simples',
-    description: 'Sem parafernalha tecnológica.'
-  };
+// Carrossel lateral simples e elegante
+const FeatureCarousel = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   
-  // Inicializa com card de imagem + features (todos escuros)
-  const [cards, setCards] = useState(() => {
-    const allCards = [
-      imageCard,
-      ...features.map((feature) => ({
-        ...feature,
-        isDark: true // Todos os cards serão escuros
-      }))
-    ];
-    return allCards;
-  });
-  
-  const moveToEnd = () => {
-    setCards(prevCards => {
-      const newCards = [...prevCards];
-      const [removed] = newCards.splice(0, 1);
-      newCards.push(removed);
-      return newCards;
-    });
+  // Cards com conteúdo real do Step13/14
+  const allCards = [
+    {
+      id: 'interface',
+      title: 'Interface simples',
+      description: 'Sem parafernalha tecnológica.',
+      image: '/imgs/tela.webp',
+      isImageCard: true
+    },
+    {
+      id: 'crm',
+      title: 'CRM Automático',
+      description: 'Você terá um CRM que se alimenta e arrasta os cards sozinho pra você 😍',
+      subtitle: '- pra quem não tem paciência de gerenciar ferramentas',
+      image: '/imgs/crm.webp'
+    },
+    {
+      id: 'audio',
+      title: 'Escuta Áudio',
+      description: 'Ela ouve áudios, responde quantos pacientes precisar, tem um leve delay para favorecer a ideia de humanização...',
+      subtitle: '- Muitos dos nossos clientes usam, e as pessoas nem percebem que é uma IA 🤫',
+      image: '/imgs/audio.webp'
+    },
+    {
+      id: 'followup',
+      title: 'FollowUp',
+      description: 'Se o paciente te der um vácuo, a própria IA dá aquela cutucadinha pra ele voltar o papo e prosseguir',
+      image: '/imgs/follow up.webp'
+    },
+    {
+      id: 'notif',
+      title: 'Notificações',
+      description: 'Caso ocorram emergências, agendamentos e situações que exijam sua atenção, você recebe um aviso e cai direto na conversa.',
+      image: '/imgs/step14.webp',
+      imageFit: 'contain' // Ajuste exclusivo para esta imagem
+    }
+  ];
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % allCards.length);
   };
 
-  const CARD_OFFSET = 12;
-  const SCALE_FACTOR = 0.03;
+  const goToPrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + allCards.length) % allCards.length);
+  };
+
+  // Autoplay a cada 5s
+  useEffect(() => {
+    const timer = setInterval(() => {
+      goToNext();
+    }, 5000);
+    
+    return () => clearInterval(timer);
+  }, [currentIndex]); // Reinicia o timer quando muda de slide
+
+  // Touch/swipe handling
+  const startX = useRef(0);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX.current - endX;
+    
+    if (Math.abs(diff) > 50) { // threshold de 50px
+      if (diff > 0) {
+        goToNext();
+      } else {
+        goToPrev();
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Card Stack Container */}
-      <div className="relative flex items-center justify-center min-h-[320px]">
-        <ul className="relative w-full max-w-md h-[280px]">
-          {cards.map((card, index) => {
-            const isStatic = 'isStatic' in card && card.isStatic;
-            const canDrag = index === 0; // Apenas o primeiro card (visível) pode ser arrastado
-            const isDark = 'isDark' in card && card.isDark === true;
-
+      {/* Carrossel Container */}
+      <div 
+        ref={containerRef}
+        className="relative overflow-hidden touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <motion.div
+          className="flex"
+          animate={{ x: `-${currentIndex * 100}%` }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        >
+          {allCards.map((card) => {
+            const isImageCard = 'isImageCard' in card && card.isImageCard;
+            
             return (
-              <motion.li
-                key={card.id}
-                className="absolute w-full h-full list-none"
-                style={{
-                  cursor: canDrag ? "grab" : "auto",
-                }}
-                animate={{
-                  top: index * -CARD_OFFSET,
-                  scale: 1 - index * SCALE_FACTOR,
-                  zIndex: cards.length - index,
-                }}
-                drag={canDrag ? "y" : false}
-                dragConstraints={{
-                  top: 0,
-                  bottom: 0,
-                }}
-                onDragEnd={(event, info) => {
-                  if (canDrag && Math.abs(info.offset.y) > 50) {
-                    moveToEnd();
-                  }
-                }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30,
-                }}
-                whileDrag={
-                  canDrag ? {
-                    cursor: "grabbing",
-                  } : {}
-                }
-              >
-                {isStatic ? (
-                  // Card com imagem
-                  <div className="w-full h-full bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] border border-white/20 overflow-hidden">
+              <div key={card.id} className="min-w-full px-4">
+                <div className="w-full bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden mx-auto max-w-md" style={{ height: '380px' }}>
+                  {isImageCard ? (
+                    // Card especial de interface (full image)
                     <div className="relative h-full">
                       <img 
-                        src="/imgs/tela.webp" 
-                        alt="Interface"
+                        src={card.image}
+                        alt={card.title}
                         className="w-full h-full object-cover"
                       />
-                      {/* Barra inferior */}
                       <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 p-4">
                         <h4 className="text-base font-bold text-gray-900">
                           {card.title}
@@ -191,52 +129,64 @@ const FeatureCardStack = ({ features }: { features: Feature[] }) => {
                         </p>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  // Cards dinâmicos (features) - todos brancos com stroke e sombra
-                  <div className="w-full h-full rounded-2xl bg-white border border-gray-200 shadow-sm p-8 flex flex-col items-center justify-center text-center">
-                    {/* Icon com animação */}
-                    <motion.div
-                      animate={{
-                        y: canDrag ? [0, -8, 0] : 0,
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: canDrag ? Infinity : 0,
-                        ease: "easeInOut",
-                      }}
-                      className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 bg-gray-100"
-                    >
-                      {'icon' in card && (
-                        <card.icon className="w-8 h-8 text-gray-700" />
-                      )}
-                    </motion.div>
-                    
-                    {/* Title */}
-                    <h4 className="text-xl font-bold mb-4 text-gray-900">
-                      {card.title}
-                    </h4>
-                    
-                    {/* Description */}
-                    <p className="text-sm leading-relaxed text-gray-600">
-                      {card.description}
-                    </p>
-                  </div>
-                )}
-              </motion.li>
+                  ) : (
+                    // Cards de features com imagem + texto
+                    <div className="h-full flex flex-col">
+                      {/* Imagem no topo */}
+                      <div className="h-[180px] bg-gray-100 border-b border-gray-200 overflow-hidden flex items-center justify-center">
+                        <img 
+                          src={card.image}
+                          alt={card.title}
+                          className={`w-full h-full ${'imageFit' in card && card.imageFit === 'contain' ? 'object-contain' : 'object-cover'}`}
+                        />
+                      </div>
+                      
+                      {/* Conteúdo do card */}
+                      <div className="flex-1 p-5 flex flex-col">
+                        <h4 className="text-lg font-bold text-gray-900 mb-2">
+                          {card.title}
+                        </h4>
+                        <p className="text-sm leading-relaxed text-gray-700 flex-1">
+                          {card.description}
+                        </p>
+                        {'subtitle' in card && card.subtitle && (
+                          <p className="text-xs text-gray-500 italic mt-2">
+                            {card.subtitle}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             );
           })}
-        </ul>
+        </motion.div>
+      </div>
+
+      {/* Navegador de dots */}
+      <div className="flex items-center justify-center gap-2">
+        {allCards.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`transition-all duration-300 rounded-full ${
+              index === currentIndex 
+                ? 'w-8 h-2 bg-gray-900' 
+                : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+            }`}
+            aria-label={`Ir para slide ${index + 1}`}
+          />
+        ))}
       </div>
 
       {/* Hint abaixo dos cards */}
       <p className="text-sm text-gray-500 text-center">
-        Arraste para cima para ver a próxima
+        Arraste pro lado
       </p>
     </div>
   );
 };
-
 const leftFeatureCard = {
   icon: Sparkles,
   title: "Secretária que conhece cada protocolo",
@@ -411,13 +361,6 @@ export const Step16SketchOffer = () => {
   };
 
   const name = userData.nome?.split(" ")[0] || "Nara";
-
-  // TODO: Substituir por userData.painPoint quando implementado
-  // Possíveis valores: 'no-secretary' | 'bad-secretary' | 'high-demand' | 'scale-revenue'
-  const userPainPoint: PainPoint = (userData.painPoint as PainPoint) || 'no-secretary';
-  
-  const selectedFeatureIds = getTopFeaturesForPain(userPainPoint);
-  const selectedFeatures = selectedFeatureIds.map(id => allFeatures[id]);
 
   const handlePlanClick = (planUrl: string, planName: string) => {
     console.log(`Plan selected: ${planName}`);
@@ -621,14 +564,14 @@ export const Step16SketchOffer = () => {
               </div>
               
               {/* Texto destacado centralizado */}
-              <p className="text-base text-center font-bold text-foreground pt-4">
-                Funções que escolhemos a dedo pra você 👇🏻
+              <p className="text-base text-center font-medium text-foreground pt-4">
+                <i>Funções que escolhemos a dedo pra você 👇🏻</i>
               </p>
             </section>
 
-            {/* Seção de Features: card stack interativo */}
+            {/* Seção de Features: carrossel lateral */}
             <section className="mt-12">
-              <FeatureCardStack features={selectedFeatures} />
+              <FeatureCarousel />
             </section>
 
             {/* Divider */}
@@ -667,6 +610,42 @@ export const Step16SketchOffer = () => {
                 </div>
               </CustomCard>
             </div>
+
+            {/* Review: Dra. Fernanda */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mt-8"
+            >
+              <CustomCard variant="bordered" className="p-4 hover:shadow-lg transition-all duration-300">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <img 
+                        src="/imgs/fernanda.webp" 
+                        alt="Dra. Fernanda Rabelo"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 text-sm">Dra. Fernanda Rabelo</h4>
+                      <p className="text-xs text-gray-600">Cirurgia Plástica</p>
+                    </div>
+                    <div className="flex gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <p className="text-xs text-gray-700 leading-relaxed pl-3">
+                      "Investimos por aqui mais de 20 mil em tráfego e a secretaria plus arrebenta com os leads"
+                    </p>
+                  </div>
+                </div>
+              </CustomCard>
+            </motion.div>
 
             {/* Spinning text como elemento standalone entre seções */}
             <div className="flex justify-center items-center py-8">
@@ -809,7 +788,7 @@ export const Step16SketchOffer = () => {
                   alt="SecretáriaPlus GO" 
                   className="w-full h-auto"
                 />
-                  </div>
+              </div>
 
                   <div className="px-6 sm:px-8 pb-10 pt-8 text-center">
                     {/* Título principal */}
@@ -860,9 +839,9 @@ export const Step16SketchOffer = () => {
                       className="mb-8 max-w-2xl mx-auto"
                     >
                       <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl" style={{ aspectRatio: '2/1' }}>
-                        <img 
-                          src="/imgs/movie.webp" 
-                          alt="SecretáriaPlus GO em ação" 
+                        <img
+                          src="/imgs/movie.gif"
+                          alt="SecretáriaPlus GO em ação"
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -873,7 +852,7 @@ export const Step16SketchOffer = () => {
                       className="pt-6 border-t border-gray-900"
                     >
                       <p className="text-gray-600 text-xs tracking-wide">
-                        Projeto em desenvolvimento, imagens e vídeos gerados por IA
+                        Projeto em desenvolvimento, imagens meramente ilustrativas.
                       </p>
                     </div>
                   </div>

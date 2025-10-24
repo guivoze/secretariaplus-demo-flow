@@ -6,11 +6,11 @@ import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
 
 const specialties = [
-  "HOF",
-  "Odonto",
-  "Harmonização Corporal",
-  "Dermato",
-  "Cir. Plástica",
+  "💉 HOF",
+  "🦷 Odonto",
+  "🍑 Harmonização Corporal",
+  "🫧 Dermato",
+  "🪡 Cir. Plástica",
   "Estética Geral (salão, micro, make)"
 ];
 
