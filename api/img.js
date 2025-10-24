@@ -19,8 +19,11 @@ export default async function handler(req, res) {
     const width = parseInt(w, 10);
     const quality = parseInt(q, 10);
 
+    // Decode URL to handle double-encoding from n8n
+    const decodedUrl = decodeURIComponent(url);
+
     // Reconstruir URL se necessário
-    const targetUrl = url.startsWith('http') ? url : `https://${url}`;
+    const targetUrl = decodedUrl.startsWith('http') ? decodedUrl : `https://${decodedUrl}`;
 
     // Buscar imagem fingindo ser navegador
     const response = await fetch(targetUrl, {

@@ -149,7 +149,7 @@ export const Step10WhatsApp = () => {
         
         // Quinta mensagem (~2s para ler)
         await new Promise(resolve => setTimeout(resolve, 3500));
-        await sendAssistantMessage('Mas já dá pra ter um gostinho agora.n');
+        await sendAssistantMessage('Mas já dá pra ter um gostinho agora!');
         
         // Sexta mensagem (~1.5s para ler)
         await new Promise(resolve => setTimeout(resolve, 1800));

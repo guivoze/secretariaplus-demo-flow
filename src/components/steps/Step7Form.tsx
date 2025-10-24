@@ -11,7 +11,7 @@ import { sendLeadWebhook } from "@/utils/webhook";
 import { sanitizeValue } from "@/utils/sanitize";
 
 export const Step7Form = () => {
-  const { userData, setUserData, nextStep } = useSupabaseDemo();
+  const { userData, setUserData, nextStep, sessionId } = useSupabaseDemo();
   const { trackLead } = useFacebookPixel();
   const flowType = useFlowType();
   const clarity = useClarity({ 
@@ -20,7 +20,8 @@ export const Step7Form = () => {
   
   const [formData, setFormData] = useState({
     email: sanitizeValue(userData.email),
-    whatsapp: sanitizeValue(userData.whatsapp)
+    whatsapp: sanitizeValue(userData.whatsapp),
+    painPoint: sanitizeValue(userData.painPoint)
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,7 +38,7 @@ export const Step7Form = () => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
   };
   
-  const isFormValid = isValidEmail(formData.email) && formData.whatsapp && !isSubmitting;
+  const isFormValid = isValidEmail(formData.email) && formData.whatsapp && formData.painPoint && !isSubmitting;
   
   const handleSubmit = async () => {
     if (!isFormValid || isSubmitting) return;
@@ -48,11 +49,13 @@ export const Step7Form = () => {
         ...userData,
         email: formData.email,
         whatsapp: formData.whatsapp,
+        painPoint: formData.painPoint,
       };
 
       setUserData({
         email: mergedData.email,
         whatsapp: mergedData.whatsapp,
+        painPoint: mergedData.painPoint,
       });
 
       // Track lead capture no Clarity
@@ -60,10 +63,11 @@ export const Step7Form = () => {
       clarity.trackInteraction('form_submission', {
         has_email: mergedData.email ? 'true' : 'false',
         has_whatsapp: mergedData.whatsapp ? 'true' : 'false',
-        specialty: mergedData.especialidade || 'unknown'
+        specialty: mergedData.especialidade || 'unknown',
+        pain_point: mergedData.painPoint || 'unknown'
       });
 
-      // Dispara pixel do Facebook e webhook simultaneamente (com proteção anti-duplo)
+      // Dispara pixel do Facebook e webhook de lead simultaneamente
       await Promise.all([
         trackLead({
           instagram: mergedData.instagram,
@@ -80,6 +84,39 @@ export const Step7Form = () => {
           especialidade: mergedData.especialidade,
         }, flowType)
       ]);
+
+      // Webhook para micro-offer (background - não bloqueia nextStep)
+      console.log('[Micro-offer] Sending webhook with:', { session_id: sessionId, pain_point: mergedData.painPoint });
+      fetch('https://n8nsplus.up.railway.app/webhook/micro-offer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionId,
+          pain_point: mergedData.painPoint
+        })
+      })
+      .then(response => {
+        console.log('[Micro-offer] Response status:', response.status);
+        return response.json();
+      })
+      .then(data => {
+        console.log('[Micro-offer] Response data:', data);
+        console.log('[Micro-offer] Has offer_copy?', !!data.offer_copy);
+        
+        // Verifica se offer_copy existe como objeto, senão usa os dados direto do root
+        const offerData = data.offer_copy || data;
+        
+        if (offerData.head_father) {
+          localStorage.setItem('offer-copy', JSON.stringify(offerData));
+          console.log('[Micro-offer] ✅ Cached successfully:', offerData);
+        } else {
+          console.warn('[Micro-offer] ⚠️ No valid offer data in response. Full response:', JSON.stringify(data, null, 2));
+        }
+      })
+      .catch(err => {
+        console.error('[Micro-offer] ❌ Error:', err);
+        console.error('[Micro-offer] ❌ Error details:', err.message, err.stack);
+      });
 
       nextStep();
     } catch (error) {
@@ -159,15 +196,32 @@ export const Step7Form = () => {
         }} transition={{
           delay: 0.2
         }} className="space-y-4">
+            <CustomInput label="Qual seu melhor e-mail?" type="email" placeholder="draana@gmail.com" value={formData.email} onChange={e => setFormData(prev => ({
+            ...prev,
+            email: e.target.value
+          }))} inputMode="email" autoComplete="email" autoCorrect="off" autoCapitalize="none" />
+
             <CustomInput label="Qual Seu WhatsApp + DDD?" placeholder="11999999999" value={formData.whatsapp} onChange={e => setFormData(prev => ({
             ...prev,
             whatsapp: formatWhatsApp(e.target.value)
           }))} />
 
-            <CustomInput label="Qual seu melhor e-mail?" type="email" placeholder="draana@gmail.com" value={formData.email} onChange={e => setFormData(prev => ({
-            ...prev,
-            email: e.target.value
-          }))} inputMode="email" autoComplete="email" autoCorrect="off" autoCapitalize="none" />
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground">
+                Qual seu MAIOR problema hoje?
+              </label>
+              <select
+                value={formData.painPoint}
+                onChange={e => setFormData(prev => ({ ...prev, painPoint: e.target.value }))}
+                className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Selecione...</option>
+                <option value="no-secretary">😭 Não tenho secretária/auxiliar e não consigo dar atenção para tudo ao mesmo tempo.</option>
+                <option value="bad-secretary">🐌 Tenho secretária mas ela é "lentinha" - Não converte e não aprende.</option>
+                <option value="high-demand">🎯 Rodo anúncios e não aguento a alta demanda de leads</option>
+                <option value="scale-revenue">💸 Está tudo certo, só quero ganhar mais dinheiro!</option>
+              </select>
+            </div>
           </motion.div>
 
           <motion.div initial={{

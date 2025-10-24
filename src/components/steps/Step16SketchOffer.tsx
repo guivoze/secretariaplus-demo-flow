@@ -7,8 +7,10 @@ import { Sparkles, Settings, Calendar, MessageSquare, Bell, ArrowRight, Database
 const mockOfferContent = {
   head: "Nara, você não nasceu pra ser secretária",
   copy1: "4mil seguem pela expertise em MPT e Cross Peel. Mas quem responde enquanto você tá no culto da @zeloigreja?",
-  copy2: "Imagine voltar do consultório e encontrar 5 agendamentos prontos. Sem áudios. Sem caos. Só notificações de conquistas.",
+  copy2: "Você é incrível, mas 'não é dois'.",
   copy3: "Entre um Ultraformer e outro, entre flores da Expoflora e o Cine Day das crianças — seu tempo escoa.",
+  head2: "Seus posts estão conquistando atenção",
+  copy4: "Imagine voltar do consultório e encontrar 5 agendamentos prontos. Sem áudios. Sem caos. Só notificações de conquistas.",
 };
 
 // Mapeamento de features por ID
@@ -50,7 +52,7 @@ const allFeatures: Record<FeatureId, Feature> = {
     iconColor: 'text-gray-700',
     bgColor: 'bg-gray-100',
     title: 'Follow-up automático',
-    description: 'Lembretes, confirmações e reconquista de desistentes.',
+    description: 'Reconquiste os desistentes sem gastar energia.',
     painPoints: ['no-secretary', 'bad-secretary', 'high-demand']
   },
   'notif': {
@@ -334,7 +336,68 @@ const ScrollParallaxImage = ({ topAnchorPx, sizePx, parallaxPx }: { topAnchorPx:
 };
 
 export const Step16SketchOffer = () => {
-  const { userData } = useSupabaseDemo();
+  const { userData, sessionId } = useSupabaseDemo();
+  const [offerContent, setOfferContent] = useState(mockOfferContent);
+  const [isLoadingCopy, setIsLoadingCopy] = useState(true);
+  const [showWhatsApp, setShowWhatsApp] = useState(false);
+  const [profileImages, setProfileImages] = useState({
+    profilePic: userData.realProfilePic || null,
+    post1: userData.realPosts?.[0] || null,
+    post2: userData.realPosts?.[1] || null,
+    post3: userData.realPosts?.[2] || null,
+  });
+
+  // Estilos CSS para bolds mais escuros (sutil)
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .offer-content strong {
+        color: rgb(0 0 0 / 0.7) !important;
+        font-weight: 500;
+      }
+      .dark .offer-content strong {
+        color: rgb(255 255 255 / 0.85) !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
+  // Buscar offer_copy do localStorage (já vem do webhook)
+  useEffect(() => {
+    const loadOfferCopy = () => {
+      try {
+        const cachedOfferCopy = localStorage.getItem('offer-copy');
+        
+        if (cachedOfferCopy) {
+          const copy = JSON.parse(cachedOfferCopy);
+          console.log('Offer copy loaded from cache:', copy);
+          
+          setOfferContent({
+            head: copy.head_father || mockOfferContent.head,      // HEAD principal
+            copy1: copy.copy_father || mockOfferContent.copy1,    // COPY principal
+            copy2: copy.head1 || mockOfferContent.copy2,          // HEAD secundário 1
+            copy3: copy.copy1 || mockOfferContent.copy3,          // COPY secundário 1
+            head2: copy.head2 || 'Seus posts estão conquistando atenção',  // HEAD secundário 2
+            copy4: copy.copy2 || mockOfferContent.copy3,          // COPY secundário 2
+          });
+          setIsLoadingCopy(false);
+        } else {
+          // Se não tiver cache, usa mock
+          console.log('No cached offer copy found, using mock');
+          setIsLoadingCopy(false);
+        }
+      } catch (err) {
+        console.error('Error loading offer copy from localStorage:', err);
+        setIsLoadingCopy(false);
+      }
+    };
+
+    // Carregar imediatamente
+    loadOfferCopy();
+  }, []);
 
   // Controladores para posicionar o selo giratório entre os cards dos planos
   const circularBadgeConfig = {
@@ -351,7 +414,7 @@ export const Step16SketchOffer = () => {
 
   // TODO: Substituir por userData.painPoint quando implementado
   // Possíveis valores: 'no-secretary' | 'bad-secretary' | 'high-demand' | 'scale-revenue'
-  const userPainPoint: PainPoint = 'no-secretary'; // Mock - virá do userData futuramente
+  const userPainPoint: PainPoint = (userData.painPoint as PainPoint) || 'no-secretary';
   
   const selectedFeatureIds = getTopFeaturesForPain(userPainPoint);
   const selectedFeatures = selectedFeatureIds.map(id => allFeatures[id]);
@@ -361,10 +424,19 @@ export const Step16SketchOffer = () => {
     window.open(planUrl, '_blank');
   };
 
-  const head = mockOfferContent.head.replace("Nara", name);
-  const copy1 = mockOfferContent.copy1;
-  // const copy2 = mockOfferContent.copy2;
-  // const copy3 = mockOfferContent.copy3;
+  // Sanitizar HTML de bold (**text** -> <strong>text</strong>) e quebras de linha (\n -> <br/>)
+  const sanitizeBold = (text: string) => {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br/>');
+  };
+
+  const head = sanitizeBold(offerContent.head);
+  const copy1 = sanitizeBold(offerContent.copy1);
+  const copy2 = sanitizeBold(offerContent.copy2);
+  const copy3 = sanitizeBold(offerContent.copy3);
+  const head2 = sanitizeBold(offerContent.head2);
+  const copy4 = sanitizeBold(offerContent.copy4);
 
   // Garantir scroll livre independente de estados globais anteriores
   useEffect(() => {
@@ -377,6 +449,18 @@ export const Step16SketchOffer = () => {
       document.documentElement.style.overflow = prevHtml;
     };
   }, []);
+
+  // Mostrar botão WhatsApp após 12 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowWhatsApp(true);
+    }, 12000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleWhatsAppClick = () => {
+    window.open('https://api.whatsapp.com/send?phone=5511936191391&text=Oi%20Thamara.%20Acabei%20de%20fazer%20meu%20teste%20gratuito%20e%20tenho%20uma%20d%C3%BAvida%20sobre%20o%20Secret%C3%A1riaPlus.', '_blank');
+  };
 
   return (
     <>
@@ -410,7 +494,7 @@ export const Step16SketchOffer = () => {
                 className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shadow-2xl border border-border/60 flex-shrink-0"
               >
                 <img
-                  src="/imgs/mock1.png"
+                  src={profileImages.profilePic || "/imgs/mock1.jpg"}
                   alt={`${name} - perfil`}
                   className="w-full h-full object-cover"
                 />
@@ -424,7 +508,11 @@ export const Step16SketchOffer = () => {
                   className="min-h-[96px] sm:min-h-[110px] flex items-start"
                 >
                   <h1 className="text-2xl sm:text-3xl lg:text-[2.3rem] font-bold leading-tight text-foreground">
-                    {head}
+                    {isLoadingCopy ? (
+                      <span className="opacity-50">Carregando proposta personalizada...</span>
+                    ) : (
+                      <span dangerouslySetInnerHTML={{ __html: head }} />
+                    )}
                   </h1>
                 </motion.div>
               </div>
@@ -435,9 +523,13 @@ export const Step16SketchOffer = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.35 }}
-              className="text-base text-muted-foreground leading-relaxed"
+              className="text-base text-muted-foreground leading-relaxed offer-content"
             >
-              {copy1}
+              {isLoadingCopy ? (
+                <span className="opacity-50">...</span>
+              ) : (
+                <span dangerouslySetInnerHTML={{ __html: copy1 }} />
+              )}
             </motion.p>
             </div>
           </CustomCard>
@@ -481,28 +573,57 @@ export const Step16SketchOffer = () => {
           </div>
         </div>
             
-            {/* 2ª seção: imagem vertical fora de card + header + texto de apoio */}
+            {/* 2ª seção: colagem de fotos do Instagram + header + texto de apoio */}
             <section className="space-y-4 mt-16 sm:mt-20">
-              <div className="rounded-2xl overflow-hidden border border-border/40 shadow-sm bg-muted/10">
-                <div className="w-full aspect-[4/1]">
-                  <img
-                    src="/imgs/clin.png"
-                    alt="Destaque do dia"
-                    className="w-full h-full object-cover"
+              {/* Colagem de 3 fotos do Instagram */}
+              <div className="grid grid-cols-3 gap-3 auto-rows-[72px] sm:auto-rows-[96px]">
+                {/* Esquerda topo: wide, baixa */}
+                <div className="col-span-2 row-span-1 rounded-xl overflow-hidden border border-border/30">
+                  <img 
+                    src={profileImages.post1 || "/imgs/mock2.jpg"} 
+                    alt="post 1" 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+                {/* Direita topo: menos vertical (1 row, mais quadrado) */}
+                <div className="col-span-1 row-span-1 rounded-xl overflow-hidden border border-border/30">
+                  <img 
+                    src={profileImages.post2 || "/imgs/mock3.jpg"} 
+                    alt="post 2" 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+                {/* Base: wide ocupando toda a largura em baixa altura */}
+                <div className="col-span-3 row-span-1 rounded-xl overflow-hidden border border-border/30">
+                  <img 
+                    src={profileImages.post3 || "/imgs/mock4.jpg"} 
+                    alt="post 3" 
+                    className="w-full h-full object-cover" 
                   />
                 </div>
               </div>
+              
               <div className="px-1 space-y-2">
-                <h2 className="text-xl font-extrabold text-foreground">
-                  Você é incrível, mas "não é dois".
+                <h2 className="text-xl font-extrabold text-foreground offer-content">
+                  {isLoadingCopy ? (
+                    <span className="opacity-50">Você é incrível, mas "não é dois".</span>
+                  ) : (
+                    <span dangerouslySetInnerHTML={{ __html: copy2 }} />
+                  )}
                 </h2>
-                <p className="text-base text-muted-foreground leading-relaxed">
-                   Entre um Ultraformer e outro, entre flores da Expoflora e o Cine Day das crianças - seu tempo escoa.
-                </p>
-                <p className="text-base text-muted-foreground leading-relaxed">
-                  <span className="font-bold text-foreground">Funções que escolhemos a dedo pra você 👇🏻</span>
+                <p className="text-base text-muted-foreground leading-relaxed offer-content">
+                  {isLoadingCopy ? (
+                    <span className="opacity-50">Entre um Ultraformer e outro, entre flores da Expoflora e o Cine Day das crianças - seu tempo escoa.</span>
+                  ) : (
+                    <span dangerouslySetInnerHTML={{ __html: copy3 }} />
+                  )}
                 </p>
               </div>
+              
+              {/* Texto destacado centralizado */}
+              <p className="text-base text-center font-bold text-foreground pt-4">
+                Funções que escolhemos a dedo pra você 👇🏻
+              </p>
             </section>
 
             {/* Seção de Features: card stack interativo */}
@@ -513,32 +634,35 @@ export const Step16SketchOffer = () => {
             {/* Divider */}
             <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-12" />
 
-            {/* 3ª seção: colagem de fotos + card com textos */}
+            {/* 3ª seção: imagem clin.png + card com textos */}
             <div className="space-y-4">
-              {/* Colagem de 3 fotos do Instagram fora do card */}
-              <div className="grid grid-cols-3 gap-3 auto-rows-[72px] sm:auto-rows-[96px]">
-                {/* Esquerda topo: wide, baixa */}
-                <div className="col-span-2 row-span-1 rounded-xl overflow-hidden border border-border/30">
-                  <img src="/imgs/mock3.png" alt="post 1" className="w-full h-full object-cover" />
-                </div>
-                {/* Direita topo: menos vertical (1 row, mais quadrado) */}
-                <div className="col-span-1 row-span-1 rounded-xl overflow-hidden border border-border/30">
-                  <img src="/imgs/mock4.png" alt="post 2" className="w-full h-full object-cover" />
-                </div>
-                {/* Base: wide ocupando toda a largura em baixa altura */}
-                <div className="col-span-3 row-span-1 rounded-xl overflow-hidden border border-border/30">
-                  <img src="/imgs/mock2.png" alt="post 3" className="w-full h-full object-cover" />
+              {/* Imagem que estava na seção 2 */}
+              <div className="rounded-2xl overflow-hidden border border-border/40 shadow-sm bg-muted/10">
+                <div className="w-full aspect-[4/1]">
+                  <img
+                    src="/imgs/clin.png"
+                    alt="Destaque do dia"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
 
               {/* Card apenas com os textos */}
               <CustomCard variant="elevated" className="p-4 sm:p-6">
                 <div className="space-y-2">
-                  <h2 className="text-xl font-extrabold text-foreground">
-                    Seus posts estão conquistando atenção
+                  <h2 className="text-xl font-extrabold text-foreground offer-content">
+                    {isLoadingCopy ? (
+                      <span className="opacity-50">Seus posts estão conquistando atenção</span>
+                    ) : (
+                      <span dangerouslySetInnerHTML={{ __html: head2 }} />
+                    )}
                   </h2>
-                  <p className="text-base text-muted-foreground leading-relaxed">
-                    Imagine voltar do consultório e encontrar 5 agendamentos prontos. Sem áudios. Sem caos. Só notificações de conquistas.
+                  <p className="text-base text-muted-foreground leading-relaxed offer-content">
+                    {isLoadingCopy ? (
+                      <span className="opacity-50">Imagine voltar do consultório e encontrar 5 agendamentos prontos. Sem áudios. Sem caos. Só notificações de conquistas.</span>
+                    ) : (
+                      <span dangerouslySetInnerHTML={{ __html: copy4 }} />
+                    )}
                   </p>
                 </div>
               </CustomCard>
@@ -570,7 +694,7 @@ export const Step16SketchOffer = () => {
             <div className="space-y-8">
               <div className="text-center space-y-3 px-2">
                 <h2 className="text-2xl font-bold text-foreground">
-                  {name}, por isso formulamos essa proposta pra você ✍🏻
+                  <span className="bg-gray-900 text-white px-2 py-1 rounded">{name}</span>, por isso formulamos essa proposta pra você ✍🏻
                 </h2>
                 <p className="text-base text-foreground font-base leading-relaxed">
                   Simples: todas as funcionalidades liberadas, fácil de configurar e sem pegadinhas.
@@ -756,6 +880,32 @@ export const Step16SketchOffer = () => {
                 </div>
               </div>
             </div>
+
+      {/* Botão flutuante do WhatsApp */}
+      {showWhatsApp && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="fixed bottom-6 right-6 z-50"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="absolute -top-12 -left-20 bg-gray-800 text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap"
+          >
+            Alguma dúvida?
+            <div className="absolute bottom-[-6px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-gray-800"></div>
+          </motion.div>
+          <button
+            onClick={handleWhatsAppClick}
+            className="w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
+          >
+            <img src="/imgs/wpp.webp" alt="WhatsApp" style={{ width: '32px', height: '32px' }} className="object-contain" />
+          </button>
+        </motion.div>
+      )}
       </>
     );
   };

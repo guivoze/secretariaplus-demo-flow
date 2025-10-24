@@ -30,6 +30,15 @@ interface UserData {
     rapport2: string;
   } | null;
   instagramRequestTime: number | null;
+  painPoint?: string;
+  offerCopy?: {
+    headFather: string;
+    copyFather: string;
+    head1: string;
+    copy1: string;
+    head2: string;
+    copy2: string;
+  } | null;
 }
 
 interface ChatMessage {

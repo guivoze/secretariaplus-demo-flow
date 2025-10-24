@@ -89,6 +89,7 @@ export type Database = {
           utm_medium: string | null
           utm_source: string | null
           whatsapp: string | null
+          offer_copy: Json | null
         }
         Insert: {
           ai_insights?: Json | null
@@ -123,6 +124,7 @@ export type Database = {
           utm_medium?: string | null
           utm_source?: string | null
           whatsapp?: string | null
+          offer_copy?: Json | null
         }
         Update: {
           ai_insights?: Json | null
@@ -157,6 +159,7 @@ export type Database = {
           utm_medium?: string | null
           utm_source?: string | null
           whatsapp?: string | null
+          offer_copy?: Json | null
         }
         Relationships: []
       }
