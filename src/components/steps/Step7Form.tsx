@@ -93,16 +93,28 @@ export const Step7Form = () => {
         'scale-revenue': 'Está tudo certo, só quero ganhar mais dinheiro'
       };
       
+      // Mapeamento de especialidades para área de atuação
+      const areaTexts: Record<string, string> = {
+        '💉 HOF': 'Harmonização facial',
+        '🦷 Odonto': 'Odontologia',
+        '🍑 Harmonização Corporal': 'Harmonização Corporal',
+        '🫧 Dermato': 'Dermatologia',
+        '🪡 Cir. Plástica': 'Cirurgia Plástica',
+        'Estética Geral (salão, micro, make)': 'Estética Geral'
+      };
+      
       const painPointText = painPointTexts[mergedData.painPoint] || mergedData.painPoint;
+      const areaText = areaTexts[mergedData.especialidade] || mergedData.especialidade;
       
       // Webhook para micro-offer (background - não bloqueia nextStep)
-      console.log('[Micro-offer] Sending webhook with:', { session_id: sessionId, pain_point: painPointText });
+      console.log('[Micro-offer] Sending webhook with:', { session_id: sessionId, pain_point: painPointText, area: areaText });
       fetch('https://n8nsplus.up.railway.app/webhook/micro-offer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_id: sessionId,
-          pain_point: painPointText
+          pain_point: painPointText,
+          area: areaText
         })
       })
       .then(response => {

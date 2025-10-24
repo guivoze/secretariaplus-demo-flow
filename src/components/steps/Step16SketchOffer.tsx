@@ -290,12 +290,22 @@ export const Step16SketchOffer = () => {
   const [offerContent, setOfferContent] = useState(mockOfferContent);
   const [isLoadingCopy, setIsLoadingCopy] = useState(true);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
+  const [showInitialLoading, setShowInitialLoading] = useState(true);
   const [profileImages, setProfileImages] = useState({
     profilePic: userData.realProfilePic || null,
     post1: userData.realPosts?.[0] || null,
     post2: userData.realPosts?.[1] || null,
     post3: userData.realPosts?.[2] || null,
   });
+
+  // Loading inicial de 3 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowInitialLoading(false);
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Estilos CSS para bolds mais escuros (sutil)
   useEffect(() => {
@@ -416,6 +426,29 @@ export const Step16SketchOffer = () => {
   const handleWhatsAppClick = () => {
     window.open('https://api.whatsapp.com/send?phone=5511936191391&text=Oi%20Thamara.%20Acabei%20de%20fazer%20meu%20teste%20gratuito%20e%20tenho%20uma%20d%C3%BAvida%20sobre%20o%20Secret%C3%A1riaPlus.', '_blank');
   };
+
+  // Loading inicial de 3 segundos
+  if (showInitialLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/40 flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center gap-6"
+        >
+          <img 
+            src="/imgs/loader.webp" 
+            alt="Loading" 
+            className="w-16 h-16 object-contain"
+          />
+          <p className="text-sm text-muted-foreground text-center max-w-xs">
+            {name}, estamos criando uma proposta personalizada pra você...
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <>
