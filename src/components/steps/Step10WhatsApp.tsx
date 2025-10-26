@@ -133,35 +133,27 @@ export const Step10WhatsApp = () => {
       setLockInput(true);
       setAllowInputFocus(false); // Bloqueia foco explicitamente
       
-      // Envia as mensagens iniciais em sequência com delays naturais baseados no tempo de leitura
+      // Envia as mensagens iniciais em sequência
       const sendInitialMessages = async () => {
-        // Primeira mensagem
-        await sendAssistantMessage('✨ Oie! Pra me testar, aja como um paciente típico, ex: "Qual valor do botox?"');
+        // Primeira mensagem - Boas-vindas
+        await sendAssistantMessage('Oii! Prazer, sou sua nova secretária. Seu teste foi liberado 🥰');
         
-        // Segunda mensagem (~3s para ler)
+        // Segunda mensagem (~2.5s)
         await new Promise(resolve => setTimeout(resolve, 2500));
-        await sendAssistantMessage('Apenas te lembrando: fui treinada só com informações públicas do seu Instagram, ta? 😊');
+        await sendAssistantMessage('Olha, eu aprendi tudo com as infos públicas do seu Instagram. Então ainda não sei tudo sobre você. Mas quando você assinar, vai poder me customizar todinha! ✨');
         
-        // Terceira mensagem (~2.5s para ler)
-        await new Promise(resolve => setTimeout(resolve, 2800));
-        await sendAssistantMessage('Ah... e eu também to digitando mais rápido que o normal pra ficar dinâmico no teste. ⚡️🏃🏻‍♀️');
+        // Terceira mensagem (~2s)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await sendAssistantMessage('Ah, e tô digitando mais rápido que o normal só pra agilizar o teste! ⚡');
         
-        // Quarta mensagem (~4s para ler - mais longa)
-        await new Promise(resolve => setTimeout(resolve, 2300));
-        await sendAssistantMessage('Quando você assinar um plano, poderei ser 100% personalizada — meu jeito de falar, tom, formalidade… tudo com a cara da sua clínica.');
+        // Quarta mensagem - Call to action (~1.5s)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        await sendAssistantMessage('Vou liberar pra você escrever. Faça como um paciente típico seu, algo como: "Qual valor do botox?" 💬');
         
-        // Quinta mensagem (~2s para ler)
-        await new Promise(resolve => setTimeout(resolve, 3500));
-        await sendAssistantMessage('Mas já dá pra ter um gostinho agora!');
-        
-        // Sexta mensagem (~1.5s para ler)
-        await new Promise(resolve => setTimeout(resolve, 1800));
-        await sendAssistantMessage('Estou prontíssima, pode mandar! 🥰');
-        
-        // Desbloqueia input após última mensagem com delay adicional
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Desbloqueia input
+        await new Promise(resolve => setTimeout(resolve, 400));
         setLockInput(false);
-        setAllowInputFocus(true); // Libera foco apenas depois de tudo
+        setAllowInputFocus(true);
       };
       
       sendInitialMessages();
@@ -441,6 +433,7 @@ export const Step10WhatsApp = () => {
 
   // Altura efetiva só quando o input está focado (evita falsos positivos do Safari)
   const effectiveKB = isInputFocused ? keyboardHeight : 0;
+  
   return <div className="chat-root fixed inset-0 flex flex-col overflow-hidden bg-white" style={{
     margin: 0,
     padding: 0

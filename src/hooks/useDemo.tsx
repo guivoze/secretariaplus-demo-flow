@@ -6,8 +6,7 @@ interface UserData {
   email: string;
   whatsapp: string;
   especialidade: string;
-  faturamento: string;
-  // Mock data
+  // Mock data (only for UI, not saved to DB)
   followers: string;
   posts: string;
   profilePic: string | null;
@@ -45,7 +44,6 @@ const initialUserData: UserData = {
   email: '',
   whatsapp: '',
   especialidade: '',
-  faturamento: '',
   followers: '1.2K',
   posts: '324',
   profilePic: null,

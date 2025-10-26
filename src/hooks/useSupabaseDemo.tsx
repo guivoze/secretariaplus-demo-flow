@@ -9,8 +9,7 @@ interface UserData {
   email: string;
   whatsapp: string;
   especialidade: string;
-  faturamento: string;
-  // Mock data
+  // Mock data (only used for UI display, not saved to DB)
   followers: string;
   posts: string;
   profilePic: string | null;
@@ -103,7 +102,6 @@ const initialUserData: UserData = {
   email: '',
   whatsapp: '',
   especialidade: '',
-  faturamento: '',
   followers: '1.2K',
   posts: '324',
   profilePic: '',
@@ -265,26 +263,35 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
     try {
       const utmParams = getUTMParams();
       
-      const sessionData = {
+      const sessionData: any = {
         session_id: sessionId,
         instagram_handle: userData.instagram,
         nome: userData.nome,
         email: userData.email,
         whatsapp: userData.whatsapp,
         especialidade: userData.especialidade,
-        faturamento: userData.faturamento,
         current_step: currentStep,
-        total_steps: 16,
+        total_steps: 13, // Fixed: actual unique steps in flow (0-12)
         has_instagram_data: userData.hasInstagramData,
-        followers_count: userData.followers,
-        posts_count: userData.posts,
-        profile_pic_url: userData.profilePic,
         real_profile_pic_url: userData.realProfilePic,
         real_posts: userData.realPosts,
         ai_insights: userData.aiInsights,
+        custom_prompt: generateCustomPrompt(),
         user_agent: navigator.userAgent,
         ...utmParams
       };
+
+      // Session timing - only set once, don't overwrite
+      if (currentStep === 3 && !dbSessionId) {
+        // First time reaching step 3 (confirmation)
+        sessionData.session_started_at = new Date().toISOString();
+      }
+      
+      if (currentStep === 12) {
+        // Reached calendar step - mark as completed
+        sessionData.session_ended_at = new Date().toISOString();
+        sessionData.completed_at = new Date().toISOString();
+      }
 
       if (dbSessionId) {
         // Update existing session
@@ -453,7 +460,6 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
     if (userData.email) score += 20;
     if (userData.whatsapp) score += 25;
     if (userData.especialidade) score += 10;
-    if (userData.faturamento) score += 10;
     if (userData.hasInstagramData) score += 10;
     if (currentStep >= 8) score += 10; // Reached form step
     
@@ -491,10 +497,9 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
       email: sanitizeValue(foundPreviousSession.email),
       whatsapp: sanitizeValue(foundPreviousSession.whatsapp),
       especialidade: sanitizeValue(foundPreviousSession.especialidade),
-      faturamento: sanitizeValue(foundPreviousSession.faturamento),
-      followers: sanitizeValue(foundPreviousSession.followers_count) || '1.2K',
-      posts: sanitizeValue(foundPreviousSession.posts_count) || '324',
-      profilePic: sanitizeValue(foundPreviousSession.profile_pic_url),
+      followers: '1.2K', // Mock data, not stored in DB
+      posts: '324', // Mock data, not stored in DB
+      profilePic: '', // Not stored anymore
       clinicName: 'Clínica Exemplo',
       procedures: ['Botox', 'Preenchimento', 'Limpeza de Pele'],
       hasInstagramData: Boolean(foundPreviousSession.has_instagram_data),

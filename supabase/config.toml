@@ -21,8 +21,7 @@ max_client_conn = 100
 
 [realtime]
 enabled = true
-ip_version = "ipv6"
-port = 54323
+ip_version = "IPv6"
 max_header_length = 4096
 
 [studio]
@@ -47,12 +46,9 @@ enabled = true
 site_url = "http://127.0.0.1:3000"
 additional_redirect_urls = ["https://127.0.0.1:3000"]
 jwt_expiry = 3600
-refresh_token_rotation_enabled = true
-security_update_password_require_reauthentication = true
 
 [edge_runtime]
 enabled = true
-port = 54321
 inspector_port = 8083
 
 [functions.chat-completion]
