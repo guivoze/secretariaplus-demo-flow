@@ -382,7 +382,7 @@ export const Step16SketchOffer = () => {
     translateY: "-50%", // ajuste fino vertical em %
   };
 
-  const name = userData.nome?.split(" ")[0] || "Nara";
+  const name = userData.nome?.split(" ")[0] || "";
 
   const handlePlanClick = (planUrl: string, planName: string) => {
     console.log(`Plan selected: ${planName}`);
@@ -715,10 +715,14 @@ export const Step16SketchOffer = () => {
             </div>
 
             {/* 4ª seção: Headline + subtexto + 2 cards de planos */}
-            <div className="space-y-8">
+            <div className="space-y-8" id="plans-section">
               <div className="text-center space-y-3 px-2">
                 <h2 className="text-2xl font-bold text-foreground">
-                  <span className="bg-gray-900 text-white px-2 py-1 rounded">{name}</span>, por isso formulamos essa proposta pra você ✍🏻
+                  {name ? (
+                    <><span className="bg-gray-900 text-white px-2 py-1 rounded">{name}</span>, por isso formulamos essa proposta pra você ✍🏻</>
+                  ) : (
+                    <>Por isso formulamos essa proposta pra você ✍🏻</>
+                  )}
                 </h2>
                 <p className="text-base text-foreground font-base leading-relaxed">
                   Simples: todas as funcionalidades liberadas, fácil de configurar e sem pegadinhas.
@@ -817,6 +821,100 @@ export const Step16SketchOffer = () => {
                     </button>
                   </div>
                 </CustomCard>
+              </div>
+
+              {/* Divider antes dos Bônus */}
+              <div className="mt-32 mb-32 px-4">
+                <div className="border-t border-gray-300"></div>
+              </div>
+
+              {/* Seção de Bônus Exclusivos */}
+              <div className="mb-12 text-center max-w-3xl mx-auto px-4">
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  {name ? `E para facilitar ainda mais sua decisão, ${name}:` : 'E para facilitar ainda mais sua decisão:'}
+                </h3>
+                <p className="text-base text-gray-600 mb-8">
+                  Separamos 2 bônus exclusivos
+                </p>
+
+                {/* Cards de Bônus */}
+                <div className="space-y-6">
+                  {/* Bônus 1: Conteúdo Infinito */}
+                  <div>
+                    <div className="rounded-3xl border border-gray-300 bg-white shadow-sm p-6 flex items-center gap-4">
+                      <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <img src="/imgs/bonus1.jpg" alt="Bônus 1" className="w-full h-full object-cover" />
+                      </div>
+                      
+                      <div className="flex-1 text-left">
+                        <h5 className="text-xl font-bold text-gray-900 mb-2">Bônus 1: Conteúdo Infinito</h5>
+                        <p className="text-base text-gray-700 leading-relaxed">
+                          Gere seu clone de IA indistinguível a realidade e economize tempo com produção de conteúdo.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center pt-3 pb-2">
+                      <span className="text-base text-gray-500 line-through mr-2">R$ 1500</span>
+                      <span className="text-base font-semibold text-green-600">Grátis</span>
+                    </div>
+                  </div>
+
+                  {/* Bônus 2: Agente HLD */}
+                  <div>
+                    <div className="rounded-3xl border border-gray-300 bg-white shadow-sm p-6 flex items-center gap-4">
+                      <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <img src="/imgs/bonus2.jpg" alt="Bônus 2" className="w-full h-full object-cover" />
+                      </div>
+                      
+                      <div className="flex-1 text-left">
+                        <h5 className="text-xl font-bold text-gray-900 mb-2">Bônus 2: Agente HLD</h5>
+                        <p className="text-base text-gray-700 leading-relaxed">
+                          Tirado da mentoria High Level Doctor, um agente de IA especialista em criação de conteúdo para instagram específico para profissionais da saúde sem tempo.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center pt-3 pb-2">
+                      <span className="text-base text-gray-500 line-through mr-2">R$ 1297</span>
+                      <span className="text-base font-semibold text-green-600">Grátis</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Divider antes da Garantia */}
+              <div className="mt-32 mb-32 px-4">
+                <div className="border-t border-gray-300"></div>
+              </div>
+
+              {/* Seção de Garantia 30 dias */}
+              <div className="mb-16 text-center max-w-md mx-auto px-4">
+                <div className="flex justify-center mb-6">
+                  <img src="/imgs/30d.webp" alt="Garantia 30 dias" className="w-32 h-32 object-contain" />
+                </div>
+                
+                <h4 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
+                  Sua IA não agendou<br />
+                  UM PACIENTE em até 30 dias?
+                </h4>
+                
+                <p className="text-base text-gray-700 leading-relaxed mb-8">
+                  Devolvemos todo seu $$$, e ainda fazemos R$ 500 no seu pix como gesto de perdão pelo seu tempo perdido.
+                </p>
+                
+                <button
+                  onClick={() => {
+                    const plansSection = document.getElementById('plans-section');
+                    if (plansSection) {
+                      plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                  className="w-full max-w-sm mx-auto bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                >
+                  Iniciar Agora
+                  <ArrowRight className="w-5 h-5" />
+                </button>
               </div>
             </div>
           </div>

@@ -140,7 +140,7 @@ export const Step10WhatsApp = () => {
         
         // Segunda mensagem (~2.5s)
         await new Promise(resolve => setTimeout(resolve, 2500));
-        await sendAssistantMessage('Olha, eu aprendi tudo com as infos públicas do seu Instagram. Então ainda não sei tudo sobre você. Mas quando você assinar, vai poder me customizar todinha! ✨');
+        await sendAssistantMessage('Olha, eu aprendi tudo com as infos públicas do seu Insta, então ainda não sei tudo sobre você, tá? Mas quando você me assinar, vai poder me customizar todinha! ✨');
         
         // Terceira mensagem (~2s)
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -148,7 +148,7 @@ export const Step10WhatsApp = () => {
         
         // Quarta mensagem - Call to action (~1.5s)
         await new Promise(resolve => setTimeout(resolve, 1500));
-        await sendAssistantMessage('Vou liberar pra você escrever. Faça como um paciente típico seu, algo como: "Qual valor do botox?" 💬');
+        await sendAssistantMessage('Vou liberar pra você escrever agora. Dica: faça como um paciente típico seu, algo como: "Qual valor do botox?" 💬');
         
         // Desbloqueia input
         await new Promise(resolve => setTimeout(resolve, 400));
