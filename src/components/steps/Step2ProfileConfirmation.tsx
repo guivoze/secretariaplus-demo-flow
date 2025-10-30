@@ -3,6 +3,7 @@ import { CustomButton } from "@/components/ui/custom-button";
 import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion } from "framer-motion";
+import { isDisqualifiedLead } from "@/utils/leadQualification";
 interface ProfileOption {
   at: string;
   username: string;
@@ -13,6 +14,7 @@ export const Step2ProfileConfirmation = () => {
     userData,
     setUserData,
     nextStep,
+    setCurrentStep,
     resetDemo,
     sessionId,
     findPreviousSession,
@@ -93,6 +95,19 @@ export const Step2ProfileConfirmation = () => {
       instagram: confirmedUsername,
       instagramConfirmed: true
     });
+
+    // PROTEÇÃO: Não faz scrape do Instagram para leads desqualificados
+    if (isDisqualifiedLead(userData.especialidade)) {
+      console.log('Lead desqualificado - scrape do Instagram bloqueado');
+      // Pula DIRETO para step 9 (formulário) evitando steps 3-8 (pain/agitate/solution/loading)
+      setUserData({
+        instagram: confirmedUsername,
+        instagramConfirmed: true,
+        hasInstagramData: false // Marca que não tem dados do Instagram
+      });
+      setCurrentStep(9); // Vai direto pro formulário
+      return;
+    }
 
     // This is the ONLY place where get_insta webhook should be called
     // Start in background after profile confirmation

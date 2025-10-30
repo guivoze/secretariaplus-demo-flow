@@ -273,6 +273,7 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
         current_step: currentStep,
         total_steps: 13, // Fixed: actual unique steps in flow (0-12)
         has_instagram_data: userData.hasInstagramData,
+        is_disqualified: userData.especialidade === "Estética Geral (salão, micro, make)", // Flag para identificar leads desqualificados
         real_profile_pic_url: userData.realProfilePic,
         real_posts: userData.realPosts,
         ai_insights: userData.aiInsights,

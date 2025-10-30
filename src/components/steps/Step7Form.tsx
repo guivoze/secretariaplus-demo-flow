@@ -9,9 +9,10 @@ import { CustomInput } from "@/components/ui/custom-input";
 import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { sendLeadWebhook } from "@/utils/webhook";
 import { sanitizeValue } from "@/utils/sanitize";
+import { isDisqualifiedLead } from "@/utils/leadQualification";
 
 export const Step7Form = () => {
-  const { userData, setUserData, nextStep, sessionId } = useSupabaseDemo();
+  const { userData, setUserData, nextStep, sessionId, setCurrentStep } = useSupabaseDemo();
   const { trackLead } = useFacebookPixel();
   const flowType = useFlowType();
   const clarity = useClarity({ 
@@ -67,23 +68,37 @@ export const Step7Form = () => {
         pain_point: mergedData.painPoint || 'unknown'
       });
 
-      // Dispara pixel do Facebook e webhook de lead simultaneamente
-      await Promise.all([
-        trackLead({
+      // SEMPRE envia webhook demo-session-lead (salva no DB para todos)
+      // Mas bloqueia pixel Facebook apenas para leads desqualificados
+      if (!isDisqualifiedLead(mergedData.especialidade)) {
+        // Lead qualificado: envia pixel + webhook
+        await Promise.all([
+          trackLead({
+            instagram: mergedData.instagram,
+            nome: mergedData.nome,
+            email: mergedData.email,
+            whatsapp: mergedData.whatsapp,
+            especialidade: mergedData.especialidade,
+          }),
+          sendLeadWebhook({
+            instagram: mergedData.instagram,
+            nome: mergedData.nome,
+            email: mergedData.email,
+            whatsapp: mergedData.whatsapp,
+            especialidade: mergedData.especialidade,
+          }, flowType)
+        ]);
+      } else {
+        // Lead desqualificado: envia APENAS webhook (não envia pixel)
+        console.log('Lead desqualificado - pixel bloqueado, mas webhook demo-session-lead enviado para DB');
+        await sendLeadWebhook({
           instagram: mergedData.instagram,
           nome: mergedData.nome,
           email: mergedData.email,
           whatsapp: mergedData.whatsapp,
           especialidade: mergedData.especialidade,
-        }),
-        sendLeadWebhook({
-          instagram: mergedData.instagram,
-          nome: mergedData.nome,
-          email: mergedData.email,
-          whatsapp: mergedData.whatsapp,
-          especialidade: mergedData.especialidade,
-        }, flowType)
-      ]);
+        }, flowType);
+      }
 
       // Mapeamento de códigos para textos completos dos pain points
       const painPointTexts: Record<string, string> = {
@@ -145,7 +160,14 @@ export const Step7Form = () => {
         console.error('[Micro-offer] ❌ Error details:', err.message, err.stack);
       });
 
-      nextStep();
+      // DECISÃO FINAL: Se for lead desqualificado, pula direto para step 13
+      if (isDisqualifiedLead(mergedData.especialidade)) {
+        console.log('Lead desqualificado detectado - pulando para tela de desqualificação');
+        setCurrentStep(13);
+      } else {
+        // Lead qualificado: segue fluxo normal
+        nextStep();
+      }
     } catch (error) {
       console.error('Erro ao enviar dados:', error);
       // Reset para permitir nova tentativa

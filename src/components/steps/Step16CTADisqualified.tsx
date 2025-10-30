@@ -133,13 +133,7 @@ export const Step16CTADisqualified = () => {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 flex items-center justify-center gap-3">
               <Clock className="w-6 h-6 text-blue-600" />
               <p className="text-lg font-semibold text-blue-800">
-                Um consultor entrará em contato em até 24h
-              </p>
-            </div>
-
-            <div className="text-gray-600 text-sm">
-              <p>
-                Recebemos seus dados e nossa equipe analisará o melhor plano para seu negócio.
+                Seu teste será liberado em até 24h.
               </p>
             </div>
           </motion.div>
