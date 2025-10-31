@@ -390,11 +390,23 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
       sender: 'user' | 'assistant',
       metadata?: Record<string, unknown>
     ) => {
-      if (!dbSessionId) return;
-    
-    try {
       const messageOrder = chatMessages.length;
       
+      // Se não houver sessão no DB, adiciona apenas em memória
+      if (!dbSessionId) {
+        console.log('📝 Adicionando mensagem em memória (sem sessão DB):', content.substring(0, 50));
+        const newMessage: ChatMessage = {
+          id: `temp-${Date.now()}-${Math.random()}`,
+          content,
+          sender,
+          timestamp: new Date(),
+          metadata: { ...(metadata || {}), threadId: threadId || null }
+        };
+        setChatMessages(prev => [...prev, newMessage]);
+        return;
+      }
+    
+    try {
       const { data } = await supabase
         .from('chat_messages')
         .insert({
@@ -422,7 +434,7 @@ const [foundPreviousSession, setFoundPreviousSession] = useState<Record<string, 
     } catch (error) {
       console.error('Error adding chat message:', error);
     }
-  }, [dbSessionId, chatMessages.length]);
+  }, [dbSessionId, chatMessages.length, threadId]);
 
   // Reset chat only in memory (não apaga histórico do DB)
   const resetChatInMemory = useCallback(() => {

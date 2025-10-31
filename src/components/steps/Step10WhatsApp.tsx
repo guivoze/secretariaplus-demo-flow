@@ -85,7 +85,9 @@ export const Step10WhatsApp = () => {
   const [visibleChunkCount, setVisibleChunkCount] = useState(0);
   const [isChunkTyping, setIsChunkTyping] = useState(false);
   const [allowInputFocus, setAllowInputFocus] = useState(false); // Nova flag para controlar quando pode focar
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const previousLockInput = useRef(lockInput);
+  const initialMessagesStarted = useRef(false); // Flag para evitar dupla execução
   
   // Nudge states
   const [showFirstNudge, setShowFirstNudge] = useState(false);
@@ -118,48 +120,81 @@ export const Step10WhatsApp = () => {
   }, [isKeyboardOpen]);
 
   // Memoize message conversion to prevent unnecessary re-renders
-  const messages: Message[] = useMemo(() => chatMessages.map(msg => ({
-    id: msg.id,
-    text: msg.content,
-    sender: msg.sender === 'user' ? 'user' : 'bot',
-    timestamp: new Date(msg.timestamp).toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  })), [chatMessages]);
+  const messages: Message[] = useMemo(() => {
+    console.log('📊 Mensagens no estado:', chatMessages.length, 'mensagens');
+    chatMessages.forEach((msg, idx) => {
+      console.log(`  - [${idx}] ${msg.sender}: "${msg.content.substring(0, 40)}..."`);
+    });
+    return chatMessages.map(msg => ({
+      id: msg.id,
+      text: msg.content,
+      sender: msg.sender === 'user' ? 'user' : 'bot',
+      timestamp: new Date(msg.timestamp).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }));
+  }, [chatMessages]);
+  // Envia mensagens iniciais sempre que o componente montar
   useEffect(() => {
-    if (chatMessages.length === 0 && !hasInitialMessage) {
+    console.log('🔄 Step10WhatsApp montado - hasInitialMessage:', hasInitialMessage, 'started:', initialMessagesStarted.current);
+    
+    // SEMPRE envia as mensagens iniciais quando montar o componente
+    // Usa ref para evitar execução duplicada mesmo com StrictMode
+    if (!hasInitialMessage && !initialMessagesStarted.current) {
+      initialMessagesStarted.current = true; // Marca como iniciado IMEDIATAMENTE
+      console.log('📤 Iniciando envio de mensagens iniciais...');
+      
       // Bloqueia input durante envio das mensagens iniciais
       setLockInput(true);
       setAllowInputFocus(false); // Bloqueia foco explicitamente
       
       // Envia as mensagens iniciais em sequência
       const sendInitialMessages = async () => {
+        // Pequeno delay para garantir que o reset foi processado
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        console.log('💬 Enviando mensagem 1...');
         // Primeira mensagem - Boas-vindas
-        await sendAssistantMessage('Oii! Prazer, sou sua nova secretária. Seu teste foi liberado 🥰');
-        
-        // Segunda mensagem (~2.5s)
-        await new Promise(resolve => setTimeout(resolve, 2500));
+        const msg1 = await sendAssistantMessage('Oii! Prazer, sou sua nova secretária. Seu teste foi liberado 🥰');
+        console.log('✅ Mensagem 1 enviada, resultado:', msg1);
+
+        console.log('⏳ Aguardando 3.5s...');
+        // Segunda mensagem (~3.5s)
+        await new Promise(resolve => setTimeout(resolve, 3500));
+        console.log('💬 Enviando mensagem 2...');
         await sendAssistantMessage('Olha, eu aprendi tudo com as infos públicas do seu Insta, então ainda não sei tudo sobre você, tá? Mas quando você me assinar, vai poder me customizar todinha! ✨');
-        
-        // Terceira mensagem (~2s)
-        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        console.log('⏳ Aguardando 4.5s...');
+        // Terceira mensagem (~4.5s)
+        await new Promise(resolve => setTimeout(resolve, 4500));
+        console.log('💬 Enviando mensagem 3...');
         await sendAssistantMessage('Ah, e tô digitando mais rápido que o normal só pra agilizar o teste! ⚡');
+
+        console.log('⏳ Aguardando 3.0s...');
+        // Quarta mensagem - Call to action (~3.0s)
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        console.log('💬 Enviando mensagem 4...');
+        await sendAssistantMessage('✨ Agora é sua vez! Simule um agendamento de consulta até o fim comigo e veja a mágica acontecer.');
         
-        // Quarta mensagem - Call to action (~1.5s)
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        await sendAssistantMessage('Vou liberar pra você escrever agora. Dica: faça como um paciente típico seu, algo como: "Qual valor do botox?" 💬');
-        
+        console.log('🔓 Desbloqueando input...');
         // Desbloqueia input
         await new Promise(resolve => setTimeout(resolve, 400));
         setLockInput(false);
         setAllowInputFocus(true);
+        
+        console.log('💡 Mostrando sugestões...');
+        // Mostra sugestões após meio segundo
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setShowSuggestions(true);
+        
+        console.log('✅ Todas as mensagens iniciais enviadas!');
       };
       
       sendInitialMessages();
       setHasInitialMessage(true);
     }
-  }, [chatMessages.length, hasInitialMessage, sendAssistantMessage]);
+  }, [hasInitialMessage]); // Removido sendAssistantMessage das dependências
   useEffect(() => {
     if (messages.length >= 8) {
       setShowFinishButton(true);
@@ -232,18 +267,20 @@ export const Step10WhatsApp = () => {
   const keepFocusPointerDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
   }, []);
-  const sendMessage = useCallback(async () => {
-    if (!inputValue.trim() || isLoading) return;
-    if (inputValue.length > MAX_MESSAGE_LENGTH) {
+  const sendMessage = useCallback(async (messageToSend?: string) => {
+    const message = messageToSend || inputValue.trim();
+    if (!message || isLoading) return;
+    if (message.length > MAX_MESSAGE_LENGTH) {
       toast.error('Mensagem muito longa.');
       return;
     }
-    if (SUSPICIOUS_CHARS.test(inputValue)) {
+    if (SUSPICIOUS_CHARS.test(message)) {
       toast.error('Caracteres inválidos na mensagem.');
       return;
     }
-    const userMessage = inputValue.trim();
+    const userMessage = message;
     setInputValue('');
+    setShowSuggestions(false); // Esconde sugestões após enviar
     
     // Track interação do chat
     clarity.trackInteraction('chat_message_sent', {
@@ -309,6 +346,11 @@ export const Step10WhatsApp = () => {
       // Não restaura foco automaticamente - deixa o usuário decidir quando focar
     }
   }, [inputValue, isLoading, sessionId, threadId, sendUserMessage, sendAssistantMessage, setAppointment, nextStep, appointment, chatMessages.length, clarity]);
+  
+  const handleSuggestionClick = useCallback((suggestion: string) => {
+    if (lockInput || isLoading || !allowInputFocus) return;
+    sendMessage(suggestion);
+  }, [sendMessage, lockInput, isLoading, allowInputFocus]);
   const finishConversation = useCallback(() => {
     setChatDarkened(true);
     setTimeout(() => {
@@ -321,9 +363,16 @@ export const Step10WhatsApp = () => {
 
   // Sempre que esta tela monta (novo teste), limpamos o chat em memória e criamos um novo threadId
   useEffect(() => {
+    console.log('🚀 Inicializando Step10WhatsApp...');
+    
+    // IMPORTANTE: Limpa o chat PRIMEIRO
     resetChatInMemory();
     setThreadId(uuidv4()); // Use UUID para threadId
     setChatStartTime(Date.now());
+    
+    // Depois reseta as flags para permitir envio das mensagens
+    setHasInitialMessage(false);
+    initialMessagesStarted.current = false;
     
     // Debug commands - use no console para testar popups
     (window as any).showNudge1 = () => {
@@ -345,7 +394,7 @@ export const Step10WhatsApp = () => {
     console.log('💡 DEBUG disponível: showNudge1(), showNudge2(), hideNudges()');
     
     // não limpamos o DB; apenas a lista em memória, e mudamos o threadId para isolar memória do assistant
-  }, [resetChatInMemory]);
+  }, []); // Executa apenas no mount
 
   // Atualiza o ref quando lockInput muda
   useEffect(() => {
@@ -630,6 +679,48 @@ export const Step10WhatsApp = () => {
       {/* Finish Button */}
       <AnimatePresence>
         {/* hidden debug button removed */}
+      </AnimatePresence>
+
+      {/* Suggestion Buttons - fixo acima do input */}
+      <AnimatePresence>
+        {showSuggestions && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="fixed left-0 right-0 px-4 py-3"
+            style={{
+              bottom: effectiveKB + 80, // acima do input (80px = altura do input)
+              zIndex: 14
+            }}
+          >
+            <p className="text-xs text-gray-500 mb-2">Sugestões:</p>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => handleSuggestionClick('Oi como funciona a consulta?')}
+                disabled={lockInput || isLoading || !allowInputFocus}
+                className="bg-white border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+              >
+                Oi como funciona a consulta?
+              </button>
+              <button
+                onClick={() => handleSuggestionClick('Quais tratamentos a clínica oferece?')}
+                disabled={lockInput || isLoading || !allowInputFocus}
+                className="bg-white border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+              >
+                Quais tratamentos a clínica oferece?
+              </button>
+              <button
+                onClick={() => handleSuggestionClick('Valor?')}
+                disabled={lockInput || isLoading || !allowInputFocus}
+                className="bg-white border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+              >
+                Valor?
+              </button>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Input Area - sempre fixo no fundo, acima do teclado */}

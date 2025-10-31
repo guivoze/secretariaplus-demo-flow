@@ -32,12 +32,12 @@ export const Step2ProfileConfirmation = () => {
         const data = JSON.parse(cachedResult);
         console.log('Using cached profile data:', data);
 
-        // Check total_found and skip if 0
+        // Check total_found and skip if 0 - vai para página de erro
         const foundCount = data.total_found || 0;
         setTotalFound(foundCount);
         if (foundCount === 0) {
-          console.log('No profiles found, skipping to next step');
-          nextStep();
+          console.log('No profiles found, redirecting to error page');
+          setCurrentStep(2.5); // Vai para Step2ProfileNotFound
           return;
         }
 

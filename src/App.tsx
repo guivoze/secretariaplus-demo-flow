@@ -6,6 +6,7 @@ import { Step1Landing } from "@/components/steps/Step1Landing";
 import { Step2Modal } from "@/components/steps/Step2Modal";
 import { Step2PersonalizationForm } from "@/components/steps/Step2PersonalizationForm";
 import { Step2ProfileConfirmation } from "@/components/steps/Step2ProfileConfirmation";
+import { Step2ProfileNotFound } from "@/components/steps/Step2ProfileNotFound";
 import { Step3Pain } from "@/components/steps/Step3Pain";
 import { Step4Agitate } from "@/components/steps/Step4Agitate";
 import { Step5Solution } from "@/components/steps/Step5Solution";
@@ -111,6 +112,8 @@ const DemoContent = () => {
         return <Step2Modal />;
       case 2:
         return <Step2PersonalizationForm />;
+      case 2.5:
+        return <Step2ProfileNotFound />;
       case 3:
         return <Step2ProfileConfirmation />;
       case 4:

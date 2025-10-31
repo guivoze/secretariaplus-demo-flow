@@ -53,9 +53,20 @@ export const Step1Landing = () => {
         })
       }).then(response => response.json()).then(data => {
         console.log('Profile query response:', data);
-        // Store response for later use
-        localStorage.setItem('profile-query-result', JSON.stringify(data));
-      }).catch(error => console.error('Error querying profiles:', error));
+        
+        // Se retornar false ou erro, força total_found = 0
+        if (data === false || data.error || !data) {
+          console.log('Profile query returned error or false, setting total_found = 0');
+          localStorage.setItem('profile-query-result', JSON.stringify({ total_found: 0 }));
+        } else {
+          // Store response for later use
+          localStorage.setItem('profile-query-result', JSON.stringify(data));
+        }
+      }).catch(error => {
+        console.error('Error querying profiles:', error);
+        // Em caso de erro de rede, também marca como não encontrado
+        localStorage.setItem('profile-query-result', JSON.stringify({ total_found: 0 }));
+      });
       nextStep(); // Goes to Step2Modal
     }
   };
