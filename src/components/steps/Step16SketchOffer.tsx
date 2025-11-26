@@ -111,7 +111,7 @@ const FeatureCarousel = () => {
             
             return (
               <div key={card.id} className="min-w-full px-4">
-                <div className="w-full bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden mx-auto max-w-md" style={{ height: '380px' }}>
+                <div className="w-full bg-white dark:bg-zinc-900 rounded-2xl shadow-lg border border-gray-200 dark:border-zinc-800 overflow-hidden mx-auto max-w-md" style={{ height: '380px' }}>
                   {isImageCard ? (
                     // Card especial de interface (full image)
                     <div className="relative h-full">
@@ -120,11 +120,11 @@ const FeatureCarousel = () => {
                         alt={card.title}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 p-4">
-                        <h4 className="text-base font-bold text-gray-900">
+                      <div className="absolute bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm border-t border-gray-200 dark:border-zinc-800 p-4">
+                        <h4 className="text-base font-bold text-gray-900 dark:text-white">
                           {card.title}
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           {card.description}
                         </p>
                       </div>
@@ -133,7 +133,7 @@ const FeatureCarousel = () => {
                     // Cards de features com imagem + texto
                     <div className="h-full flex flex-col">
                       {/* Imagem no topo */}
-                      <div className="h-[180px] bg-gray-100 border-b border-gray-200 overflow-hidden flex items-center justify-center">
+                      <div className="h-[180px] bg-gray-100 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-800 overflow-hidden flex items-center justify-center">
                         <img 
                           src={card.image}
                           alt={card.title}
@@ -143,14 +143,14 @@ const FeatureCarousel = () => {
                       
                       {/* Conteúdo do card */}
                       <div className="flex-1 p-5 flex flex-col">
-                        <h4 className="text-lg font-bold text-gray-900 mb-2">
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                           {card.title}
                         </h4>
-                        <p className="text-sm leading-relaxed text-gray-700 flex-1">
+                        <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">
                           {card.description}
                         </p>
                         {'subtitle' in card && card.subtitle && (
-                          <p className="text-xs text-gray-500 italic mt-2">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-2">
                             {card.subtitle}
                           </p>
                         )}
@@ -172,8 +172,8 @@ const FeatureCarousel = () => {
             onClick={() => setCurrentIndex(index)}
             className={`transition-all duration-300 rounded-full ${
               index === currentIndex 
-                ? 'w-8 h-2 bg-gray-900' 
-                : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                ? 'w-8 h-2 bg-gray-900 dark:bg-white' 
+                : 'w-2 h-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
             }`}
             aria-label={`Ir para slide ${index + 1}`}
           />
@@ -236,7 +236,7 @@ const SpinningCircularText = ({
         </defs>
         <text
           fontSize={Math.max(10, Math.round(size * 0.11))}
-          className="fill-black drop-shadow-sm"
+          className="fill-black dark:fill-white drop-shadow-sm"
           style={{ letterSpacing: "0.5px", fontWeight: 400 }}
         >
           <textPath href={`#${id}`}>{text}</textPath>
@@ -424,7 +424,7 @@ export const Step16SketchOffer = () => {
   }, []);
 
   const handleWhatsAppClick = () => {
-    window.open('https://api.whatsapp.com/send?phone=5511936191391&text=Oi%20Thamara.%20Acabei%20de%20fazer%20meu%20teste%20gratuito%20e%20tenho%20uma%20d%C3%BAvida%20sobre%20o%20Secret%C3%A1riaPlus.', '_blank');
+    window.open('https://api.whatsapp.com/send?phone=5511936191391&text=Ol%C3%A1%2C%20tenho%20interesse%20na%20Black%20Secret%C3%A1riaPlus.', '_blank');
   };
 
   // Loading inicial de 3 segundos
@@ -453,14 +453,14 @@ export const Step16SketchOffer = () => {
   return (
     <>
       {/* Header preto full-width no topo sem gaps */}
-      <div className="w-full bg-gray-900 text-white px-6 sm:px-8 py-6">
+      <div className="w-full bg-white text-black px-6 sm:px-8 py-6">
         <div className="flex items-center justify-center gap-2">
           <img
             src="/imgs/logo2.svg"
             alt="logo"
-            className="w-4 h-4 invert"
+            className="w-4 h-4"
           />
-          <p className="text-[11px] sm:text-xs uppercase tracking-[0.24em] opacity-90">
+          <p className="text-[11px] sm:text-xs uppercase tracking-[0.24em] opacity-90 font-medium">
             PROPOSTA ÚNICA • Chegou a Hora
           </p>
         </div>
@@ -551,13 +551,18 @@ export const Step16SketchOffer = () => {
           </div> */}
           </div>
 
-          {/* Imagem "Como vamos te ajudar" */}
-          <div className="my-0 px-0">
-            <img 
-              src="/imgs/como-vamos.png" 
-              alt="Como vamos te ajudar a resolver isso?" 
-              className="w-[80%] mx-auto"
-            />
+          {/* Imagem "Como vamos te ajudar" substituída por Marquee */}
+          <div className="my-0 px-0 w-full overflow-hidden bg-white py-3 border-y border-gray-100">
+            <motion.div 
+              className="flex whitespace-nowrap"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ repeat: Infinity, ease: "linear", duration: 60 }}
+              style={{ width: "fit-content" }}
+            >
+              {Array(20).fill("BLACK WEEK SPLUS • ").map((t, i) => (
+                <span key={i} className="text-black font-bold text-sm sm:text-base mx-2 tracking-widest">{t}</span>
+              ))}
+            </motion.div>
           </div>
         </div>
             
@@ -663,7 +668,7 @@ export const Step16SketchOffer = () => {
               transition={{ duration: 0.5 }}
               className="mt-8"
             >
-              <CustomCard variant="bordered" className="p-4 hover:shadow-lg transition-all duration-300">
+              <CustomCard variant="bordered" className="p-4 hover:shadow-lg transition-all duration-300 dark:bg-zinc-900 dark:border-zinc-800">
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
@@ -674,8 +679,8 @@ export const Step16SketchOffer = () => {
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 text-sm">Dra. Fernanda Rabelo</h4>
-                      <p className="text-xs text-gray-600">Cirurgia Plástica</p>
+                      <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Dra. Fernanda Rabelo</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">Cirurgia Plástica</p>
                     </div>
                     <div className="flex gap-1">
                       {Array.from({ length: 5 }).map((_, i) => (
@@ -684,7 +689,7 @@ export const Step16SketchOffer = () => {
                     </div>
                   </div>
                   <div className="relative">
-                    <p className="text-xs text-gray-700 leading-relaxed pl-3">
+                    <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed pl-3">
                       "Investimos por aqui mais de 20 mil em tráfego e a secretaria plus arrebenta com os leads"
                     </p>
                   </div>
@@ -706,7 +711,7 @@ export const Step16SketchOffer = () => {
                   alt="logo"
                   className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
                   style={{
-                    filter: "brightness(0)",
+                    filter: "brightness(0) invert(1)",
                     width: circularBadgeConfig.logoSize,
                     height: circularBadgeConfig.logoSize,
                   }}
@@ -733,18 +738,18 @@ export const Step16SketchOffer = () => {
               <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
                 
                 {/* Card 1: Plano Mensal */}
-                <CustomCard variant="elevated" className="p-0 border-2 border-gray-200 bg-white flex flex-col h-full overflow-hidden">
+                <CustomCard variant="elevated" className="p-0 border-2 border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col h-full overflow-hidden">
                   {/* Lâmina fina decorativa */}
-                  <div className="w-full bg-gray-900 h-1"></div>
+                  <div className="w-full bg-gray-900 dark:bg-white h-1"></div>
                   
                   <div className="p-6 text-left flex-1 flex flex-col">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 mt-2">Plano Mensal</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 mt-2">Plano Mensal</h3>
                     
-                    <div className="text-3xl font-bold text-gray-900 mb-6">
-                      397<span className="text-lg text-gray-600">/mês</span>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                      397<span className="text-lg text-gray-600 dark:text-gray-400">/mês</span>
                     </div>
                     
-                    <div className="space-y-3 text-gray-700 mb-6 flex-1">
+                    <div className="space-y-3 text-gray-700 dark:text-gray-300 mb-6 flex-1">
                       <div className="flex items-start gap-3">
                         <Sparkles className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
                         <span>Configure procedimentos, seus horários, jeito de falar da IA e muito mais</span>
@@ -773,7 +778,7 @@ export const Step16SketchOffer = () => {
                     
                     <button
                       onClick={() => handlePlanClick('https://pay.hub.la/BYp9dknJxerlzZYJJLRN', 'Mensal')}
-                      className="w-full bg-gray-900 hover:bg-black text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                      className="w-full bg-gray-900 hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                     >
                       Iniciar Agora
                       <ArrowRight className="w-5 h-5" />
@@ -782,20 +787,20 @@ export const Step16SketchOffer = () => {
                 </CustomCard>
 
                 {/* Card 2: Plano Anual */}
-                <CustomCard variant="elevated" className="p-6 border-2 border-gray-800 bg-gray-900 flex flex-col h-full">
+                <CustomCard variant="elevated" className="p-6 border-2 border-gray-800 bg-gray-900 dark:bg-white flex flex-col h-full">
                   <div className="text-left flex-1 flex flex-col">
-                    <h3 className="text-lg font-semibold text-white mb-3 mt-2">Plano Anual S+ Go</h3>
+                    <h3 className="text-lg font-semibold text-white dark:text-black mb-3 mt-2">Plano Anual S+ Go</h3>
                     
                     <div className="mb-1">
-                      <span className="text-sm text-gray-400">12x de</span>
+                      <span className="text-sm text-gray-400 dark:text-gray-600">12x de</span>
                     </div>
-                    <div className="text-3xl font-bold text-white mb-6">
-                      297<span className="text-lg text-gray-400">/ano</span>
+                    <div className="text-3xl font-bold text-white dark:text-black mb-6">
+                      297<span className="text-lg text-gray-400 dark:text-gray-600">/ano</span>
                     </div>
                     
-                    <div className="space-y-3 text-gray-300 mb-6 flex-1">
+                    <div className="space-y-3 text-gray-300 dark:text-gray-700 mb-6 flex-1">
                       <div className="flex items-start gap-3">
-                        <Plus className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <Plus className="w-4 h-4 text-gray-400 dark:text-gray-600 mt-0.5 flex-shrink-0" />
                         <span>Tudo do mensal</span>
                       </div>
                       <div className="flex items-start gap-3">
@@ -803,10 +808,10 @@ export const Step16SketchOffer = () => {
                         <span>2 meses grátis</span>
                       </div>
                       <div>
-                        <div className="bg-white text-gray-900 px-3 py-2 rounded-lg inline-block">
+                        <div className="bg-white dark:bg-black text-gray-900 dark:text-white px-3 py-2 rounded-lg inline-block">
                           <span className="font-semibold">Pré-lista S+ Go</span>
                         </div>
-                        <p className="text-xs text-gray-400 mt-2 italic">
+                        <p className="text-xs text-gray-400 dark:text-gray-600 mt-2 italic">
                           Veja detalhes abaixo.
                         </p>
                       </div>
@@ -814,7 +819,7 @@ export const Step16SketchOffer = () => {
                     
                     <button
                       onClick={() => handlePlanClick('https://pay.hub.la/NdojLLBPRoAf6cedmdVr', 'Anual')}
-                      className="w-full bg-white hover:bg-gray-100 text-gray-900 font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                      className="w-full bg-white hover:bg-gray-100 dark:bg-black dark:text-white dark:hover:bg-gray-800 text-gray-900 font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                     >
                       Iniciar Agora
                       <ArrowRight className="w-5 h-5" />
@@ -825,7 +830,7 @@ export const Step16SketchOffer = () => {
 
               {/* Divider antes dos Bônus */}
               <div className="mt-32 mb-32 px-4">
-                <div className="border-t border-gray-300"></div>
+                <div className="border-t border-gray-300 dark:border-gray-700"></div>
               </div>
 
               {/* Seção de Bônus Exclusivos */}
@@ -841,42 +846,42 @@ export const Step16SketchOffer = () => {
                 <div className="space-y-6">
                   {/* Bônus 1: Conteúdo Infinito */}
                   <div>
-                    <div className="rounded-3xl border border-gray-300 bg-white shadow-sm p-6 flex items-center gap-4">
+                    <div className="rounded-3xl border border-gray-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm p-6 flex items-center gap-4">
                       <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                         <img src="/imgs/bonus1.jpg" alt="Bônus 1" className="w-full h-full object-cover" />
                       </div>
                       
                       <div className="flex-1 text-left">
-                        <h5 className="text-xl font-bold text-gray-900 mb-2">Bônus 1: Conteúdo Infinito</h5>
-                        <p className="text-base text-gray-700 leading-relaxed">
+                        <h5 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Bônus 1: Conteúdo Infinito</h5>
+                        <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                           Gere seu clone de IA indistinguível a realidade e economize tempo com produção de conteúdo.
                         </p>
                       </div>
                     </div>
                     
                     <div className="text-center pt-3 pb-2">
-                      <span className="text-base text-gray-500 line-through mr-2">R$ 1500</span>
+                      <span className="text-base text-gray-500 dark:text-gray-400 line-through mr-2">R$ 1500</span>
                       <span className="text-base font-semibold text-green-600">Grátis</span>
                     </div>
                   </div>
 
                   {/* Bônus 2: Agente HLD */}
                   <div>
-                    <div className="rounded-3xl border border-gray-300 bg-white shadow-sm p-6 flex items-center gap-4">
+                    <div className="rounded-3xl border border-gray-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm p-6 flex items-center gap-4">
                       <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                         <img src="/imgs/bonus2.jpg" alt="Bônus 2" className="w-full h-full object-cover" />
                       </div>
                       
                       <div className="flex-1 text-left">
-                        <h5 className="text-xl font-bold text-gray-900 mb-2">Bônus 2: Agente HLD</h5>
-                        <p className="text-base text-gray-700 leading-relaxed">
+                        <h5 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Bônus 2: Agente HLD</h5>
+                        <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                           Tirado da mentoria High Level Doctor, um agente de IA especialista em criação de conteúdo para instagram específico para profissionais da saúde sem tempo.
                         </p>
                       </div>
                     </div>
                     
                     <div className="text-center pt-3 pb-2">
-                      <span className="text-base text-gray-500 line-through mr-2">R$ 1297</span>
+                      <span className="text-base text-gray-500 dark:text-gray-400 line-through mr-2">R$ 1297</span>
                       <span className="text-base font-semibold text-green-600">Grátis</span>
                     </div>
                   </div>
@@ -910,7 +915,7 @@ export const Step16SketchOffer = () => {
                       plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                   }}
-                  className="w-full max-w-sm mx-auto bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  className="w-full max-w-sm mx-auto bg-gray-900 hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                 >
                   Iniciar Agora
                   <ArrowRight className="w-5 h-5" />
@@ -923,28 +928,33 @@ export const Step16SketchOffer = () => {
         {/* Card GO full width fora do container max-w */}
         <div className="w-full">
           <div className="w-full">
-            <div className="relative bg-black">
+            <div className="relative bg-black dark:bg-white">
               {/* Imagem do GO */}
-              <div className="w-full">
+              {/* <div className="w-full">
                 <img 
                   src="/imgs/splusgo1.jpg" 
                   alt="SecretáriaPlus GO" 
                   className="w-full h-auto"
                 />
-              </div>
+              </div> */}
 
                   <div className="px-6 sm:px-8 pb-10 pt-8 text-center">
+                    {/* Logo */}
+                    <div className="flex justify-center mb-8">
+                      <img src="/imgs/logo-blk.svg" alt="Logo" className="w-12 h-12 dark:invert-0 invert" />
+                    </div>
+
                     {/* Título principal */}
                     <h3
-                      className="text-white/90 text-xl font-light tracking-wide mb-8 leading-relaxed"
+                      className="text-white/90 dark:text-black/90 text-xl font-light tracking-wide mb-8 leading-relaxed"
                     >
                       Assine o plano anual e concorra a um{" "}
-                      <span className="font-medium text-white">SecretáriaPlus Go</span> em 2026.
+                      <span className="font-medium text-white dark:text-black">SecretáriaPlus Go</span> em 2026.
                     </h3>
 
                     {/* Subtítulo */}
                     <p
-                      className="text-gray-500 text-sm font-light tracking-wide mb-10"
+                      className="text-gray-500 dark:text-gray-600 text-sm font-light tracking-wide mb-10"
                     >
                       Pré-desenvolvimento: O device que será o padrão das clinicas nos próximos 3 anos. 
                     </p>

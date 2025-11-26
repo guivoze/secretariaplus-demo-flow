@@ -101,7 +101,7 @@ export const Step1Landing = () => {
             <img src="/imgs/step1.webp" alt="Background" className="absolute inset-0 w-full h-full object-cover brightness-75" />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-card rounded-2xl shadow-lg flex items-center justify-center">
-                <img src="/imgs/logo2.svg" alt="Logo" className="w-10 h-10 sm:w-12 sm:h-12" />
+                <img src="/imgs/logo2.svg" alt="Logo" className="w-10 h-10 sm:w-12 sm:h-12 dark:invert" />
               </div>
             </div>
           </div>
@@ -146,10 +146,10 @@ export const Step1Landing = () => {
               textTransform: 'lowercase'
             }} autoComplete="off" autoCorrect="off" autoCapitalize="none" spellCheck={false} inputMode="text" name="instagram_handle" error={instagramError || undefined} />
 
-              <CustomButton onClick={handleSubmit} disabled={!instagram.trim() || isSubmitting} size="md" className="w-full text-white bg-black hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] rounded-md text-center mx-0 py-[13px]">
+              <CustomButton onClick={handleSubmit} disabled={!instagram.trim() || isSubmitting} size="md" className="w-full text-white bg-black hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] rounded-md text-center mx-0 py-[13px]">
                 {isSubmitting ? (
                   <div className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white dark:border-black"></div>
                     Iniciando teste...
                   </div>
                 ) : (

@@ -32,7 +32,7 @@ export const Step16CTADisqualified = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-black dark:to-zinc-900 p-4 py-8">
       <div className="flex justify-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -81,7 +81,7 @@ export const Step16CTADisqualified = () => {
               <img 
                 src="/imgs/logo-blk.svg" 
                 alt="Logo SecretariaPlus" 
-                className="w-16 h-16"
+                className="w-16 h-16 dark:invert"
               />
             </div>
           </motion.div>
@@ -130,9 +130,9 @@ export const Step16CTADisqualified = () => {
             className="space-y-4"
           >
             {/* Texto informativo ao invés do botão */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 flex items-center justify-center gap-3">
-              <Clock className="w-6 h-6 text-blue-600" />
-              <p className="text-lg font-semibold text-blue-800">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 flex items-center justify-center gap-3">
+              <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <p className="text-lg font-semibold text-blue-800 dark:text-blue-300">
                 Seu teste será liberado em até 24h.
               </p>
             </div>

@@ -22,7 +22,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
           )}
           <input
             className={cn(
-              "w-full px-4 py-3 rounded-2xl border border-border bg-white text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base",
+              "w-full px-4 py-3 rounded-2xl border border-border bg-white dark:bg-zinc-900 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-base",
               prefix && "pl-8",
               error && "border-destructive focus:ring-destructive",
               className

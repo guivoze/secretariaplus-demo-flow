@@ -181,7 +181,7 @@ export const Step7Form = () => {
     }
     return value;
   };
-  return <div className="h-screen relative flex items-center justify-center p-4 overflow-hidden">
+  return <div className="h-screen relative flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-black dark:to-zinc-900">
       {/* Background image com overlay escuro - AJUSTE O BRIGHTNESS AQUI */}
       {backgroundImage && <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{
       backgroundImage: `url(${backgroundImage})`,
@@ -197,7 +197,7 @@ export const Step7Form = () => {
     }} transition={{
       duration: 0.6
     }} className="w-full max-w-lg relative z-10 max-h-[calc(100vh-2rem)] overflow-y-auto overflow-x-hidden">
-        <CustomCard variant="elevated" className="space-y-6 overflow-hidden">
+        <CustomCard variant="elevated" className="space-y-6 overflow-hidden dark:bg-zinc-900 dark:border-zinc-800">
           <motion.div initial={{
           opacity: 0,
           y: 20
@@ -207,10 +207,10 @@ export const Step7Form = () => {
         }} transition={{
           delay: 0.1
         }} className="text-left space-y-4">
-            <h1 className="text-foreground leading-tight font-bold" style={{ fontSize: '1.7rem', lineHeight: '1.2' }}>
+            <h1 className="text-foreground dark:text-white leading-tight font-bold" style={{ fontSize: '1.7rem', lineHeight: '1.2' }}>
               MUITO legal, {firstName}!
             </h1>
-            <p className="text-foreground leading-relaxed text-base">
+            <p className="text-foreground dark:text-white leading-relaxed text-base">
               {hasProcedure && <>
                   Já vimos que você se destaca com{' '}
                   <span className="font-semibold">{procedure1}</span>
@@ -231,7 +231,7 @@ export const Step7Form = () => {
         }} transition={{
           delay: 0.15
         }} className="space-y-2">
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-muted-foreground dark:text-gray-400 leading-relaxed">
               Pra gente enriquecer ainda mais o treinamento da IA, falta só um detalhe:
             </p>
           </motion.div>
@@ -256,15 +256,14 @@ export const Step7Form = () => {
           }))} />
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground">
+              <label className="block text-sm font-medium text-foreground dark:text-white">
                 Para personalizar sua experiência: Qual seu MAIOR problema hoje?
               </label>
               <select
                 value={formData.painPoint}
                 onChange={e => setFormData(prev => ({ ...prev, painPoint: e.target.value }))}
-                className="w-full px-3 py-4 rounded-lg border-2 border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer text-base font-medium shadow-sm hover:border-gray-400 transition-colors overflow-hidden"
+                className="w-full px-3 py-4 rounded-lg border-2 border-input bg-background dark:bg-zinc-900 dark:border-zinc-700 text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer text-base font-medium shadow-sm hover:border-gray-400 dark:hover:border-zinc-600 transition-colors overflow-hidden bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23000000%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] dark:bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23ffffff%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')]"
                 style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
                   backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'right 0.75rem center',
                   backgroundSize: '1.5em 1.5em',
@@ -273,11 +272,11 @@ export const Step7Form = () => {
                   maxWidth: '100%'
                 }}
               >
-                <option value="">Selecione...</option>
-                <option value="no-secretary">😭 Não tenho secretária/auxiliar e não consigo dar atenção para tudo ao mesmo tempo.</option>
-                <option value="bad-secretary">🐌 Tenho secretária mas ela é "lentinha" - Não converte e não aprende.</option>
-                <option value="high-demand">🎯 Rodo anúncios e não aguento a alta demanda de leads</option>
-                <option value="scale-revenue">💸 Está tudo certo, só quero ganhar mais dinheiro!</option>
+                <option value="" className="dark:bg-zinc-900">Selecione...</option>
+                <option value="no-secretary" className="dark:bg-zinc-900">😭 Não tenho secretária/auxiliar e não consigo dar atenção para tudo ao mesmo tempo.</option>
+                <option value="bad-secretary" className="dark:bg-zinc-900">🐌 Tenho secretária mas ela é "lentinha" - Não converte e não aprende.</option>
+                <option value="high-demand" className="dark:bg-zinc-900">🎯 Rodo anúncios e não aguento a alta demanda de leads</option>
+                <option value="scale-revenue" className="dark:bg-zinc-900">💸 Está tudo certo, só quero ganhar mais dinheiro!</option>
               </select>
             </div>
           </motion.div>
@@ -291,7 +290,7 @@ export const Step7Form = () => {
         }} transition={{
           delay: 0.3
         }} className="space-y-3">
-            <CustomButton onClick={handleSubmit} disabled={!isFormValid || isSubmitting} className="w-full" size="lg">
+            <CustomButton onClick={handleSubmit} disabled={!isFormValid || isSubmitting} className="w-full text-white bg-black hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200" size="lg">
               {isSubmitting ? 'Enviando...' : 'Conversar com minha nova secretária →'}
             </CustomButton>
           </motion.div>

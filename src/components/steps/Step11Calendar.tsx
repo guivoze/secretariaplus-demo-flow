@@ -98,25 +98,25 @@ export const Step11Calendar = () => {
   const appointments = generateSmartAppointments();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex justify-center p-4 pt-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-black dark:to-zinc-900 flex justify-center p-4 pt-8">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="w-full max-w-lg pb-8"
       >
-        <CustomCard variant="elevated" className="space-y-4 p-4 sm:p-6">
+        <CustomCard variant="elevated" className="space-y-4 p-4 sm:p-6 dark:bg-zinc-900 dark:border-zinc-800">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="text-center"
           >
-            <h2 className="title-sub text-foreground flex items-center justify-center gap-2">
-              <Calendar className="w-5 h-5 text-gray-800" />
+            <h2 className="title-sub text-foreground dark:text-white flex items-center justify-center gap-2">
+              <Calendar className="w-5 h-5 text-gray-800 dark:text-white" />
               {headerDate}
             </h2>
-            <p className="text-small text-muted-foreground mt-1 capitalize">{weekday}</p>
+            <p className="text-small text-muted-foreground dark:text-gray-400 mt-1 capitalize">{weekday}</p>
           </motion.div>
 
           <motion.div
@@ -140,24 +140,24 @@ export const Step11Calendar = () => {
                       appointment.isEdge ? 'opacity-60' : ''
                     } ${
                       appointment.isNew
-                        ? 'border-gray-800 bg-gray-100 animate-pulse'
+                        ? 'border-gray-800 bg-gray-100 dark:border-white dark:bg-zinc-800 animate-pulse'
                         : appointment.available
-                        ? 'border-dashed border-muted-foreground/50 bg-muted/30'
-                        : 'border-border bg-background'
+                        ? 'border-dashed border-muted-foreground/50 bg-muted/30 dark:border-gray-700 dark:bg-zinc-900/50'
+                        : 'border-border bg-background dark:bg-zinc-900 dark:border-zinc-800'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-content-medium text-foreground">{appointment.time}</span>
+                      <span className="text-content-medium text-foreground dark:text-white">{appointment.time}</span>
                       {appointment.isNew && (
-                        <span className="text-small bg-gray-800 text-white px-2 py-1 rounded-full font-semibold">
+                        <span className="text-small bg-gray-800 text-white dark:bg-white dark:text-black px-2 py-1 rounded-full font-semibold">
                           NOVO!
                         </span>
                       )}
                     </div>
                     <p className={`text-small ${
                       appointment.available 
-                        ? 'text-muted-foreground italic' 
-                        : 'text-foreground'
+                        ? 'text-muted-foreground italic dark:text-gray-500' 
+                        : 'text-foreground dark:text-white'
                     }`}>
                       {appointment.available ? 'Disponível' : appointment.patient}
                     </p>
@@ -170,12 +170,12 @@ export const Step11Calendar = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-gray-100 border border-gray-300 rounded-xl p-4"
+            className="bg-gray-100 border border-gray-300 rounded-xl p-4 dark:bg-zinc-800 dark:border-zinc-700"
           >
-            <h4 className="text-content-medium text-foreground mb-2">
+            <h4 className="text-content-medium text-foreground dark:text-white mb-2">
               🎉 Agendamento realizado automaticamente!
             </h4>
-            <p className="text-small text-muted-foreground">
+            <p className="text-small text-muted-foreground dark:text-gray-300">
               A I.A acabou de agendar {selectedPatient} para {selectedProcedure}&nbsp; 
               no dia {headerDate} às {selectedTime}. <strong>Tudo sem sua intervenção!</strong>
             </p>
@@ -190,7 +190,7 @@ export const Step11Calendar = () => {
             <CustomButton
               onClick={nextStep}
               size="lg"
-              className="px-12"
+              className="px-12 w-full text-white bg-black hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200"
             >
               Continuar
             </CustomButton>

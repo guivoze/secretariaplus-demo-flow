@@ -52,11 +52,11 @@ export const Step12Result = () => {
             transition={{ duration: 0.6 }}
             className="text-left space-y-3"
           >
-            <PartyPopper className="w-6 h-6 text-gray-900" />
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
+            <PartyPopper className="w-6 h-6 text-gray-900 dark:text-white" />
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white leading-tight">
               Agora: imagina TODOS seus leads atendidos com esta qualidade e agendados sozinhos?
             </h1>
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
               Isso é tempo de sobra pra você cuidar dos seus pacientes e não se preocupar com atendimento.
             </p>
           </motion.div>
@@ -70,7 +70,7 @@ export const Step12Result = () => {
               transition={{ duration: 0.6, delay: 0.1 + index * 0.1 }}
               className="space-y-4"
             >
-              <CustomCard variant="bordered" className="p-4 hover:shadow-lg transition-all duration-300">
+              <CustomCard variant="bordered" className="p-4 hover:shadow-lg transition-all duration-300 dark:bg-zinc-900 dark:border-zinc-800">
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
@@ -81,8 +81,8 @@ export const Step12Result = () => {
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 text-sm">{caseItem.name}</h4>
-                      <p className="text-xs text-gray-600">{caseItem.specialty}</p>
+                      <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{caseItem.name}</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{caseItem.specialty}</p>
                     </div>
                     <div className="flex gap-1">
                       {Array.from({ length: caseItem.rating }).map((_, i) => (
@@ -92,7 +92,7 @@ export const Step12Result = () => {
                   </div>
 
                   <div className="relative">
-                    <p className="text-xs text-gray-700 leading-relaxed pl-3">
+                    <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed pl-3">
                       "{caseItem.text}"
                     </p>
                   </div>

@@ -29,6 +29,16 @@ const DemoContent = () => {
     projectId: import.meta.env.VITE_CLARITY_PROJECT_ID || "t5ehdfteyd" 
   });
 
+  // Check for Black Friday mode
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('black')) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
   // Tracking de tempo por step
   const stepStartTime = useRef<number>(Date.now());
 

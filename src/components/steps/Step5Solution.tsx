@@ -122,7 +122,7 @@ export const Step5Solution = () => {
                   exit={{ opacity: 0, y: 20, scale: 0.9 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <CustomButton onClick={nextStep} className="w-full text-white bg-black hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]" size="lg">
+                  <CustomButton onClick={nextStep} className="w-full text-white bg-black hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]" size="lg">
                     Certo, quero testar! →
                   </CustomButton>
                 </motion.div>

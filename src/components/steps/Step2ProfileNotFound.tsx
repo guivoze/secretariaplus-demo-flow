@@ -85,7 +85,7 @@ export const Step2ProfileNotFound = () => {
               <CustomButton
                 onClick={handleTryAgain}
                 size="md"
-                className="w-full text-white bg-black hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] rounded-md text-center py-[13px]"
+                className="w-full text-white bg-black hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] rounded-md text-center py-[13px]"
               >
                 Tentar Novamente
               </CustomButton>

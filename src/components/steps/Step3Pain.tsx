@@ -93,9 +93,9 @@ export const Step3Pain = () => {
           }} transition={{
             delay: 1.8,
             duration: 0.5
-          }} className="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl p-6 border border-red-100">
+          }} className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-zinc-800 dark:to-zinc-900 rounded-2xl p-6 border border-red-100 dark:border-zinc-800">
               <motion.p 
-                className="text-lg font-semibold text-foreground text-center leading-tight"
+                className="text-lg font-semibold text-foreground dark:text-white text-center leading-tight"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2.1, duration: 0.4 }}
@@ -103,7 +103,7 @@ export const Step3Pain = () => {
                 73% dos pacientes SOMEM se você leva mais de 3 min. pra responder.
               </motion.p>
               <motion.p 
-                className="text-sm text-muted-foreground text-center mt-2 italic"
+                className="text-sm text-muted-foreground dark:text-gray-400 text-center mt-2 italic"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2.4, duration: 0.4 }}
@@ -120,7 +120,7 @@ export const Step3Pain = () => {
                   exit={{ opacity: 0, y: 20, scale: 0.9 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <CustomButton onClick={nextStep} className="w-full text-white bg-black hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]" size="lg">
+                  <CustomButton onClick={nextStep} className="w-full text-white bg-black hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]" size="lg">
                     Como assim? →
                   </CustomButton>
                 </motion.div>

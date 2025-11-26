@@ -19,9 +19,9 @@ export const CustomButton = forwardRef<HTMLButtonElement, CustomButtonProps>(({
   ...props
 }, ref) => {
   const variants = {
-    primary: "bg-black text-white hover:bg-gray-900 shadow-card",
+    primary: "bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200 shadow-card",
     secondary: "bg-primary text-black hover:bg-primary/90",
-    outline: "border-2 border-black text-black hover:bg-black hover:text-white"
+    outline: "border-2 border-black text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
   };
 
   const sizes = {

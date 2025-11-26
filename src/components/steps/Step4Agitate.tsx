@@ -94,9 +94,9 @@ export const Step4Agitate = () => {
             delay: 1.8,
             duration: 0.5
           }} className="space-y-4">
-              <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-4">
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-zinc-800 dark:to-zinc-900 rounded-2xl p-4">
                 <motion.p 
-                  className="text-sm text-muted-foreground text-center italic"
+                  className="text-sm text-muted-foreground dark:text-white text-center italic"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 2.4, duration: 0.4 }}
@@ -114,7 +114,7 @@ export const Step4Agitate = () => {
                   exit={{ opacity: 0, y: 20, scale: 0.9 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <CustomButton onClick={nextStep} className="w-full text-white bg-black hover:bg-gray-900 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]" size="lg">
+                  <CustomButton onClick={nextStep} className="w-full text-white bg-black hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]" size="lg">
                     Hmmm... mas e aí? →
                   </CustomButton>
                 </motion.div>

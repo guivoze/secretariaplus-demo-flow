@@ -154,7 +154,7 @@ export const Step2ProfileConfirmation = () => {
       setIsConfirming(false);
     }
   };
-  return <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+  return <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-black dark:to-zinc-900 flex items-center justify-center p-4">
       <motion.div initial={{
       opacity: 0,
       y: 30
@@ -164,7 +164,7 @@ export const Step2ProfileConfirmation = () => {
     }} transition={{
       duration: 0.6
     }} className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto">
-        <CustomCard variant="elevated" className="text-center space-y-6">
+        <CustomCard variant="elevated" className="text-center space-y-6 dark:bg-zinc-900 dark:border-zinc-800">
           <div className="space-y-2">
             <h2 className="text-xl font-bold text-foreground">Confirma pra gente</h2>
             <p className="text-muted-foreground text-sm">
@@ -184,20 +184,20 @@ export const Step2ProfileConfirmation = () => {
             duration: 0.4
           }} onClick={() => handleProfileSelect(profile.at)} className={`
                   flex items-center space-x-4 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200
-                  ${isConfirming ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-400'}
-                  ${selectedProfile === profile.at ? 'border-gray-800 bg-gray-50' : 'border-gray-200'}
+                  ${isConfirming ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-400 dark:hover:border-zinc-600'}
+                  ${selectedProfile === profile.at ? 'border-gray-800 bg-gray-50 dark:bg-zinc-800 dark:border-zinc-600' : 'border-gray-200 dark:border-zinc-800'}
                 `}>
                 <img src={profile.photo} alt={profile.username} className="w-12 h-12 rounded-lg object-cover" />
                 <div className="flex-1 text-left">
-                  <p className="font-semibold text-foreground text-sm">
+                  <p className="font-semibold text-foreground dark:text-white text-sm">
                     {profile.at}
                   </p>
-                  <p className="text-muted-foreground text-xs break-words">
+                  <p className="text-muted-foreground dark:text-gray-400 text-xs break-words">
                     {profile.username}
                   </p>
                 </div>
-                {selectedProfile === profile.at && <div className="w-4 h-4 bg-gray-800 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full" />
+                {selectedProfile === profile.at && <div className="w-4 h-4 bg-gray-800 dark:bg-white rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white dark:bg-black rounded-full" />
                   </div>}
               </motion.div>)}
           </div>
@@ -222,7 +222,7 @@ export const Step2ProfileConfirmation = () => {
             <CustomButton onClick={() => {
             // Reset para step 0 (início do fluxo)
             resetDemo();
-          }} variant="outline" size="lg" className="w-full bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200 text-xs font-light" disabled={isConfirming}>Eita... não é nenhum desses</CustomButton>
+          }} variant="outline" size="lg" className="w-full bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200 dark:bg-zinc-800 dark:text-white dark:border-zinc-700 dark:hover:bg-zinc-700 text-xs font-light" disabled={isConfirming}>Eita... não é nenhum desses</CustomButton>
           </div>
         </CustomCard>
       </motion.div>
