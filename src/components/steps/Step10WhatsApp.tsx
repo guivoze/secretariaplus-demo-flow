@@ -742,11 +742,13 @@ export const Step10WhatsApp = () => {
             onFocus={handleInputFocus} 
             onBlur={handleInputBlur}
             placeholder="Digite uma mensagem..." 
-            className={`flex-1 outline-none bg-transparent transition-opacity ${(isLoading || lockInput || !allowInputFocus) ? 'opacity-50' : ''}`}
+            className={`flex-1 outline-none bg-transparent text-black transition-opacity ${(isLoading || lockInput || !allowInputFocus) ? 'opacity-50' : ''}`}
             disabled={isLoading || lockInput || !allowInputFocus || isChunkTyping || chatDarkened}
             readOnly={isLoading || lockInput || !allowInputFocus || isChunkTyping}
             style={{
-              fontSize: '16px'
+              fontSize: '16px',
+              color: '#000000',
+              caretColor: '#000000'
             }}
             autoComplete="off" 
             autoCorrect="on" 

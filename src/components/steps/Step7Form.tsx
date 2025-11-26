@@ -10,6 +10,7 @@ import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { sendLeadWebhook } from "@/utils/webhook";
 import { sanitizeValue } from "@/utils/sanitize";
 import { isDisqualifiedLead } from "@/utils/leadQualification";
+import { ChevronDown } from "lucide-react";
 
 export const Step7Form = () => {
   const { userData, setUserData, nextStep, sessionId, setCurrentStep } = useSupabaseDemo();
@@ -25,6 +26,14 @@ export const Step7Form = () => {
     painPoint: sanitizeValue(userData.painPoint)
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const painPointOptions = [
+    { value: "no-secretary", label: "😭 Não tenho secretária/auxiliar e não consigo dar atenção para tudo ao mesmo tempo." },
+    { value: "bad-secretary", label: "🐌 Tenho secretária mas ela é \"lentinha\" - Não converte e não aprende." },
+    { value: "high-demand", label: "🎯 Rodo anúncios e não aguento a alta demanda de leads" },
+    { value: "scale-revenue", label: "💸 Está tudo certo, só quero ganhar mais dinheiro!" }
+  ];
+  const [showPainOptions, setShowPainOptions] = useState(Boolean(formData.painPoint));
+  const selectedPainPoint = painPointOptions.find(option => option.value === formData.painPoint);
 
   // Pegar primeiro nome e dados da análise do Instagram
   const firstName = sanitizeValue(userData.nome) ? sanitizeValue(userData.nome).split(' ')[0] : '';
@@ -255,29 +264,63 @@ export const Step7Form = () => {
             whatsapp: formatWhatsApp(e.target.value)
           }))} />
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground dark:text-white">
-                Para personalizar sua experiência: Qual seu MAIOR problema hoje?
-              </label>
-              <select
-                value={formData.painPoint}
-                onChange={e => setFormData(prev => ({ ...prev, painPoint: e.target.value }))}
-                className="w-full px-3 py-4 rounded-lg border-2 border-input bg-background dark:bg-zinc-900 dark:border-zinc-700 text-foreground dark:text-white focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer text-base font-medium shadow-sm hover:border-gray-400 dark:hover:border-zinc-600 transition-colors overflow-hidden bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23000000%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] dark:bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23ffffff%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')]"
-                style={{
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 0.75rem center',
-                  backgroundSize: '1.5em 1.5em',
-                  paddingRight: '2.5rem',
-                  minHeight: '3.5rem',
-                  maxWidth: '100%'
-                }}
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => setShowPainOptions(prev => !prev)}
+                className="w-full border-2 border-input dark:border-zinc-700 rounded-2xl px-4 py-3 bg-background dark:bg-zinc-900 shadow-sm hover:border-gray-400 dark:hover:border-zinc-600 transition-colors flex items-center justify-between gap-4 text-left"
               >
-                <option value="" className="dark:bg-zinc-900">Selecione...</option>
-                <option value="no-secretary" className="dark:bg-zinc-900">😭 Não tenho secretária/auxiliar e não consigo dar atenção para tudo ao mesmo tempo.</option>
-                <option value="bad-secretary" className="dark:bg-zinc-900">🐌 Tenho secretária mas ela é "lentinha" - Não converte e não aprende.</option>
-                <option value="high-demand" className="dark:bg-zinc-900">🎯 Rodo anúncios e não aguento a alta demanda de leads</option>
-                <option value="scale-revenue" className="dark:bg-zinc-900">💸 Está tudo certo, só quero ganhar mais dinheiro!</option>
-              </select>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground dark:text-zinc-300">
+                    Para personalizar sua experiência
+                  </p>
+                  <p className="text-sm font-medium text-foreground dark:text-white leading-snug">
+                    {selectedPainPoint ? selectedPainPoint.label : 'Qual seu MAIOR problema hoje?'}
+                  </p>
+                  {!selectedPainPoint && (
+                    <span className="text-xs text-muted-foreground dark:text-zinc-400">Toque para escolher</span>
+                  )}
+                </div>
+                <ChevronDown
+                  className={`w-5 h-5 text-muted-foreground dark:text-zinc-300 transition-transform ${showPainOptions ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {showPainOptions && (
+                <div className="grid grid-cols-1 gap-3">
+                  {painPointOptions.map((option) => (
+                    <div
+                      key={option.value}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, painPoint: option.value }));
+                        setShowPainOptions(false);
+                      }}
+                      className={`
+                        relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left
+                        ${formData.painPoint === option.value 
+                          ? 'border-black bg-black/5 dark:border-white dark:bg-white/10' 
+                          : 'border-input hover:border-gray-400 dark:border-zinc-700 dark:hover:border-zinc-600 bg-background dark:bg-zinc-900'}
+                      `}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`
+                          mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
+                          ${formData.painPoint === option.value 
+                            ? 'border-black dark:border-white' 
+                            : 'border-gray-300 dark:border-zinc-600'}
+                        `}>
+                          {formData.painPoint === option.value && (
+                            <div className="w-2.5 h-2.5 rounded-full bg-black dark:bg-white" />
+                          )}
+                        </div>
+                        <span className={`text-sm font-medium ${formData.painPoint === option.value ? 'text-foreground dark:text-white' : 'text-muted-foreground dark:text-zinc-300'}`}>
+                          {option.label}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
 

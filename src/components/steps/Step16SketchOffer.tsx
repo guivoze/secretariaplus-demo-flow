@@ -311,6 +311,12 @@ export const Step16SketchOffer = () => {
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
+      .offer-content {
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+        display: block;
+      }
       .offer-content strong {
         color: rgb(0 0 0 / 0.7) !important;
         font-weight: 500;
@@ -954,7 +960,7 @@ export const Step16SketchOffer = () => {
 
                     {/* Subtítulo */}
                     <p
-                      className="text-gray-500 dark:text-gray-600 text-sm font-light tracking-wide mb-10"
+                      className="text-gray-300 dark:text-gray-600 text-sm font-light tracking-wide mb-10"
                     >
                       Pré-desenvolvimento: O device que será o padrão das clinicas nos próximos 3 anos. 
                     </p>
@@ -972,8 +978,8 @@ export const Step16SketchOffer = () => {
                           key={index}
                           className="flex items-start gap-3"
                         >
-                          <div className="w-1 h-1 bg-gray-600 rounded-full mt-2 flex-shrink-0" />
-                          <span className="text-gray-400 text-sm leading-relaxed font-light">
+                          <div className="w-1 h-1 bg-gray-400 rounded-full mt-2 flex-shrink-0" />
+                          <span className="text-gray-200 dark:text-gray-600 text-sm leading-relaxed font-light">
                             {feature}
                           </span>
                         </div>
@@ -982,7 +988,7 @@ export const Step16SketchOffer = () => {
 
                     {/* Tagline */}
                     <p
-                      className="text-white/80 text-sm font-light tracking-wider mb-8"
+                      className="text-white/90 dark:text-black/70 text-sm font-light tracking-wider mb-8"
                     >
                       Sua verdadeira companhia S+ 100% integrada.
                     </p>
@@ -1002,9 +1008,9 @@ export const Step16SketchOffer = () => {
 
                     {/* Disclaimer */}
                     <div
-                      className="pt-6 border-t border-gray-900"
+                      className="pt-6 border-t border-gray-800"
                     >
-                      <p className="text-gray-600 text-xs tracking-wide">
+                      <p className="text-gray-300 dark:text-gray-600 text-xs tracking-wide">
                         Projeto em desenvolvimento, imagens meramente ilustrativas.
                       </p>
                     </div>
