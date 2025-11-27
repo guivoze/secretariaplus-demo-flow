@@ -264,63 +264,48 @@ export const Step7Form = () => {
             whatsapp: formatWhatsApp(e.target.value)
           }))} />
 
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={() => setShowPainOptions(prev => !prev)}
-                className="w-full border-2 border-input dark:border-zinc-700 rounded-2xl px-4 py-3 bg-background dark:bg-zinc-900 shadow-sm hover:border-gray-400 dark:hover:border-zinc-600 transition-colors flex items-center justify-between gap-4 text-left"
-              >
-                <div className="space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground dark:text-zinc-300">
-                    Para personalizar sua experiência
-                  </p>
-                  <p className="text-sm font-medium text-foreground dark:text-white leading-snug">
-                    {selectedPainPoint ? selectedPainPoint.label : 'Qual seu MAIOR problema hoje?'}
-                  </p>
-                  {!selectedPainPoint && (
-                    <span className="text-xs text-muted-foreground dark:text-zinc-400">Toque para escolher</span>
-                  )}
-                </div>
-                <ChevronDown
-                  className={`w-5 h-5 text-muted-foreground dark:text-zinc-300 transition-transform ${showPainOptions ? 'rotate-180' : ''}`}
-                />
-              </button>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-zinc-400">
+                  Para personalizar sua experiência
+                </p>
+                <p className="text-sm font-semibold text-foreground dark:text-white">
+                  Qual seu MAIOR problema hoje?
+                </p>
+              </div>
 
-              {showPainOptions && (
-                <div className="grid grid-cols-1 gap-3">
-                  {painPointOptions.map((option) => (
-                    <div
-                      key={option.value}
-                      onClick={() => {
-                        setFormData(prev => ({ ...prev, painPoint: option.value }));
-                        setShowPainOptions(false);
-                      }}
-                      className={`
-                        relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left
+              <div className="grid grid-cols-1 gap-3">
+                {painPointOptions.map((option) => (
+                  <div
+                    key={option.value}
+                    onClick={() => {
+                      setFormData(prev => ({ ...prev, painPoint: option.value }));
+                    }}
+                    className={`
+                      relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 text-left group
+                      ${formData.painPoint === option.value 
+                        ? 'border-black bg-black/5 dark:border-white dark:bg-white/10 shadow-sm' 
+                        : 'border-gray-200 hover:border-gray-400 dark:border-zinc-700 dark:hover:border-zinc-600 bg-background dark:bg-zinc-900 hover:shadow-sm'}
+                    `}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`
+                        mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
                         ${formData.painPoint === option.value 
-                          ? 'border-black bg-black/5 dark:border-white dark:bg-white/10' 
-                          : 'border-input hover:border-gray-400 dark:border-zinc-700 dark:hover:border-zinc-600 bg-background dark:bg-zinc-900'}
-                      `}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`
-                          mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
-                          ${formData.painPoint === option.value 
-                            ? 'border-black dark:border-white' 
-                            : 'border-gray-300 dark:border-zinc-600'}
-                        `}>
-                          {formData.painPoint === option.value && (
-                            <div className="w-2.5 h-2.5 rounded-full bg-black dark:bg-white" />
-                          )}
-                        </div>
-                        <span className={`text-sm font-medium ${formData.painPoint === option.value ? 'text-foreground dark:text-white' : 'text-muted-foreground dark:text-zinc-300'}`}>
-                          {option.label}
-                        </span>
+                          ? 'border-black dark:border-white bg-white dark:bg-black' 
+                          : 'border-gray-300 dark:border-zinc-600 group-hover:border-gray-400 dark:group-hover:border-zinc-500'}
+                      `}>
+                        {formData.painPoint === option.value && (
+                          <div className="w-2.5 h-2.5 rounded-full bg-black dark:bg-white" />
+                        )}
                       </div>
+                      <span className={`text-sm leading-relaxed transition-colors ${formData.painPoint === option.value ? 'font-medium text-foreground dark:text-white' : 'text-muted-foreground dark:text-zinc-300 group-hover:text-foreground dark:group-hover:text-white'}`}>
+                        {option.label}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
           </motion.div>
 

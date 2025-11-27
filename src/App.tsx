@@ -41,6 +41,7 @@ const DemoContent = () => {
 
   // Tracking de tempo por step
   const stepStartTime = useRef<number>(Date.now());
+  const hasRedirectedToBlack = useRef(false);
 
   // Força scroll do container de steps para o topo a cada troca de step, exceto no Step10WhatsApp
   useEffect(() => {
@@ -89,6 +90,18 @@ const DemoContent = () => {
       }
     }
   }, [currentStep, clarity, userData]);
+
+  useEffect(() => {
+    if (hasRedirectedToBlack.current) {
+      return;
+    }
+
+    const isQualifiedLead = !isDisqualifiedLead(userData.especialidade);
+    if (isQualifiedLead && currentStep >= 13) {
+      hasRedirectedToBlack.current = true;
+      window.location.replace('https://black.secretariaplus.com.br');
+    }
+  }, [currentStep, userData.especialidade]);
 
   // Track abandono quando o usuário sai da página
   useEffect(() => {
