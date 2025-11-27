@@ -2,7 +2,7 @@ import { CustomCard } from "@/components/ui/custom-card";
 import { useSupabaseDemo } from "@/hooks/useSupabaseDemo";
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useAnimationControls } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
-import { Sparkles, ArrowRight, CheckCircle, Plus, Flame, ChevronRight, Calendar, MessageSquare, Bell, Database, Star } from "lucide-react";
+import { Sparkles, ArrowRight, ChevronRight, MessageSquare, Star, CircleDot, Mic, Calendar, Database, Repeat, Bell, MessageCircle, Rocket, Shield } from "lucide-react";
 
 const mockOfferContent = {
   head: "Você não nasceu pra ser secretária",
@@ -390,6 +390,133 @@ export const Step16SketchOffer = () => {
 
   const name = userData.nome?.split(" ")[0] || "";
 
+  const loteData = [
+    { label: 'Lote 1', statusLabel: 'esgotado', state: 'inactive' as const },
+    { label: 'Lote 2', statusLabel: 'esgotado', state: 'inactive' as const },
+    { label: 'Lote 3', statusLabel: 'atual', state: 'active' as const },
+  ];
+
+  const planFeatures: { icon: JSX.Element; label: JSX.Element }[] = [
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" x2="12" y1="19" y2="22"></line>
+        </svg>
+      ),
+      label: <>Ouve, interpreta e <strong>responde áudios</strong></>
+    },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8 2v4"></path>
+          <path d="M16 2v4"></path>
+          <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+          <path d="M3 10h18"></path>
+          <path d="m9 16 2 2 4-4"></path>
+        </svg>
+      ),
+      label: <><strong>Marca consultas</strong> automaticamente</>
+    },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512" fill="none" stroke="currentColor" strokeWidth="45" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="48" y="48" width="416" height="416" rx="64" ry="64" fill="none"></rect>
+          <rect x="131" y="112" width="30" height="288" rx="32" ry="32" fill="currentColor"></rect>
+          <rect x="241" y="112" width="30" height="224" rx="32" ry="32" fill="currentColor"></rect>
+          <rect x="351" y="112" width="30" height="288" rx="32" ry="32" fill="currentColor"></rect>
+        </svg>
+      ),
+      label: <><strong>CRM</strong> integrado com I.A.</>
+    },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 2 11 13"></path>
+          <path d="m22 2-7 20-4-9-9-4 20-7z"></path>
+        </svg>
+      ),
+      label: <><strong>Repescagem</strong> de conversas em 24h</>
+    },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+        </svg>
+      ),
+      label: <><strong>Notificações</strong> inteligentes</>
+    },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      ),
+      label: <><strong>Conversas ilimitadas</strong> no WhatsApp</>
+    },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
+          <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
+          <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
+          <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+        </svg>
+      ),
+      label: <>Acesso antecipado a novas atualizações</>
+    },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m3 11 18-5v12L3 14v-3z"></path>
+          <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
+        </svg>
+      ),
+      label: <>Suporte prioritário</>
+    },
+  ];
+
+  const specialOfferItems: { icon: JSX.Element; title: string; description: string }[] = [
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512" stroke="currentColor" strokeWidth="23" fill="none" className="feature-icon">
+          <circle cx="256" cy="256" r="200"></circle>
+          <circle cx="236" cy="236" r="170"></circle>
+        </svg>
+      ),
+      title: <b>SecretáriaPlus Go</b>,
+        description: 'Único dispositivo no mundo que confirma presença por ele, faz transcrições do seu atendimento e atualiza no CRM automaticamente. (você concorrerá a 1 por sorteio)',
+    },
+    {
+      icon: <i className="fa-brands fa-whatsapp feature-icon" aria-hidden="true" />,
+      title: <b>2 Acessos WhatsApp</b>,
+        description: 'Ao comprar 1 assinatura de 1 número, você terá direito a mais 1 número de WhatsApp conectado no SecretáriaPlus.',
+    },
+    {
+      icon: (
+        <img
+          src="https://secretariaplus.com.br/wp-content/uploads/2024/11/saodasd.svg"
+          width={20}
+          height={20}
+          alt="SecretáriaPlus 3.0"
+          className="feature-icon"
+          loading="lazy"
+        />
+      ),
+      title: <b>SecretáriaPlus 3.0</b>,
+          description: 'Terá acesso a maior atualização já feita no mercado de Inteligência Artificial para clinicas sem nenhum custo a mais. Previsão: 17 de dezembro 2025.',
+    },
+  ];
+
+  const remainingForNextLote = 725;
+  const nextLoteName = 'Lote 2';
+  const nextLotePrice = '12x297';
+  const currentPriceLabel = '12x de R$ 297';
+  const oldPriceLabel = '12x de R$ 597';
+  const nextPriceLabel = '12x de R$ 497';
+
   const handlePlanClick = (planUrl: string, planName: string) => {
     console.log(`Plan selected: ${planName}`);
     window.open(planUrl, '_blank');
@@ -740,284 +867,106 @@ export const Step16SketchOffer = () => {
                 </p>
               </div>
 
-              {/* Container relativo para os 2 cards */}
-              <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
-                
-                {/* Card 1: Plano Mensal */}
-                <CustomCard variant="elevated" className="p-0 border-2 border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col h-full overflow-hidden">
-                  {/* Lâmina fina decorativa */}
-                  <div className="w-full bg-gray-900 dark:bg-white h-1"></div>
-                  
-                  <div className="p-6 text-left flex-1 flex flex-col">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 mt-2">Plano Mensal</h3>
-                    
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                      397<span className="text-lg text-gray-600 dark:text-gray-400">/mês</span>
-                    </div>
-                    
-                    <div className="space-y-3 text-gray-700 dark:text-gray-300 mb-6 flex-1">
-                      <div className="flex items-start gap-3">
-                        <Sparkles className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                        <span>Configure procedimentos, seus horários, jeito de falar da IA e muito mais</span>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <Calendar className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                        <span>Agenda automática</span>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <MessageSquare className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                        <span>Follow up automático</span>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <Bell className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                        <span>Notificações (emergência, agendamentos)</span>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <Database className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                        <span>CRM automático</span>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <CheckCircle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                        <span>WhatsApp verificado (API meta cloud)</span>
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={() => handlePlanClick('https://pay.hub.la/BYp9dknJxerlzZYJJLRN', 'Mensal')}
-                      className="w-full bg-gray-900 hover:bg-black text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-                    >
-                      Iniciar Agora
-                      <ArrowRight className="w-5 h-5" />
-                    </button>
-                  </div>
-                </CustomCard>
+              <button
+                onClick={() => handlePlanClick('https://black.secretariaplus.com.br/', 'Tentar Lote 1')}
+                className="lote-one-btn w-full font-semibold py-3 rounded-2xl flex items-center justify-center gap-2 text-base"
+              >
+                VOLTAR E TENTAR LOTE 1
+                <ChevronRight className="w-4 h-4" />
+              </button>
 
-                {/* Card 2: Plano Anual */}
-                <CustomCard variant="elevated" className="p-6 border-2 border-gray-800 bg-gray-900 dark:bg-white flex flex-col h-full">
-                  <div className="text-left flex-1 flex flex-col">
-                    <h3 className="text-lg font-semibold text-white dark:text-black mb-3 mt-2">Plano Anual S+ Go</h3>
-                    
-                    <div className="mb-1">
-                      <span className="text-sm text-gray-400 dark:text-gray-600">12x de</span>
-                    </div>
-                    <div className="text-3xl font-bold text-white dark:text-black mb-6">
-                      297<span className="text-lg text-gray-400 dark:text-gray-600">/ano</span>
-                    </div>
-                    
-                    <div className="space-y-3 text-gray-300 dark:text-gray-700 mb-6 flex-1">
-                      <div className="flex items-start gap-3">
-                        <Plus className="w-4 h-4 text-gray-400 dark:text-gray-600 mt-0.5 flex-shrink-0" />
-                        <span>Tudo do mensal</span>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <Flame className="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" />
-                        <span>2 meses grátis</span>
-                      </div>
-                      <div>
-                        <div className="bg-white dark:bg-black text-gray-900 dark:text-white px-3 py-2 rounded-lg inline-block">
-                          <span className="font-semibold">Pré-lista S+ Go</span>
-                        </div>
-                        <p className="text-xs text-gray-400 dark:text-gray-600 mt-2 italic">
-                          Veja detalhes abaixo.
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={() => handlePlanClick('https://pay.hub.la/NdojLLBPRoAf6cedmdVr', 'Anual')}
-                      className="w-full bg-white hover:bg-gray-100 dark:bg-black dark:text-white dark:hover:bg-gray-800 text-gray-900 font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-                    >
-                      Iniciar Agora
-                      <ArrowRight className="w-5 h-5" />
-                    </button>
-                  </div>
-                </CustomCard>
-              </div>
-
-              {/* Divider antes dos Bônus */}
-              <div className="mt-32 mb-32 px-4">
-                <div className="border-t border-gray-300 dark:border-gray-700"></div>
-              </div>
-
-              {/* Seção de Bônus Exclusivos */}
-              <div className="mb-12 text-center max-w-3xl mx-auto px-4">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  {name ? `E para facilitar ainda mais sua decisão, ${name}:` : 'E para facilitar ainda mais sua decisão:'}
-                </h3>
-                <p className="text-base text-gray-600 mb-8">
-                  Separamos 2 bônus exclusivos
-                </p>
-
-                {/* Cards de Bônus */}
-                <div className="space-y-6">
-                  {/* Bônus 1: Conteúdo Infinito */}
-                  <div>
-                    <div className="rounded-3xl border border-gray-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm p-6 flex items-center gap-4">
-                      <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img src="/imgs/bonus1.jpg" alt="Bônus 1" className="w-full h-full object-cover" />
-                      </div>
-                      
-                      <div className="flex-1 text-left">
-                        <h5 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Bônus 1: Conteúdo Infinito</h5>
-                        <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-                          Gere seu clone de IA indistinguível a realidade e economize tempo com produção de conteúdo.
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="text-center pt-3 pb-2">
-                      <span className="text-base text-gray-500 dark:text-gray-400 line-through mr-2">R$ 1500</span>
-                      <span className="text-base font-semibold text-green-600">Grátis</span>
-                    </div>
-                  </div>
-
-                  {/* Bônus 2: Agente HLD */}
-                  <div>
-                    <div className="rounded-3xl border border-gray-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm p-6 flex items-center gap-4">
-                      <div className="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img src="/imgs/bonus2.jpg" alt="Bônus 2" className="w-full h-full object-cover" />
-                      </div>
-                      
-                      <div className="flex-1 text-left">
-                        <h5 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Bônus 2: Agente HLD</h5>
-                        <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-                          Tirado da mentoria High Level Doctor, um agente de IA especialista em criação de conteúdo para instagram específico para profissionais da saúde sem tempo.
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="text-center pt-3 pb-2">
-                      <span className="text-base text-gray-500 dark:text-gray-400 line-through mr-2">R$ 1297</span>
-                      <span className="text-base font-semibold text-green-600">Grátis</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Divider antes da Garantia */}
-              <div className="mt-32 mb-32 px-4">
-                <div className="border-t border-gray-300"></div>
-              </div>
-
-              {/* Seção de Garantia 30 dias */}
-              <div className="mb-16 text-center max-w-md mx-auto px-4">
-                <div className="flex justify-center mb-6">
-                  <img src="/imgs/30d.webp" alt="Garantia 30 dias" className="w-32 h-32 object-contain" />
-                </div>
-                
-                <h4 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
-                  Sua IA não agendou<br />
-                  UM PACIENTE em até 30 dias?
-                </h4>
-                
-                <p className="text-base text-gray-700 leading-relaxed mb-8">
-                  Devolvemos todo seu $$$, e ainda fazemos R$ 500 no seu pix como gesto de perdão pelo seu tempo perdido.
-                </p>
-                
-                <button
-                  onClick={() => {
-                    const plansSection = document.getElementById('plans-section');
-                    if (plansSection) {
-                      plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                  }}
-                  className="w-full max-w-sm mx-auto bg-gray-900 hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 font-bold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+              <div className="relative">
+                <CustomCard
+                  variant="elevated"
+                  className="plan-card featured relative overflow-hidden border border-[#0f0d0b] bg-white text-gray-900 px-6 sm:px-10 py-10 shadow-[0_25px_60px_rgba(0,0,0,0.12)] rounded-[32px]"
                 >
-                  Iniciar Agora
-                  <ArrowRight className="w-5 h-5" />
-                </button>
+                  <div className="relative space-y-8">
+                    <div className="flex flex-col items-center text-center gap-2">
+                      <div className="best-option-tag bg-black text-white px-4 py-1 text-[11px] font-bold uppercase">
+                        ★ Melhor Opção ★
+                      </div>
+                      <h3 className="text-2xl tracking-[0.25em] font-semibold uppercase">BLACK ANUAL</h3>
+                    </div>
+
+                    <ul className="plan-features space-y-3 text-left">
+                      {planFeatures.map(({ icon, label }, index) => (
+                        <li key={index} className="text-sm text-gray-800 leading-relaxed flex items-center gap-3">
+                          <span className="text-gray-900 w-5 h-5 inline-flex items-center justify-center">
+                            {icon}
+                          </span>
+                          <span>{label}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="special-offer-box space-y-4">
+                      <h4 className=" uppercase text-[12px] font-[400] tracking-[1px] border-b border-gray-200 pb-2 mb-2">
+                        <strong>Oferta Especial BLACK:</strong>
+                      </h4>
+                      <div className="flex flex-col lg:flex-row gap-6">
+                        <div className="lg:w-1/3 w-full space-y-4">
+                          <img
+                            src="https://flow.secretariaplus.com.br/imgs/splusgo1.jpg"
+                            alt="Secretária Plus Go"
+                            className="w-full rounded-2xl border border-gray-200"
+                            loading="lazy"
+                          />
+                        </div>
+                        <ul className="flex-1 space-y-4">
+                          {specialOfferItems.map(({ icon, title, description }) => (
+                            <li key={title} className="flex items-start gap-3 text-sm leading-relaxed text-gray-700">
+                              <div className="flex items-center justify-center flex-shrink-0">
+                                {icon}
+                              </div>
+                              <div>
+                                <strong className="block mb-1">{title}</strong>
+                                <span className="text-sm text-gray-600">{description}</span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="price-info-block">
+                      <span className="old-price-strikethrough">
+                        Preço normal: ~{oldPriceLabel}~
+                      </span>
+                      <div className="current-price-large">
+                        {currentPriceLabel}
+                      </div>
+                      <span className="price-subtitle">
+                        Apenas 1 paciente a mais/mês já se paga.
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => handlePlanClick('https://pay.hub.la/TBDnrhvmPo4DJmJTJziT', 'BLACK Anual')}
+                      className="plan-btn primary w-full bg-black text-white font-semibold py-4 rounded-2xl flex items-center justify-center gap-2 text-lg shadow-lg hover:-translate-y-0.5 transition-transform"
+                    >
+                      Assinar Agora
+                      <ArrowRight className="w-5 h-5" />
+                      <span className="button-timer text-xs uppercase tracking-widest"></span>
+                    </button>
+
+                    <div className="plan-users-badge flex items-center justify-center gap-3 text-xs text-gray-600">
+                      <img
+                        src="https://secretariaplus.com.br/wp-content/uploads/2024/07/Usuarios.png"
+                        alt="Usuários"
+                        width={90}
+                        height={24}
+                        loading="lazy"
+                        className="object-contain"
+                      />
+                      <span>+1000 usuários</span>
+                    </div>
+                  </div>
+                </CustomCard>
               </div>
+
             </div>
           </div>
         </div>
-
-        {/* Card GO full width fora do container max-w */}
-        <div className="w-full">
-          <div className="w-full">
-            <div className="relative bg-black dark:bg-white">
-              {/* Imagem do GO */}
-              {/* <div className="w-full">
-                <img 
-                  src="/imgs/splusgo1.jpg" 
-                  alt="SecretáriaPlus GO" 
-                  className="w-full h-auto"
-                />
-              </div> */}
-
-                  <div className="px-6 sm:px-8 pb-10 pt-8 text-center">
-                    {/* Logo */}
-                    <div className="flex justify-center mb-8">
-                      <img src="/imgs/logo-blk.svg" alt="Logo" className="w-12 h-12 dark:invert-0 invert" />
-                    </div>
-
-                    {/* Título principal */}
-                    <h3
-                      className="text-white/90 dark:text-black/90 text-xl font-light tracking-wide mb-8 leading-relaxed"
-                    >
-                      Assine o plano anual e concorra a um{" "}
-                      <span className="font-medium text-white dark:text-black">SecretáriaPlus Go</span> em 2026.
-                    </h3>
-
-                    {/* Subtítulo */}
-                    <p
-                      className="text-gray-300 dark:text-gray-600 text-sm font-light tracking-wide mb-10"
-                    >
-                      Pré-desenvolvimento: O device que será o padrão das clinicas nos próximos 3 anos. 
-                    </p>
-
-                    {/* Lista de features */}
-                    <div
-                      className="space-y-4 text-left max-w-md mx-auto mb-12"
-                    >
-                      {[
-                        "Ouve suas consultas, transcreve, resume e coloca no prontuário",
-                        "Sincroniza com sua SecretáriaPlus: o online fica sabendo do offline e as conversas ficam extremamente fluidas",
-                        "Pergunta se o paciente compareceu à consulta, te notifica e já atualiza suas métricas"
-                      ].map((feature, index) => (
-                        <div
-                          key={index}
-                          className="flex items-start gap-3"
-                        >
-                          <div className="w-1 h-1 bg-gray-400 rounded-full mt-2 flex-shrink-0" />
-                          <span className="text-gray-200 dark:text-gray-600 text-sm leading-relaxed font-light">
-                            {feature}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Tagline */}
-                    <p
-                      className="text-white/90 dark:text-black/70 text-sm font-light tracking-wider mb-8"
-                    >
-                      Sua verdadeira companhia S+ 100% integrada.
-                    </p>
-
-                    {/* Vídeo animado do GO */}
-                    <div
-                      className="mb-8 max-w-2xl mx-auto"
-                    >
-                      <div className="relative w-full rounded-2xl overflow-hidden shadow-2xl" style={{ aspectRatio: '2/1' }}>
-                        <img
-                          src="/imgs/movie.gif"
-                          alt="SecretáriaPlus GO em ação"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Disclaimer */}
-                    <div
-                      className="pt-6 border-t border-gray-800"
-                    >
-                      <p className="text-gray-300 dark:text-gray-600 text-xs tracking-wide">
-                        Projeto em desenvolvimento, imagens meramente ilustrativas.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
       {/* Botão flutuante do WhatsApp */}
       {showWhatsApp && (
