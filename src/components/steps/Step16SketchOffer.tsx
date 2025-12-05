@@ -297,6 +297,7 @@ export const Step16SketchOffer = () => {
     post2: userData.realPosts?.[1] || null,
     post3: userData.realPosts?.[2] || null,
   });
+  const [countdown, setCountdown] = useState("--:--");
 
   // Loading inicial de 3 segundos
   useEffect(() => {
@@ -510,12 +511,13 @@ export const Step16SketchOffer = () => {
     },
   ];
 
-  const remainingForNextLote = 725;
-  const nextLoteName = 'Lote 2';
-  const nextLotePrice = '12x297';
-  const currentPriceLabel = '12x de R$ 297';
-  const oldPriceLabel = '12x de R$ 597';
-  const nextPriceLabel = '12x de R$ 497';
+  const extendedOfferMessage = 'BLACK estendida até as 23h59 ou 100 vendas';
+  const remainingForNextLote = 100;
+  const nextLoteName = 'Lote Extra';
+  const nextLotePrice = '12x197';
+  const currentPriceLabel = '12x de R$ 197';
+  const oldPriceLabel = '12x de R$ 297';
+  const nextPriceLabel = '12x de R$ 297';
 
   const handlePlanClick = (planUrl: string, planName: string) => {
     console.log(`Plan selected: ${planName}`);
@@ -559,6 +561,35 @@ export const Step16SketchOffer = () => {
   const handleWhatsAppClick = () => {
     window.open('https://api.whatsapp.com/send?phone=5511936191391&text=Ol%C3%A1%2C%20tenho%20interesse%20na%20Black%20Secret%C3%A1riaPlus.', '_blank');
   };
+
+  // Contagem regressiva até 23h59 de hoje
+  useEffect(() => {
+    const target = new Date();
+    target.setHours(23, 59, 0, 0);
+
+    const formatTime = (ms: number) => {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      const pad = (v: number) => v.toString().padStart(2, "0");
+      return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    };
+
+    let timer: number | undefined;
+    const updateCountdown = () => {
+      const now = new Date();
+      const diff = target.getTime() - now.getTime();
+      setCountdown(formatTime(diff));
+      if (diff <= 0 && timer) {
+        clearInterval(timer);
+      }
+    };
+
+    timer = window.setInterval(updateCountdown, 1000);
+    updateCountdown();
+    return () => clearInterval(timer);
+  }, []);
 
   // Loading inicial de 3 segundos
   if (showInitialLoading) {
@@ -692,7 +723,7 @@ export const Step16SketchOffer = () => {
               transition={{ repeat: Infinity, ease: "linear", duration: 60 }}
               style={{ width: "fit-content" }}
             >
-              {Array(20).fill("BLACK WEEK SPLUS • ").map((t, i) => (
+              {Array(20).fill(`${extendedOfferMessage} • `).map((t, i) => (
                 <span key={i} className="text-black font-bold text-sm sm:text-base mx-2 tracking-widest">{t}</span>
               ))}
             </motion.div>
@@ -868,10 +899,10 @@ export const Step16SketchOffer = () => {
               </div>
 
               <button
-                onClick={() => handlePlanClick('https://black.secretariaplus.com.br/', 'Tentar Lote 1')}
+                onClick={() => handlePlanClick('https://pay.hub.la/4vKjlCIm6mnGZugbaX4m', 'BLACK Estendida')}
                 className="lote-one-btn w-full font-semibold py-3 rounded-2xl flex items-center justify-center gap-2 text-base"
               >
-                VOLTAR E TENTAR LOTE 1
+                <span className="tracking-[0.12em]">BLACK ESTENDIDA acaba em {countdown}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
 
@@ -886,6 +917,9 @@ export const Step16SketchOffer = () => {
                         ★ Melhor Opção ★
                       </div>
                       <h3 className="text-2xl tracking-[0.25em] font-semibold uppercase">BLACK ANUAL</h3>
+                      <span className="text-[11px] uppercase tracking-[0.15em] text-gray-800 bg-gray-100 px-3 py-1 rounded-full">
+                        {extendedOfferMessage}
+                      </span>
                     </div>
 
                     <ul className="plan-features space-y-3 text-left">
@@ -941,7 +975,7 @@ export const Step16SketchOffer = () => {
                     </div>
 
                     <button
-                      onClick={() => handlePlanClick('https://pay.hub.la/TBDnrhvmPo4DJmJTJziT', 'BLACK Anual')}
+                      onClick={() => handlePlanClick('https://pay.hub.la/4vKjlCIm6mnGZugbaX4m', 'BLACK Anual')}
                       className="plan-btn primary w-full bg-black text-white font-semibold py-4 rounded-2xl flex items-center justify-center gap-2 text-lg shadow-lg hover:-translate-y-0.5 transition-transform"
                     >
                       Assinar Agora
